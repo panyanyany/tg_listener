@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "tg_listener"
+version = "0.1.0"
+description = ""
+authors = ["panyanyany <568397440@qq.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+Telethon = "^1.23.0"
+click = "^8.0.3"
+python-socks = {extras = ["asyncio"], version = "^2.0.0"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
