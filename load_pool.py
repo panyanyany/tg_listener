@@ -10,7 +10,7 @@ init_database()
 
 
 def getPair(addr):
-    out, err = myexec("bin/hunt pancakeswap " + addr,
+    out, err = myexec("bin/hunt psPair " + addr,
                       cwd="/var/www/pyys/tugou-hunter")
     if err or out == '':
         return None
