@@ -62,7 +62,7 @@ def make_stat():
 make_stat()
 
 with TelegramClient('./storage/bot', settings.app_id, settings.app_id_hash,
-                    proxy=("socks5", '127.0.0.1', 1081)) as client:
+                    proxy=settings.proxy) as client:
     client: TC
     # client.send_message('me', 'Hello, myself!')
     # print(client.download_profile_photo('me'))
