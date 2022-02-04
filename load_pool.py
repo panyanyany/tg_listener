@@ -36,6 +36,7 @@ def main():
         jd = getPair(md.address)
         if not jd:
             continue
+        jd = jd['0x9efb4d9716e1df9d0524166d6f2b02cfb8963530']
         busd_amount = jd['totalBusdAmount']
         busd_amount = busd_amount / (10 ** 12)
 
