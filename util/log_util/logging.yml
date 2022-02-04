@@ -1,0 +1,42 @@
+version: 1
+disable_existing_loggers: False
+
+filters:
+    myfilter:
+        '()': util.log_util.ContextFilter
+formatters:
+    tofile:
+        # format: "%(asctime)s|%(lvlname)s|%(name)s:%(funcName)s|> %(message)s"
+        format: "%(process)d [%(asctime)s] [%(levelname)s] %(name)s|> %(message)s" # 实践发现 logger name 和 funcName 好像没啥必要, lvlname 不容易肉眼区分
+        datefmt: '%m-%d %H:%M'
+    tocons:
+        format: "%(asctime)s|%(levelname)s|> %(message)s"
+        # datefmt: '%H:%M:%S'
+        datefmt: '%H:%M'
+
+handlers:
+    console:
+        # class: logging.StreamHandler
+        class: util.log_util.ConsoleHandler
+        level: INFO # 控制台输出统计信息就够了，太多东西眼睛痛得不行
+        formatter: tocons
+        stream: ext://sys.stdout
+        filters: [myfilter]
+
+    file_handler:
+        class: logging.handlers.RotatingFileHandler
+        # class: util.src.log_util.DebugRotatingFileHandler
+        level: DEBUG
+        formatter: tofile
+        filename: logs/routines.log
+        # maxBytes: 10485760 # 10MB
+        backupCount: 3
+        encoding: utf8
+        filters: [myfilter]
+
+
+root:
+    level: DEBUG
+    handlers: [console, file_handler]
+
+
