@@ -36,7 +36,7 @@ class AddressRecord(BaseModel):
     chat_id = IntegerField()
     user_fullname = CharField(null=True)
     user_id = IntegerField()
-    username = CharField()
+    username = CharField(null=True)
 
 
 class AddressStat(BaseModel):
