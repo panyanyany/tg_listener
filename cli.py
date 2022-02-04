@@ -52,7 +52,8 @@ def make_stat():
         items.append({
             'address': addr,
             'cnt': cnt,
-            'day': today.today().strftime('%Y-%m-%d')
+            'day': today.today().strftime('%Y-%m-%d'),
+            'updated_at': today.today(),
         })
 
     print(arrow.now(), 'insert: ', len(items))
