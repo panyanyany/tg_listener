@@ -41,7 +41,7 @@ def main():
         busd_amount = busd_amount / (10 ** 12)
 
         md.busd_amount = busd_amount
-        md.symbol = jd['token0']['symbol'][:255]
+        md.symbol = jd['tokenQuote']['symbol'][:255]
         md.save()
 
         print(md.symbol, busd_amount)
