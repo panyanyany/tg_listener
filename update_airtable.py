@@ -1,0 +1,38 @@
+import arrow
+from pyairtable import Table
+
+import settings
+from tg_listener.db import init_database
+from tg_listener.models import AddressStat
+
+init_database()
+
+table = Table(settings.airtable['api_key'], 'appRLf4sYiFHWsI1D', '当天统计')
+
+
+def load_stat():
+    today = arrow.now().date()
+    query = AddressStat.select().where(
+        (AddressStat.created_at.year == today.year) &
+        (AddressStat.created_at.month == today.month) &
+        (AddressStat.created_at.day == today.day)).order_by(AddressStat.cnt.desc()).limit(10)
+
+    records = []
+    for md in query:
+        md: AddressStat
+        records.append({
+            '代币符号': md.symbol,
+            '地址': md.address,
+            '初始BUSD': md.busd_amount or 0,
+            '推荐次数': md.cnt,
+            '更新时间': str(md.updated_at),
+        })
+
+    ids = list(map(lambda e: e['id'], table.all()))
+    if len(ids) > 0:
+        table.batch_delete(ids)
+
+    table.batch_create(records)
+
+
+load_stat()

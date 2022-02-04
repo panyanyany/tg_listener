@@ -13,6 +13,7 @@ peewee = "^3.14.8"
 arrow = "^1.2.1"
 mysqlclient = "^2.1.0"
 psutil = "^5.9.0"
+pyairtable = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 
