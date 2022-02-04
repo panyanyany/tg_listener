@@ -5,7 +5,7 @@ description = ""
 authors = ["panyanyany <568397440@qq.com>"]
 
 [tool.poetry.dependencies]
-python = "3.6.14"
+python = "3.9.9"
 click = "^8.0.3"
 python-socks = {extras = ["asyncio"], version = "^2.0.0"}
 Telethon = "^1.24.0"
@@ -13,6 +13,7 @@ peewee = "^3.14.8"
 arrow = "^1.2.1"
 mysqlclient = "^2.1.0"
 web3 = "^5.25.0"
+psutil = "^5.9.0"
 
 [tool.poetry.dev-dependencies]
 

@@ -43,6 +43,8 @@ class AddressStat(BaseModel):
     address = CharField()
     cnt = IntegerField()
     memo = CharField(null=True)
+    symbol = CharField(null=True)
+    busd_amount = IntegerField(null=True)
     day = DateField()
 
     class Meta:
