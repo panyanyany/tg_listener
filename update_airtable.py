@@ -15,7 +15,7 @@ def load_stat():
     query = AddressStat.select().where(
         (AddressStat.created_at.year == today.year) &
         (AddressStat.created_at.month == today.month) &
-        (AddressStat.created_at.day == today.day)).order_by(AddressStat.cnt.desc()).limit(10)
+        (AddressStat.created_at.day == today.day)).order_by(AddressStat.cnt.desc(), AddressStat.busd_amount.desc()).limit(10)
 
     records = []
     for md in query:
