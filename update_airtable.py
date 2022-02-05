@@ -10,12 +10,19 @@ init_database()
 table = Table(settings.airtable['api_key'], 'appRLf4sYiFHWsI1D', '当天统计')
 
 
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+
 def load_stat():
     today = arrow.now().date()
     query = AddressStat.select().where(
         (AddressStat.created_at.year == today.year) &
         (AddressStat.created_at.month == today.month) &
-        (AddressStat.created_at.day == today.day)).order_by(AddressStat.cnt.desc(), AddressStat.busd_amount.desc()).limit(10)
+        (AddressStat.created_at.day == today.day)).order_by(AddressStat.cnt.desc(),
+                                                            AddressStat.busd_amount.desc()).limit(100)
 
     records = []
     for md in query:
@@ -30,9 +37,11 @@ def load_stat():
 
     ids = list(map(lambda e: e['id'], table.all()))
     if len(ids) > 0:
-        table.batch_delete(ids)
+        for _ids in chunks(ids, 10):
+            table.batch_delete(_ids)
 
-    table.batch_create(records)
+    for _recs in chunks(records, 10):
+        table.batch_create(_recs)
 
 
 load_stat()
