@@ -53,7 +53,7 @@ def make_stat():
             'address': addr,
             'cnt': cnt,
             'day': today.today().strftime('%Y-%m-%d'),
-            'updated_at': today.today(),
+            'updated_at': arrow.now().datetime,
         })
 
     print(arrow.now(), 'insert: ', len(items))
