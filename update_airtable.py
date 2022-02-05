@@ -27,6 +27,8 @@ def load_stat():
     records = []
     for md in query:
         md: AddressStat
+        if not md.symbol:
+            continue
         records.append({
             '代币符号': md.symbol,
             '地址': md.address,
