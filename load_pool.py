@@ -26,6 +26,15 @@ def main():
         (AddressStat.created_at.month == today.month) &
         (AddressStat.created_at.day == today.day))
 
+    pairs = []
+    for md in query:
+        md: AddressStat
+        if md.busd_amount:
+            continue
+        pairs.append(md.address)
+
+    all_pair_info = getPair(','.join(pairs))
+
     for md in query:
         md: AddressStat
         if md.busd_amount:
@@ -33,10 +42,7 @@ def main():
         # if md.address != '0x552594612f935441c01c6854edf111f343c1ca07':
         #     continue
 
-        jd = getPair(md.address)
-        if not jd:
-            continue
-        jd = jd[md.address]
+        jd = all_pair_info[md.address]
         busd_amount = jd['totalBusdAmount']
         busd_amount = busd_amount / (10 ** 12)
 
