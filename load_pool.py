@@ -33,6 +33,8 @@ def main():
             continue
         pairs.append(md.address)
 
+    if len(pairs) == 0:
+        return
     all_pair_info = getPair(','.join(pairs))
 
     for md in query:
