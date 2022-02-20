@@ -12,6 +12,7 @@ import settings
 import re
 import logging
 
+from tg_listener import db
 from tg_listener.db import init_database
 from tg_listener.models import AddressRecord, AddressStat
 
@@ -25,12 +26,13 @@ ptn = re.compile(r'(0x[a-z0-9]{40})', re.IGNORECASE | re.MULTILINE)
 
 def make_stat():
     today = arrow.now().date()
+    # 加载 record
     query = AddressRecord.select().where(
         (AddressRecord.created_at.year == today.year) &
         (AddressRecord.created_at.month == today.month) &
         (AddressRecord.created_at.day == today.day))
 
-    items = []
+    # 统计 addr-user
     stat1 = {}
     for md in query:
         md: AddressRecord
@@ -42,22 +44,46 @@ def make_stat():
         stat1.setdefault(key, 0)
         stat1[key] += 1
 
+    # 统计 addr
     stat2 = {}
     for key, cnt in stat1.items():
         addr = key[0]
         stat2.setdefault(addr, 0)
         stat2[addr] += 1
 
-    for addr, cnt in stat2.items():
-        items.append({
-            'address': addr,
-            'cnt': cnt,
-            'day': today.today().strftime('%Y-%m-%d'),
-            'updated_at': arrow.now().datetime,
-        })
+    today_str = today.today().strftime('%Y-%m-%d')
+    query = AddressStat.select().where(AddressStat.day == today_str)
+    exists_stat = {}
+    for md in query:
+        md: AddressStat
+        exists_stat[md.address] = md
 
-    print(arrow.now(), 'insert: ', len(items))
-    AddressStat.insert_many(items).on_conflict(preserve=[AddressStat.cnt], update={}).execute()
+    to_update_stat = []
+    to_insert_stat = []
+    for addr, cnt in stat2.items():
+        if addr in exists_stat:
+            md = exists_stat[addr]
+            md: AddressStat
+
+            md.cnt = cnt
+            md.updated_at = arrow.now().datetime
+            to_update_stat.append(md)
+        else:
+            md: AddressStat = AddressStat()
+            md.address = addr
+            md.cnt = cnt
+            md.day = today_str
+            md.created_at = arrow.now().datetime
+            to_insert_stat.append(md)
+
+    print(arrow.now(), 'insert: ', len(to_insert_stat))
+    print(arrow.now(), 'update: ', len(to_update_stat))
+    # AddressStat.insert_many(items).on_conflict(preserve=[AddressStat.cnt], update={}).execute()
+
+    with db.atomic():
+        AddressStat.bulk_update(to_update_stat, fields=['cnt', 'updated_at'], batch_size=50)
+    with db.atomic():
+        AddressStat.bulk_create(to_insert_stat, batch_size=50)
 
 
 make_stat()
