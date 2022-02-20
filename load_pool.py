@@ -35,6 +35,7 @@ def main():
 
     if len(pairs) == 0:
         return
+    print('querying pairs', ','.join(pairs))
     all_pair_info = getPair(','.join(pairs))
 
     for md in query:
@@ -44,6 +45,9 @@ def main():
         # if md.address != '0x552594612f935441c01c6854edf111f343c1ca07':
         #     continue
 
+        if md.address not in all_pair_info:
+            print('not found pair', md.address)
+            continue
         jd = all_pair_info[md.address]
         busd_amount = jd['totalBusdAmount']
         busd_amount = busd_amount / (10 ** 12)
