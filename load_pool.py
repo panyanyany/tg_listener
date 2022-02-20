@@ -13,6 +13,7 @@ def getPair(addr):
     out, err = myexec("bin/hunt psPair " + addr,
                       cwd="/var/www/pyys/tugou-hunter")
     if err or out == '':
+        print(err)
         return None
 
     jd = json.loads(out)
