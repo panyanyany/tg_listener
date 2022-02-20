@@ -21,6 +21,8 @@ logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s'
                     level=logging.WARNING)
 
 ptn = re.compile(r'(0x[a-z0-9]{40})', re.IGNORECASE | re.MULTILINE)
+cop = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9]")  # 匹配不是中文、大小写、数字的其他字符
+multi_space = re.compile(r"\s+")  # 匹配不是中文、大小写、数字的其他字符
 
 
 def make_stat():
@@ -134,6 +136,9 @@ with TelegramClient('./storage/bot', settings.app_id, settings.app_id_hash,
             # sender: User = await msg.get_sender()
             # if not sender:
             #     sender = msg.sender
+
+            text = cop.sub(' ', text)
+            text = multi_space.sub(' ', text)
 
             print('{title}({id}): {msg}'.format(title=chat.title, id=chat.id, msg=text), sender.username)
             md = AddressRecord()
