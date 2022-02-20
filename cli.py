@@ -12,11 +12,10 @@ import settings
 import re
 import logging
 
-from tg_listener import db
 from tg_listener.db import init_database
 from tg_listener.models import AddressRecord, AddressStat
 
-init_database()
+db = init_database()
 
 logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
                     level=logging.WARNING)

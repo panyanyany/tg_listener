@@ -61,3 +61,5 @@ def init_database():
             )
         except Exception as e:
             logging.warning('!!!! alter_column_type: %s', str(e))
+
+    return db
