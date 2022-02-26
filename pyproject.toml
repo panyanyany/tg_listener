@@ -17,6 +17,7 @@ pyairtable = "^1.0.0"
 uniswap-python = "^0.5.5"
 multicall = "^0.3.0"
 dacite = "^1.6.0"
+beeprint = "^2.4.10"
 
 [tool.poetry.dev-dependencies]
 

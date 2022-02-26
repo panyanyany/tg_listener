@@ -15,3 +15,10 @@ proxy = None
 airtable = {
     'api_key': '这里填 API KEY'
 }
+
+accounts = {
+    'default': {
+        'private_key': '0x....',
+        'address': '0x....',
+    }
+}

@@ -1,17 +1,16 @@
 from dataclasses import dataclass
+from typing import Union
 
 from dacite import from_dict
 from web3 import Web3
 
 from util.bsc import constants
 
-multi_call = '0x5dc53ed77bbc84f39c76fb4c84ac9f28384a4b55'
-
 
 class Multicall:
     def __init__(self, web3: Web3):
         self.web3 = web3
-        self.c_multi_call = web3.eth.contract(address=web3.toChecksumAddress(multi_call),
+        self.c_multi_call = web3.eth.contract(address=web3.toChecksumAddress(constants.multi_call),
                                               abi=open('./resources/bsc/MultiCall/abi.json').read())
 
     def get_pair_info_with_price(self, pair_address):
@@ -53,8 +52,8 @@ class PairInfo:
     total_supply: int
     # symbol_1: str
     # symbol_0: str
-    token_0: TokenInfo
-    token_1: TokenInfo
+    token_0: Union[TokenInfo, tuple]
+    token_1: Union[TokenInfo, tuple]
     total_busd_amount: int
     farm_tvl: int
     total_busd_amount_human: float = 0

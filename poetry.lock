@@ -74,6 +74,17 @@ python-versions = ">=3.5"
 tests = ["mypy", "PyHamcrest (>=2.0.2)", "pytest (>=4.6)", "pytest-benchmark", "pytest-cov", "pytest-flake8"]
 
 [[package]]
+name = "beeprint"
+version = "2.4.10"
+description = "make your debug printing more friendly"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+urwid = "*"
+
+[[package]]
 name = "bitarray"
 version = "1.2.2"
 description = "efficient arrays of booleans -- C extension"
@@ -642,6 +653,14 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
+name = "urwid"
+version = "2.1.2"
+description = "A full-featured console (xterm et al.) user interface library"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "varint"
 version = "1.0.2"
 description = "Simple python varint implementation"
@@ -702,7 +721,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "3.9.9"
-content-hash = "31c57d8b7521b18d6ef60e33673f39805d0ac915e0c5931dd7f91fcb727f67e0"
+content-hash = "dc10d40b035205fd7bf9119432f2f59d1743af08eb073e587916bb16e980f324"
 
 [metadata.files]
 aiohttp = [
@@ -798,6 +817,9 @@ attrs = [
 base58 = [
     {file = "base58-2.1.1-py3-none-any.whl", hash = "sha256:11a36f4d3ce51dfc1043f3218591ac4eb1ceb172919cebe05b52a5bcc8d245c2"},
     {file = "base58-2.1.1.tar.gz", hash = "sha256:c5d0cb3f5b6e81e8e35da5754388ddcc6d0d14b6c6a132cb93d69ed580a7278c"},
+]
+beeprint = [
+    {file = "beeprint-2.4.10.tar.gz", hash = "sha256:b3cbe170718e696bfa05e074789212ba6aef5f096a5fd12717f14d4f1615a440"},
 ]
 bitarray = [
     {file = "bitarray-1.2.2.tar.gz", hash = "sha256:27a69ffcee3b868abab3ce8b17c69e02b63e722d4d64ffd91d659f81e9984954"},
@@ -1219,6 +1241,9 @@ uniswap-python = [
 urllib3 = [
     {file = "urllib3-1.26.8-py2.py3-none-any.whl", hash = "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed"},
     {file = "urllib3-1.26.8.tar.gz", hash = "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"},
+]
+urwid = [
+    {file = "urwid-2.1.2.tar.gz", hash = "sha256:588bee9c1cb208d0906a9f73c613d2bd32c3ed3702012f51efe318a3f2127eae"},
 ]
 varint = [
     {file = "varint-1.0.2.tar.gz", hash = "sha256:a6ecc02377ac5ee9d65a6a8ad45c9ff1dac8ccee19400a5950fb51d594214ca5"},
