@@ -6,7 +6,8 @@ from playhouse.db_url import connect, MySQLDatabase
 from playhouse.migrate import MySQLMigrator, migrate
 
 import settings
-from tg_listener.models import database_proxy, AddressRecord, AddressStat
+from tg_listener.models.models import database_proxy, AddressRecord
+from tg_listener.models.AddressStat import AddressStat
 
 db_inst: MySQLDatabase = None
 

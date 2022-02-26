@@ -3,7 +3,7 @@ import json
 import arrow
 
 from tg_listener.db import init_database
-from tg_listener.models import AddressStat
+from tg_listener.models.AddressStat import AddressStat
 from util.sys_util import myexec
 
 init_database()

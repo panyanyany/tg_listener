@@ -3,7 +3,7 @@ from pyairtable import Table
 
 import settings
 from tg_listener.db import init_database
-from tg_listener.models import AddressStat
+from tg_listener.models.AddressStat import AddressStat
 
 init_database()
 

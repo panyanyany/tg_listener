@@ -1,7 +1,7 @@
 import datetime
 
 import arrow
-from peewee import Model, DateTimeField, Proxy, CharField, IntegerField, DateField
+from peewee import Model, DateTimeField, Proxy, CharField, IntegerField
 
 database_proxy = Proxy()
 
@@ -39,15 +39,3 @@ class AddressRecord(BaseModel):
     username = CharField(null=True)
 
 
-class AddressStat(BaseModel):
-    address = CharField()
-    cnt = IntegerField()
-    memo = CharField(null=True)
-    symbol = CharField(null=True)
-    busd_amount = IntegerField(null=True)
-    day = DateField()
-
-    class Meta:
-        indexes = (
-            (('address', 'day'), True),
-        )
