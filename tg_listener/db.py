@@ -1,4 +1,6 @@
 import logging
+import asyncio
+import threading
 
 from playhouse.db_url import connect
 from playhouse.migrate import MySQLMigrator, migrate
@@ -6,9 +8,24 @@ from playhouse.migrate import MySQLMigrator, migrate
 import settings
 from tg_listener.models import database_proxy, AddressRecord, AddressStat
 
+db_inst = None
+
+
+def keep_alive():
+    # mysql 的连接只能保持 8 小时，之后会断开，用这个方法保活
+    async def ping():
+        while True:
+            await asyncio.sleep(60)
+            print('hi')
+
+    asyncio.run(ping())
+
 
 def init_database():
-    db = connect('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
+    global db_inst
+    if db_inst:
+        return db_inst
+    db_inst = db = connect('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
         username=settings.DB_USERNAME,
         password=settings.DB_PASSWORD,
         db_name=settings.DB_NAME,
@@ -62,4 +79,5 @@ def init_database():
         except Exception as e:
             logging.warning('!!!! alter_column_type: %s', str(e))
 
+    threading.Thread(target=keep_alive, daemon=True).start()
     return db
