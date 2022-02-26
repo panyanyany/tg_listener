@@ -14,6 +14,9 @@ arrow = "^1.2.1"
 mysqlclient = "^2.1.0"
 psutil = "^5.9.0"
 pyairtable = "^1.0.0"
+uniswap-python = "^0.5.5"
+multicall = "^0.3.0"
+dacite = "^1.6.0"
 
 [tool.poetry.dev-dependencies]
 
