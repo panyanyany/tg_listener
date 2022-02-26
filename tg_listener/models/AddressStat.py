@@ -2,7 +2,6 @@ import arrow
 from peewee import CharField, IntegerField, DateField
 
 import settings
-from cli import db
 
 from tg_listener.models.models import BaseModel, AddressRecord
 
@@ -77,7 +76,5 @@ def make_stat():
     print(arrow.now(), 'update: ', len(to_update_stat))
     # AddressStat.insert_many(items).on_conflict(preserve=[AddressStat.cnt], update={}).execute()
 
-    with db.atomic():
-        AddressStat.bulk_update(to_update_stat, fields=['cnt', 'updated_at'], batch_size=50)
-    with db.atomic():
-        AddressStat.bulk_create(to_insert_stat, batch_size=50)
+    AddressStat.bulk_update(to_update_stat, fields=['cnt', 'updated_at'], batch_size=50)
+    AddressStat.bulk_create(to_insert_stat, batch_size=50)
