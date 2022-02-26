@@ -2,13 +2,13 @@ import logging
 import asyncio
 import threading
 
-from playhouse.db_url import connect
+from playhouse.db_url import connect, MySQLDatabase
 from playhouse.migrate import MySQLMigrator, migrate
 
 import settings
 from tg_listener.models import database_proxy, AddressRecord, AddressStat
 
-db_inst = None
+db_inst: MySQLDatabase = None
 
 
 def keep_alive():
@@ -16,24 +16,23 @@ def keep_alive():
     async def ping():
         while True:
             await asyncio.sleep(60)
-            print('hi')
+            result = db_inst.execute_sql('select 1')
+            print('ping result:', result)
 
     asyncio.run(ping())
 
 
 def init_database():
     global db_inst
-    if db_inst:
-        return db_inst
-    db_inst = db = connect('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
+    db_inst = connect('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
         username=settings.DB_USERNAME,
         password=settings.DB_PASSWORD,
         db_name=settings.DB_NAME,
     ), charset='utf8mb4')
-    database_proxy.initialize(db)
+    database_proxy.initialize(db_inst)
 
-    db.connect()
-    db.execute_sql("SET collation_connection = 'utf8mb4_bin';")
+    db_inst.connect()
+    db_inst.execute_sql("SET collation_connection = 'utf8mb4_bin';")
     # self.db.drop_tables([VideoTask])  # debug
     # db.drop_tables(
     #     [RecognizeRecord, SearchResult, SearchTask, CrawlPageTask, ExtractTask, PersonResume,
@@ -41,10 +40,10 @@ def init_database():
     # db.drop_tables([
     #     EnIntroUrlScanTask,
     # ])
-    db.create_tables(
+    db_inst.create_tables(
         [AddressRecord, AddressStat])
 
-    migrator = MySQLMigrator(db)
+    migrator = MySQLMigrator(db_inst)
 
     add_columns = [
     ]
@@ -80,4 +79,4 @@ def init_database():
             logging.warning('!!!! alter_column_type: %s', str(e))
 
     threading.Thread(target=keep_alive, daemon=True).start()
-    return db
+    return db_inst
