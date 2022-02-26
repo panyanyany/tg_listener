@@ -11,3 +11,7 @@ BLOCK_ADDRESSES = set([
 ])
 
 proxy = None
+
+airtable = {
+    'api_key': '这里填 API KEY'
+}
