@@ -11,6 +11,7 @@ class AddressStat(BaseModel):
     cnt = IntegerField()
     memo = CharField(null=True)
     symbol = CharField(null=True)
+    name = CharField(null=True)
     busd_amount = IntegerField(null=True)
     day = DateField()
 

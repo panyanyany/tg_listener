@@ -31,6 +31,7 @@ def load_stat():
             continue
         records.append({
             '代币符号': md.symbol,
+            '代币名': md.name,
             '地址': md.address,
             '初始BUSD': md.busd_amount or 0,
             '推荐次数': md.cnt,

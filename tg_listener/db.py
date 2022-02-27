@@ -3,7 +3,7 @@ import asyncio
 import threading
 
 from playhouse.db_url import connect, MySQLDatabase
-from playhouse.migrate import MySQLMigrator, migrate
+from playhouse.migrate import MySQLMigrator, migrate, CharField
 
 import settings
 from tg_listener.models.models import database_proxy, AddressRecord
@@ -50,7 +50,7 @@ def init_database():
     ]
 
     alter_columns = [
-        # ['crawl_page_tasks', 'url', CharField(null=True)],
+        ['address_stat', 'name', CharField(null=True)],
         # ['file_node', 'outer_id', CharField(unique=False)],
         # ['article_task', 'new_img_urls', CharField(max_length=4096, default='', null=True)],
     ]

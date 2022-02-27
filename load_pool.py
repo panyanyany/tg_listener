@@ -55,6 +55,7 @@ def main():
 
         md.busd_amount = busd_amount
         md.symbol = jd['tokenQuote']['symbol'][:255]
+        md.name = jd['tokenQuote']['name'][:255]
         md.save()
 
         print(md.symbol, busd_amount)
