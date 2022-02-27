@@ -59,7 +59,7 @@ def main():
         if md.now_busd_amount == 0:
             md.pool_growth = -1
         else:
-            md.pool_growth = 100 * (md.now_busd_amount - md.init_busd_amount) / md.init_busd_amount
+            md.pool_growth = (md.now_busd_amount - md.init_busd_amount) / md.init_busd_amount
         md.symbol = jd['tokenQuote']['symbol'][:255]
         md.name = jd['tokenQuote']['name'][:255]
         md.save()
