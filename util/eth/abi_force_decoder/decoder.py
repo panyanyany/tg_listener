@@ -40,10 +40,11 @@ lines = fn_signature_compose(['mint',
                               'uint256 amt',
                               'address to, uint16 amt',
                               'address to, uint256 amt',
-                              'uint256 _amount, bytes32[] _whitelistProof'])
+                              'uint256 _amount, bytes32[] _whitelistProof',
+                              ])
 
 
-def DefaultDecoder(w3: Web3 = None):
+def freemint_decoder(w3: Web3 = None):
     if w3 is None:
         provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
         w3 = Web3(Web3.HTTPProvider(provider))
