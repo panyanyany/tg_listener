@@ -3,7 +3,7 @@ import asyncio
 import threading
 
 from playhouse.db_url import connect, MySQLDatabase
-from playhouse.migrate import MySQLMigrator, migrate, CharField, IntegerField
+from playhouse.migrate import MySQLMigrator, migrate, CharField, IntegerField, DecimalField
 
 import settings
 from tg_listener.models.models import database_proxy, AddressRecord
@@ -47,10 +47,11 @@ def init_database():
     migrator = MySQLMigrator(db_inst)
 
     add_columns = [
-        ['address_stat', 'now_busd_amount', IntegerField(null=True)],
+        # ['address_stat', 'now_busd_amount', IntegerField(null=True)],
+        ['address_stat', 'pool_growth', DecimalField(null=True)],
     ]
     rename_columns = [
-        ['address_stat', 'busd_amount', 'init_busd_amount'],
+        # ['address_stat', 'busd_amount', 'init_busd_amount'],
     ]
 
     alter_columns = [

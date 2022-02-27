@@ -35,6 +35,7 @@ def load_stat():
             '地址': md.address,
             '初始池': md.init_busd_amount or 0,
             '当前池': md.now_busd_amount or 0,
+            '涨幅': md.pool_growth,
             '推荐次数': md.cnt,
             '更新时间': str(md.updated_at),
         })

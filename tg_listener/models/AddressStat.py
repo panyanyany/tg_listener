@@ -1,5 +1,5 @@
 import arrow
-from peewee import CharField, IntegerField, DateField
+from peewee import CharField, IntegerField, DateField, DecimalField
 
 import settings
 
@@ -14,6 +14,7 @@ class AddressStat(BaseModel):
     name = CharField(null=True)
     init_busd_amount = IntegerField(null=True)
     now_busd_amount = IntegerField(null=True)
+    pool_growth = DecimalField(null=True)
     day = DateField()
 
     class Meta:
