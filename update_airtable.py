@@ -33,8 +33,8 @@ def load_stat():
             '代币符号': md.symbol,
             '代币名': md.name,
             '地址': md.address,
-            '初始BUSD': md.init_busd_amount or 0,
-            '当前BUSD': md.now_busd_amount or 0,
+            '初始池': md.init_busd_amount or 0,
+            '当前池': md.now_busd_amount or 0,
             '推荐次数': md.cnt,
             '更新时间': str(md.updated_at),
         })
