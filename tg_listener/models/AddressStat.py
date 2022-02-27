@@ -72,8 +72,8 @@ def make_stat():
             md.created_at = arrow.now().datetime
             to_insert_stat.append(md)
 
-    print(arrow.now(), 'insert: ', len(to_insert_stat))
-    print(arrow.now(), 'update: ', len(to_update_stat))
+    print(arrow.now(),
+          'insert: {insert}, update={update}'.format(insert=len(to_insert_stat), update=len(to_update_stat)))
     # AddressStat.insert_many(items).on_conflict(preserve=[AddressStat.cnt], update={}).execute()
 
     AddressStat.bulk_update(to_update_stat, fields=['cnt', 'updated_at'], batch_size=50)

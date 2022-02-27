@@ -45,6 +45,7 @@ lines = fn_signature_compose(['mint',
 
 
 def freemint_decoder(w3: Web3 = None):
+    """专门检测 free mint 的 decoder"""
     if w3 is None:
         provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
         w3 = Web3(Web3.HTTPProvider(provider))

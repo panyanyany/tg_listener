@@ -2,6 +2,7 @@ from itertools import permutations, product
 
 
 def fn_signature_compose(names: [str], arg_sigs: [str]):
+    """组合生成不重复的函数签名: fn_signature_compose(['mint', 'claim'], ['uint num', 'uint256 num'])"""
     transformed_names = []
     for name in names:
         n = str(name).replace(' ', '')

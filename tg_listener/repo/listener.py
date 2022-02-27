@@ -64,7 +64,8 @@ class Listener:
                     text = words_ptn.sub(' ', text)
                     text = multi_space.sub(' ', text)
 
-                    print('{title}({id}): {msg}'.format(title=chat.title, id=chat.id, msg=text), sender.username)
+                    print('{title}({id}): msg={msg}, username={username}'.format(title=chat.title, id=chat.id, msg=text,
+                                                                                 username=sender.username))
                     md = AddressRecord()
                     md.address = address
                     md.text = text[:1024]
