@@ -12,7 +12,8 @@ class AddressStat(BaseModel):
     memo = CharField(null=True)
     symbol = CharField(null=True)
     name = CharField(null=True)
-    busd_amount = IntegerField(null=True)
+    init_busd_amount = IntegerField(null=True)
+    now_busd_amount = IntegerField(null=True)
     day = DateField()
 
     class Meta:

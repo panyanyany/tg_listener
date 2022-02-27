@@ -22,7 +22,7 @@ def load_stat():
         (AddressStat.created_at.year == today.year) &
         (AddressStat.created_at.month == today.month) &
         (AddressStat.created_at.day == today.day)).order_by(AddressStat.cnt.desc(),
-                                                            AddressStat.busd_amount.desc()).limit(100)
+                                                            AddressStat.init_busd_amount.desc()).limit(100)
 
     records = []
     for md in query:
@@ -33,7 +33,7 @@ def load_stat():
             '代币符号': md.symbol,
             '代币名': md.name,
             '地址': md.address,
-            '初始BUSD': md.busd_amount or 0,
+            '初始BUSD': md.init_busd_amount or 0,
             '推荐次数': md.cnt,
             '更新时间': str(md.updated_at),
         })

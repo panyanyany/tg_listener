@@ -30,8 +30,8 @@ def main():
     pairs = []
     for md in query:
         md: AddressStat
-        if md.busd_amount:
-            continue
+        # if md.busd_amount:
+        #     continue
         pairs.append(md.address)
 
     if len(pairs) == 0:
@@ -41,8 +41,8 @@ def main():
 
     for md in query:
         md: AddressStat
-        if md.busd_amount:
-            continue
+        # if md.busd_amount:
+        #     continue
         # if md.address != '0x552594612f935441c01c6854edf111f343c1ca07':
         #     continue
 
@@ -53,7 +53,9 @@ def main():
         busd_amount = jd['totalBusdAmount']
         busd_amount = busd_amount / (10 ** 12)
 
-        md.busd_amount = busd_amount
+        if not md.init_busd_amount:
+            md.init_busd_amount = busd_amount
+        md.now_busd_amount = busd_amount
         md.symbol = jd['tokenQuote']['symbol'][:255]
         md.name = jd['tokenQuote']['name'][:255]
         md.save()

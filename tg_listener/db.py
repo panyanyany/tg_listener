@@ -3,7 +3,7 @@ import asyncio
 import threading
 
 from playhouse.db_url import connect, MySQLDatabase
-from playhouse.migrate import MySQLMigrator, migrate, CharField
+from playhouse.migrate import MySQLMigrator, migrate, CharField, IntegerField
 
 import settings
 from tg_listener.models.models import database_proxy, AddressRecord
@@ -47,10 +47,14 @@ def init_database():
     migrator = MySQLMigrator(db_inst)
 
     add_columns = [
-        ['address_stat', 'name', CharField(null=True)],
+        ['address_stat', 'now_busd_amount', IntegerField(null=True)],
+    ]
+    rename_columns = [
+        ['address_stat', 'busd_amount', 'init_busd_amount'],
     ]
 
     alter_columns = [
+        # ['address_stat', 'name', CharField(null=True)],
         # ['file_node', 'outer_id', CharField(unique=False)],
         # ['article_task', 'new_img_urls', CharField(max_length=4096, default='', null=True)],
     ]
@@ -70,6 +74,14 @@ def init_database():
             )
         except Exception as e:
             logging.warning('!!!! add_column: %s', str(e))
+
+    for rename_column_args in rename_columns:
+        try:
+            migrate(
+                migrator.rename_column(*rename_column_args),
+            )
+        except Exception as e:
+            logging.warning('!!!! rename_column: %s', str(e))
 
     for alter_column_args in alter_columns:
         try:
