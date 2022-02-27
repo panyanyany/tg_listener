@@ -70,7 +70,7 @@ class Listener:
                     md.chat_id = chat.id
                     md.chat_name = chat.title
                     md.user_id = msg.sender_id
-                    md.user_fullname = sender.first_name + ' ' + (sender.last_name or '')
+                    md.user_fullname = (sender.first_name + ' ' + (sender.last_name or '')).strip()
                     md.username = sender.username
 
                     fullname = words_ptn.sub(' ', md.user_fullname)
