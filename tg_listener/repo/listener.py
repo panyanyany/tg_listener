@@ -64,11 +64,6 @@ class Listener:
                     text = words_ptn.sub(' ', text)
                     text = multi_space.sub(' ', text)
 
-                    print('{title}({id}): msg={msg}, username={username}, name={firstname} {lastname}'.format(
-                        title=chat.title, id=chat.id, msg=text,
-                        username=sender.username,
-                        firstname=sender.first_name,
-                        lastname=sender.last_name))
                     md = AddressRecord()
                     md.address = address
                     md.text = text[:1024]
@@ -77,6 +72,16 @@ class Listener:
                     md.user_id = msg.sender_id
                     md.user_fullname = sender.first_name + ' ' + (sender.last_name or '')
                     md.username = sender.username
+
+                    fullname = words_ptn.sub(' ', md.user_fullname)
+                    fullname = multi_space.sub(' ', fullname)
+
+                    print('{title}({id}): msg={msg}, from={fullname}(ID:{user_id})'.format(
+                        title=chat.title, id=chat.id, msg=text,
+                        user_id=md.user_id,
+                        fullname=fullname,
+                    ))
+
                     md.save()
 
                     make_stat()
