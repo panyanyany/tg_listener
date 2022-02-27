@@ -77,7 +77,7 @@ class Listener:
                     fullname = words_ptn.sub(' ', md.user_fullname)
                     fullname = multi_space.sub(' ', fullname)
 
-                    print('{title}(ID:{id}) / {fullname}(ID:{user_id}): {msg}'.format(
+                    print('{title} / {fullname}(ID:{user_id}): {msg}'.format(
                         title=chat.title, id=chat.id, msg=text,
                         user_id=md.user_id,
                         fullname=fullname,
