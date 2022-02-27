@@ -47,10 +47,10 @@ def init_database():
     migrator = MySQLMigrator(db_inst)
 
     add_columns = [
+        ['address_stat', 'name', CharField(null=True)],
     ]
 
     alter_columns = [
-        ['address_stat', 'name', CharField(null=True)],
         # ['file_node', 'outer_id', CharField(unique=False)],
         # ['article_task', 'new_img_urls', CharField(max_length=4096, default='', null=True)],
     ]
