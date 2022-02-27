@@ -73,7 +73,7 @@ def make_stat():
             to_insert_stat.append(md)
 
     print(arrow.now(),
-          'insert: {insert}, update={update}'.format(insert=len(to_insert_stat), update=len(to_update_stat)))
+          'insert: {insert}, update: {update}'.format(insert=len(to_insert_stat), update=len(to_update_stat)))
     # AddressStat.insert_many(items).on_conflict(preserve=[AddressStat.cnt], update={}).execute()
 
     AddressStat.bulk_update(to_update_stat, fields=['cnt', 'updated_at'], batch_size=50)
