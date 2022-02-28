@@ -1,4 +1,26 @@
+import json
 from itertools import permutations, product
+
+
+def get_signatures_from_abi(filename) -> list:
+    with open(filename) as fp:
+        content = fp.read()
+
+    items = json.loads(content)
+    fns = []
+    for item in items:
+        if item['type'] != 'function':
+            continue
+        fn_args = []
+        for arg in item['inputs']:
+            internal_type = arg['internalType']
+            _type = arg['type']
+            name = arg['name']
+            fn_args.append(f"{internal_type} {name}")
+
+        fn = f"{item['name']}({', '.join(fn_args)})"
+        fns.append(fn)
+    return fns
 
 
 def fn_signature_compose(names: [str], arg_sigs: [str]):
