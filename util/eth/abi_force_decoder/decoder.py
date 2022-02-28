@@ -44,7 +44,8 @@ free_mint_signatures = fn_signature_compose(['mint',
                                              'address to, uint256 amt',
                                              'uint256 _amount, bytes32[] _whitelistProof',
                                              ])
-pancake_swap_router_signatures = get_signatures_from_abi(project_root().joinpath('./resources/bsc/PancakeRouter/abi.json'))
+pancake_swap_router_signatures = get_signatures_from_abi(
+    Path(__file__).parent.joinpath('./data/abi/pancake_swap_router.json'))
 
 
 def freemint_decoder(w3: Web3 = None):
