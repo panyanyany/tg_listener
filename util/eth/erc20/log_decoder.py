@@ -20,7 +20,7 @@ class LogDecoder:
         """把日志解码为转账事件
         https://medium.com/coinmonks/unlocking-the-secrets-of-an-ethereum-transaction-3a33991f696c
         """
-        receipt_event_signature_hex = self.w3.toHex(log.topics[0])
+        receipt_event_signature_hex = self.w3.toHex(log['topics'][0])
         for event in self.abi_events:
             # Get event signature components
             name = event["name"]

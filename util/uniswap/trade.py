@@ -22,8 +22,10 @@ class Trade:
 
     @classmethod
     def from_transaction(cls, tx: TxData, receipt: TxReceipt):
+        fn_details = cls.router_decoder.decode(tx['input'])
+        if not fn_details:
+            return
         operator = tx['from'].lower()
-        fn_details = cls.router_decoder.decode(tx.input)
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
         paths = fn_inputs['path']
@@ -39,7 +41,7 @@ class Trade:
             amount_in = tx['value']
 
         logs = []
-        for log in receipt.logs:
+        for log in receipt['logs']:
             logs.append(dict(log))
             smart_contract = log["address"]
             dlog = cls.log_decoder.decode(log)
@@ -51,8 +53,8 @@ class Trade:
             to = dlog['args']['to'].lower()
             if to == router.lower() or to == operator:
                 amount_out += dlog['args']['value']
-            print(f"Contract:{dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
+            # print(f"Contract:{dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
-        print(f'amount_in={amount_in}/{raw_amount_in}, amount_out={amount_out}')
+        # print(f'amount_in={amount_in}/{raw_amount_in}, amount_out={amount_out}')
         return cls(operator=operator, token_in=token_in, token_out=token_out, amount_in=amount_in,
-                   amount_out=amount_out)
+                   amount_out=amount_out, )
