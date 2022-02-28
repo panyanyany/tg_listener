@@ -12,7 +12,9 @@ from util.project.project import project_root
 
 
 class Decoder:
-    def __init__(self, w3: Web3, lines: [str]):
+    def __init__(self, lines: [str], w3: Web3 = None):
+        w3 = w3 if w3 else Web3()
+
         self.w3 = w3
         self.fn_signatures: [FunctionSignature] = []
         self.test_contracts = []
@@ -29,6 +31,16 @@ class Decoder:
         for c in self.test_contracts:
             try:
                 function_input = c.decode_function_input(data)
+                # (
+                #   <Function swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[],address,uint256)>,
+                #   {
+                #     'amountIn': 174662476028127148025,
+                #     'amountOutMin': 25507846803485763,
+                #     'deadline': 1646030003,
+                #     'path': ['0x4a72AF9609d22Bf2fF227AEC333c7d0860f3dB36', '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c'],
+                #     'to': '0x4FA40e5Dd24eedE393c7DDf53fcDB6Ca887e096C',
+                #   },
+                # )
                 return function_input
             except Exception as e:
                 continue
@@ -54,4 +66,4 @@ def freemint_decoder(w3: Web3 = None):
         provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
         w3 = Web3(Web3.HTTPProvider(provider))
         w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
-    return Decoder(w3, free_mint_signatures)
+    return Decoder(free_mint_signatures, w3)

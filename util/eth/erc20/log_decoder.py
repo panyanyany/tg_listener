@@ -7,11 +7,13 @@ from util.bsc import constants
 
 
 class LogDecoder:
-    def __init__(self, w3: Web3):
-        self.w3 = w3
+    def __init__(self, w3: Web3 = None):
+        w3 = w3 if w3 else Web3()
 
-        self.contract = w3.eth.contract(w3.toChecksumAddress(constants.busd),
-                                        abi=open(Path(__file__).parent.joinpath('./data/erc20_event_abi.json')).read())
+        self.w3 = w3
+        self.contract = self.w3.eth.contract(self.w3.toChecksumAddress(constants.busd),
+                                             abi=open(
+                                                 Path(__file__).parent.joinpath('./data/erc20_event_abi.json')).read())
         self.abi_events = [abi for abi in self.contract.abi if abi["type"] == "event"]
 
     def decode(self, log: LogReceipt):

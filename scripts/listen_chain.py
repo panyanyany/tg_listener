@@ -16,7 +16,7 @@ w3 = Web3(Web3.HTTPProvider(provider))
 w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
 
 # print(pancake_swap_router_signatures)
-decoder = Decoder(w3, pancake_swap_router_signatures)
+decoder = Decoder(pancake_swap_router_signatures, w3)
 
 
 # print(w3.eth.get_block('0x69c85120e58c6a24bd5e9f0969708edbb4132ccf37593a0b4d32b1113ffe9772'))
