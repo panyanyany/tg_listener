@@ -17,6 +17,8 @@ class Trade:
     amount_in: int
     amount_out: int
 
+    hash: str = ''
+
     log_decoder = LogDecoder()
     router_decoder = Decoder(pancake_swap_router_signatures)
 
@@ -24,6 +26,8 @@ class Trade:
     def from_transaction(cls, tx: TxData, receipt: TxReceipt):
         fn_details = cls.router_decoder.decode(tx['input'])
         if not fn_details:
+            return
+        if receipt['status'] != 1 or len(receipt['logs']) == 0:
             return
         operator = tx['from'].lower()
         fn_name = fn_details[0].fn_name
@@ -33,7 +37,7 @@ class Trade:
         token_in = paths[0]
         token_out = paths[-1]
 
-        raw_amount_in = fn_inputs.get('amountIn', 0)
+        # raw_amount_in = fn_inputs.get('amountIn', 0)
         amount_in = 0
         amount_out = 0
 
@@ -61,4 +65,6 @@ class Trade:
 
         # print(f'amount_in={amount_in}/{raw_amount_in}, amount_out={amount_out}')
         return cls(operator=operator, token_in=token_in, token_out=token_out, amount_in=amount_in,
-                   amount_out=amount_out, )
+                   amount_out=amount_out,
+                   hash=tx['hash'].hex(),
+                   )

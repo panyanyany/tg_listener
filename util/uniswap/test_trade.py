@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from beeprint import pp
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from web3.types import TxData, TxReceipt
@@ -51,8 +52,14 @@ def test_from_transaction():
          'data': 'tx01',
          'result': Trade(operator='0xfcd40e251e387ee9e1829ca0c882d5b7a6078a38',
                          token_in='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-                         token_out='0x52419258E3fa44DEAc7E670eaDD4c892B480A805', amount_in=12571431557544302, amount_out=12600000000)
+                         token_out='0x52419258E3fa44DEAc7E670eaDD4c892B480A805', amount_in=12571431557544302,
+                         amount_out=12600000000)
 
+         },
+        {'input': '0x929e23445858fa6fbb56d73bc81dd799980f27f28721b0629d16016e6aadec96',
+         'name': 'swapETHForExactTokens',
+         'data': 'tx01',
+         'result': None
          },
     ]
     cur_dir = Path(__file__).parent
@@ -62,10 +69,17 @@ def test_from_transaction():
         tx = w3.eth.get_transaction(txh)
         rec: TxReceipt = w3.eth.get_transaction_receipt(txh)
 
+        # print()
+        # pp(dict(tx))
+        # print()
+        # pp(dict(rec))
+
         trade = Trade.from_transaction(tx, rec)
         # print()
         # print(trade)
         # print()
+        if trade:
+            trade.hash = ''
         assert trade == testdata['result']
 
 
