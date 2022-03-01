@@ -18,6 +18,7 @@ uniswap-python = "^0.5.5"
 multicall = "^0.3.0"
 dacite = "^1.6.0"
 beeprint = "^2.4.10"
+pytest = "^7.0.1"
 
 [tool.poetry.dev-dependencies]
 

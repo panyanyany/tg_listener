@@ -37,7 +37,7 @@ class Trade:
         amount_in = 0
         amount_out = 0
 
-        if fn_name == 'swapExactETHForTokens':
+        if fn_name in ['swapExactETHForTokens', 'swapExactETHForTokensSupportingFeeOnTransferTokens']:
             amount_in = tx['value']
 
         logs = []
@@ -47,8 +47,12 @@ class Trade:
             dlog = cls.log_decoder.decode(log)
             if not dlog:
                 continue
-            if dlog['args']['from'].lower() == operator:
+            _from = dlog['args']['from'].lower()
+            if _from == operator:
                 amount_in += dlog['args']['value']
+            elif _from == router.lower():
+                if fn_name == 'swapETHForExactTokens':
+                    amount_in += dlog['args']['value']
 
             to = dlog['args']['to'].lower()
             if to == router.lower() or to == operator:

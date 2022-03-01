@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import time
 from threading import Thread
 from typing import Union, Sequence
@@ -28,12 +29,12 @@ async def handle_event(i: HexBytes):
     # block_hash = i.hex()
     while True:
         try:
-            block = w3.eth.get_block(i, full_transactions=True)
-            await asyncio.sleep(0.2)
+            block: BlockData = w3.eth.get_block(i, full_transactions=True)
             break
         except:
-            pass
-    print('===== Block hash:  ', i.hex(), block['number'])
+            await asyncio.sleep(0.2)
+    dt = datetime.datetime.fromtimestamp(block['timestamp'])
+    print('===== Block hash:  ', i.hex(), block['number'], dt)
     # and whatever
 
 

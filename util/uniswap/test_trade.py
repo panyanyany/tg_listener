@@ -46,14 +46,26 @@ def test_from_transaction():
                          token_out='0x3B3691d4C3EC75660f203F41adC6296a494404d0', amount_in=50027534254641814483,
                          amount_out=1241013201)
          },
+        {'input': '0xa7d8e9dfe5a4d53bce5e08d36415660b1f8f25401545c998e5cc6fc4dc959bb5',
+         'name': 'swapETHForExactTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0xfcd40e251e387ee9e1829ca0c882d5b7a6078a38',
+                         token_in='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+                         token_out='0x52419258E3fa44DEAc7E670eaDD4c892B480A805', amount_in=12571431557544302, amount_out=12600000000)
+
+         },
     ]
     cur_dir = Path(__file__).parent
-    for testdata in testdata_list:
+    # print()
+    for testdata in testdata_list[:]:
         txh = testdata['input']
         tx = w3.eth.get_transaction(txh)
         rec: TxReceipt = w3.eth.get_transaction_receipt(txh)
 
         trade = Trade.from_transaction(tx, rec)
+        # print()
+        # print(trade)
+        # print()
         assert trade == testdata['result']
 
 
