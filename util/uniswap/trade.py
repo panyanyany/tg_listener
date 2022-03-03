@@ -63,7 +63,11 @@ class Trade:
             last_value = dlog['args']['value']
             # router2 在这个交易会用到： 0xfcd695e238155d01a42e7fe0a3e668e32a8932e8df81b4e657910d4df08e3016
             if to in [router, operator, router2]:
-                amount_out += dlog['args']['value']
+                # 分红币分的同等数量的不知道啥玩意
+                if _from == '0x0000000000000000000000000000000000000000':
+                    pass
+                else:
+                    amount_out += dlog['args']['value']
             # print(f"Contract:{dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
         # 最后一个可能是其他的 router

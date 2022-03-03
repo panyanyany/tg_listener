@@ -81,6 +81,16 @@ def test_from_transaction():
                          amount_out=191021198742087862,
                          hash='')
          },
+        # 分红币
+        {'input': '0xac367c95db801129797f9f30a1f7e99beb2a9c594f20761aaee262c6df0fb139',
+         'name': 'swapExactTokensForTokensSupportingFeeOnTransferTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0x4334cd7f02d826bcd87c40fca6c0502f1d34baf2',
+                         token_in='0x55d398326f99059fF775485246999027B3197955',
+                         token_out='0x38AE40D9F1897BA20aEbf37Bf6a9D36778aac3f3', amount_in=5000000000000000000,
+                         amount_out=14684305240671903553278779239,
+                         hash='')
+         },
     ]
     cur_dir = Path(__file__).parent
     # print()
