@@ -1,23 +1,18 @@
-import json
+import asyncio
+import logging
+from typing import List
 
-from hexbytes import HexBytes
 from web3 import Web3
-from web3.types import TxData
-from web3.datastructures import AttributeDict
-from web3.middleware import geth_poa_middleware
-from beeprint import pp
+from web3.eth import AsyncEth
+from web3.middleware import async_geth_poa_middleware
 from web3.types import TxReceipt
 
-from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
-from util.eth.erc20.log_decoder import LogDecoder
-from util.uniswap.trade import Trade
+from util.web3.http_providers import AsyncConcurrencyHTTPProvider
 
 provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
 
-w3 = Web3(Web3.HTTPProvider(provider))
-w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
-
-router_decoder = Decoder(pancake_swap_router_signatures, w3)
+w3 = Web3(AsyncConcurrencyHTTPProvider(provider), modules={'eth': (AsyncEth,)}, middlewares=[])
+w3.middleware_onion.inject(async_geth_poa_middleware, layer=0)  # 注入poa中间件
 
 # txh = '0x39ba3d511176788076f1012538d6354ea4e0b3bb70ec0d0a097002137c442e24'
 tx_list = [
@@ -29,16 +24,22 @@ tx_list = [
 ]
 
 
-class MyEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, HexBytes):
-            return obj.hex()
-        if isinstance(obj, AttributeDict):
-            return dict(obj)
-        return json.dumps(obj)
+async def main():
+    gathering = asyncio.gather(*[
+        w3.eth.get_transaction_receipt(tx) for tx in tx_list
+    ])
+
+    results = await gathering
+    failed_cnt = 0
+    print(results[0])
+    receipts: List[TxReceipt] = []
+    for item in results:
+        if not item:
+            failed_cnt += 1
+        else:
+            receipts.append(item)
+    print(len(results), failed_cnt)
 
 
-for txh in tx_list:
-    tx = w3.eth.get_transaction(txh)
-    rec = w3.eth.get_transaction_receipt(txh)
-    print(Trade.from_transaction(tx, rec))
+logging.basicConfig(level=logging.DEBUG)
+asyncio.run(main())

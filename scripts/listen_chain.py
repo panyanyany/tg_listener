@@ -10,11 +10,12 @@ from web3.types import BlockData, TxData, TxReceipt
 
 from tg_listener.repo.chain_listener import ChainListener
 from util.uniswap.trade import Trade
+from util.web3.http_providers import AsyncConcurrencyHTTPProvider
 
 block_queue = ChainListener().start()
 
 provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
-w3 = Web3(Web3.AsyncHTTPProvider(provider), modules={'eth': (AsyncEth,)}, middlewares=[])
+w3 = Web3(AsyncConcurrencyHTTPProvider(provider), modules={'eth': (AsyncEth,)}, middlewares=[])
 w3.middleware_onion.inject(async_geth_poa_middleware, layer=0)  # 注入poa中间件
 
 
@@ -73,7 +74,7 @@ async def main():
             trade = Trade.from_transaction(tx, receipt)
             if not trade:
                 continue
-            print(trade)
+            # print(trade)
 
 
 asyncio.run(main())
