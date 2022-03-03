@@ -20,6 +20,8 @@ dacite = "^1.6.0"
 beeprint = "^2.4.10"
 pytest = "^7.0.1"
 web3 = "5.28.0"
+PyYAML = "^6.0"
+concurrent-log-handler = "^0.9.20"
 
 [tool.poetry.dev-dependencies]
 
