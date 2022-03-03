@@ -1,4 +1,6 @@
-router = '0x10ED43C718714eb63d5aA57B78B54704E256024E'
+router = '0x10ed43c718714eb63d5aa57b78b54704e256024e'
+router2 = '0x05ff2b0db69458a0750badebc4f9e13add608c7f'
+router3 = '0xcd3d4eb34385a2ddf470aed617378eaae53082d4'
 factory = '0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73'
 wbnb = '0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c'
 busd = '0xe9e7cea3dedca5984780bafc599bd69add087d56'

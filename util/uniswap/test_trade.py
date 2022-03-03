@@ -61,6 +61,26 @@ def test_from_transaction():
          'data': 'tx01',
          'result': None
          },
+        # 会用到 router2
+        {'input': '0xfcd695e238155d01a42e7fe0a3e668e32a8932e8df81b4e657910d4df08e3016',
+         'name': 'swapExactTokensForETHSupportingFeeOnTransferTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0x9dc37743319ffdeecfe5cd925e125a2a7252898d',
+                         token_in='0xA9776B590bfc2f956711b3419910A5Ec1F63153E',
+                         token_out='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+                         amount_in=71000000000000000,
+                         amount_out=19019168878003732, hash='')
+         },
+        # 其他 router
+        {'input': '0x105e3130bf0027eceeeabaf52db3f63f4a08f7b4da4718c5326f26b56a1f97a4',
+         'name': 'swapExactTokensForETHSupportingFeeOnTransferTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0xfc0e59008d817fd57d90a7b1bab6ffb92cbadb07',
+                         token_in='0x15104336cf1C5BB4281eD1E12fecc5A1197e5E36',
+                         token_out='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', amount_in=540000000000000000000000000,
+                         amount_out=191021198742087862,
+                         hash='')
+         },
     ]
     cur_dir = Path(__file__).parent
     # print()

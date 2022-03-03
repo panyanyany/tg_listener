@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from web3.types import TxData, TxReceipt
 
-from util.bsc.constants import router
+from util.bsc.constants import router, router2
 from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
 from util.eth.erc20.log_decoder import LogDecoder
 
@@ -37,7 +37,7 @@ class Trade:
         token_in = paths[0]
         token_out = paths[-1]
 
-        # raw_amount_in = fn_inputs.get('amountIn', 0)
+        raw_amount_in = fn_inputs.get('amountIn', 0)
         amount_in = 0
         amount_out = 0
 
@@ -45,6 +45,7 @@ class Trade:
             amount_in = tx['value']
 
         logs = []
+        last_value = 0
         for log in receipt['logs']:
             logs.append(dict(log))
             smart_contract = log["address"]
@@ -54,15 +55,20 @@ class Trade:
             _from = dlog['args']['from'].lower()
             if _from == operator:
                 amount_in += dlog['args']['value']
-            elif _from == router.lower():
+            elif _from == router:
                 if fn_name == 'swapETHForExactTokens':
                     amount_in += dlog['args']['value']
 
             to = dlog['args']['to'].lower()
-            if to == router.lower() or to == operator:
+            last_value = dlog['args']['value']
+            # router2 在这个交易会用到： 0xfcd695e238155d01a42e7fe0a3e668e32a8932e8df81b4e657910d4df08e3016
+            if to in [router, operator, router2]:
                 amount_out += dlog['args']['value']
             # print(f"Contract:{dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
+        # 最后一个可能是其他的 router
+        if amount_out == 0:
+            amount_out = last_value
         # print(f'amount_in={amount_in}/{raw_amount_in}, amount_out={amount_out}')
         return cls(operator=operator, token_in=token_in, token_out=token_out, amount_in=amount_in,
                    amount_out=amount_out,

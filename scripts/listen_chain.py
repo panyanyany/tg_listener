@@ -48,12 +48,13 @@ async def main():
             except:
                 return
 
+        await asyncio.sleep(1)
         gathering = asyncio.gather(*[
             get_receipt(tx) for tx in swap_transactions
         ])
         results = await gathering
         failed_cnt = 0
-        print(results[0])
+        # print(results[0])
         receipts: List[TxReceipt] = []
         for item in results:
             if not item:
@@ -74,7 +75,8 @@ async def main():
             trade = Trade.from_transaction(tx, receipt)
             if not trade:
                 continue
-            # print(trade)
+            if trade.amount_in == 0 or trade.amount_out == 0:
+                print(trade)
 
 
 asyncio.run(main())
