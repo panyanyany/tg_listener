@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+from typing import Union
 
-from web3.types import TxData, TxReceipt
+from web3.types import TxData, TxReceipt, EventData
 
 from util.bsc.constants import router, router2
 from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
@@ -49,7 +50,7 @@ class Trade:
         for log in receipt['logs']:
             logs.append(dict(log))
             smart_contract = log["address"]
-            dlog = cls.log_decoder.decode(log)
+            dlog: Union[EventData, None] = cls.log_decoder.decode(log)
             if not dlog:
                 continue
             _from = dlog['args']['from'].lower()

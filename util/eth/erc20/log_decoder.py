@@ -1,7 +1,8 @@
 from pathlib import Path
+from typing import Union
 
 from web3 import Web3
-from web3.types import LogReceipt
+from web3.types import LogReceipt, EventData
 
 from util.bsc import constants
 
@@ -16,7 +17,7 @@ class LogDecoder:
                                                  Path(__file__).parent.joinpath('./data/erc20_event_abi.json')).read())
         self.abi_events = [abi for abi in self.contract.abi if abi["type"] == "event"]
 
-    def decode(self, log: LogReceipt):
+    def decode(self, log: LogReceipt) -> Union[EventData, None]:
         """把日志解码为转账事件
         https://medium.com/coinmonks/unlocking-the-secrets-of-an-ethereum-transaction-3a33991f696c
         """
