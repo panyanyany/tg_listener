@@ -31,11 +31,8 @@ def init_database():
     #     password=settings.DB_PASSWORD,
     #     db_name=settings.DB_NAME,
     # ), charset='utf8mb4')
-    db_inst = PooledMySQLDatabase('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
-        username=settings.DB_USERNAME,
-        password=settings.DB_PASSWORD,
-        db_name=settings.DB_NAME,
-    ), charset='utf8mb4')
+    db_inst = PooledMySQLDatabase(settings.DB_NAME, user=settings.DB_USERNAME, password=settings.DB_PASSWORD,
+                                  charset='utf8mb4')
 
     database_proxy.initialize(db_inst)
 
@@ -55,7 +52,7 @@ def init_database():
 
     add_columns = [
         # ['address_stat', 'now_busd_amount', IntegerField(null=True)],
-        ['address_stat', 'pool_growth', DecimalField(null=True)],
+        # ['address_stat', 'pool_growth', DecimalField(null=True)],
     ]
     rename_columns = [
         # ['address_stat', 'busd_amount', 'init_busd_amount'],
@@ -99,5 +96,5 @@ def init_database():
         except Exception as e:
             logging.warning('!!!! alter_column_type: %s', str(e))
 
-    threading.Thread(target=keep_alive, daemon=True).start()
+    # threading.Thread(target=keep_alive, daemon=True).start()
     return db_inst
