@@ -31,8 +31,11 @@ def init_database():
     #     password=settings.DB_PASSWORD,
     #     db_name=settings.DB_NAME,
     # ), charset='utf8mb4')
-    db_inst = PooledMySQLDatabase(settings.DB_NAME, username=settings.DB_USERNAME, password=settings.DB_PASSWORD,
-                                  charset='utf8mb4')
+    db_inst = PooledMySQLDatabase('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
+        username=settings.DB_USERNAME,
+        password=settings.DB_PASSWORD,
+        db_name=settings.DB_NAME,
+    ), charset='utf8mb4')
 
     database_proxy.initialize(db_inst)
 
