@@ -31,6 +31,8 @@ def init_database():
     #     password=settings.DB_PASSWORD,
     #     db_name=settings.DB_NAME,
     # ), charset='utf8mb4')
+    # 为什么要用 PooledMySQLDatabase 呢？
+    # 因为 mysql 的连接总是会自动断开，不管你有没有 ping, pool 会自动回收处理无效的连接
     db_inst = PooledMySQLDatabase(settings.DB_NAME, user=settings.DB_USERNAME, password=settings.DB_PASSWORD,
                                   charset='utf8mb4')
 
