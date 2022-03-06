@@ -2,6 +2,7 @@ import logging
 import asyncio
 import threading
 
+from playhouse.pool import PooledMySQLDatabase
 from playhouse.db_url import connect, MySQLDatabase
 from playhouse.migrate import MySQLMigrator, migrate, CharField, IntegerField, DecimalField
 
@@ -25,11 +26,14 @@ def keep_alive():
 
 def init_database():
     global db_inst
-    db_inst = connect('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
-        username=settings.DB_USERNAME,
-        password=settings.DB_PASSWORD,
-        db_name=settings.DB_NAME,
-    ), charset='utf8mb4')
+    # db_inst = connect('mysql://{username}:{password}@127.0.0.1:3306/{db_name}'.format(
+    #     username=settings.DB_USERNAME,
+    #     password=settings.DB_PASSWORD,
+    #     db_name=settings.DB_NAME,
+    # ), charset='utf8mb4')
+    db_inst = PooledMySQLDatabase(settings.DB_NAME, username=settings.DB_USERNAME, password=settings.DB_PASSWORD,
+                                  charset='utf8mb4')
+
     database_proxy.initialize(db_inst)
 
     db_inst.connect()
