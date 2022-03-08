@@ -1,14 +1,16 @@
 import asyncio
 import threading
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional, Union
 
+from eth_typing import URI
 from web3 import AsyncHTTPProvider
 from web3._utils.request import async_make_post_request
 from web3.types import RPCEndpoint, RPCResponse
 
 
 class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
+
     endpoints = [
         "https://bsc-dataseed.binance.org/",
         "https://bsc-dataseed1.binance.org/",
@@ -27,6 +29,9 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     last_time = {}
     lock = threading.Lock()
     interval = 0.2
+
+    def __init__(self, endpoint_uri: Optional[Union[URI, str]] = None, request_kwargs: Optional[Any] = None) -> None:
+        super().__init__(endpoint_uri, request_kwargs)
 
     async def pick_endpoint(self):
         while True:

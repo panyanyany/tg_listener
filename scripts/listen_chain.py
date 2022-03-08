@@ -18,8 +18,7 @@ setup3(ignore_names=['web3.*', 'asyncio'] + default_ignore_names)
 
 block_queue = ChainListener().start()
 
-provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
-w3 = Web3(AsyncConcurrencyHTTPProvider(provider), modules={'eth': (AsyncEth,)}, middlewares=[])
+w3 = Web3(AsyncConcurrencyHTTPProvider(), modules={'eth': (AsyncEth,)}, middlewares=[])
 w3.middleware_onion.inject(async_geth_poa_middleware, layer=0)  # 注入poa中间件
 
 
@@ -42,15 +41,24 @@ async def main():
                 swap_cnt += 1
                 swap_transactions.append(tx)
 
-        print(datetime.now(), block['hash'].hex(), block['number'], dt, len(block['transactions']), swap_cnt)
+        print(
+            f"{datetime.now()}, {block['hash'].hex()}, {block['number']}, {dt}"
+            f", len(txs)={len(block['transactions'])}"
+            f", swap_cnt={swap_cnt}")
 
         # 请求交易结果
         async def get_receipt(tx: TxData):
-            try:
-                resp = await w3.eth.get_transaction_receipt(tx['hash'])
-                return resp
-            except:
-                return
+            attempt = 0
+            max_attempt = 2
+            while attempt < max_attempt:
+                attempt += 1
+                try:
+                    resp = await w3.eth.get_transaction_receipt(tx['hash'])
+                    return resp
+                except:
+                    print('retry')
+                    await asyncio.sleep(2 ** (attempt - 1))
+                    continue
 
         await asyncio.sleep(1)
         gathering = asyncio.gather(*[
