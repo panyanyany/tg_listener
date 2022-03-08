@@ -23,7 +23,6 @@ tx_list = [
     '0x8a47ae500e41ea481289fba363a2bd5cb10295c6a84e61b4fb07e7013ecd0065',  # swapExactETHForTokens
 ]
 
-
 async def main():
     gathering = asyncio.gather(*[
         w3.eth.get_transaction_receipt(tx) for tx in tx_list
