@@ -1,5 +1,6 @@
 # main()
 import asyncio
+import logging
 from datetime import datetime
 from typing import List
 
@@ -9,8 +10,11 @@ from web3.middleware import geth_poa_middleware, async_geth_poa_middleware
 from web3.types import BlockData, TxData, TxReceipt
 
 from tg_listener.repo.chain_listener import ChainListener
+from util.log_util import setup3, default_ignore_names
 from util.uniswap.trade import Trade
 from util.web3.http_providers import AsyncConcurrencyHTTPProvider
+
+setup3(ignore_names=['web3.*', 'asyncio'] + default_ignore_names)
 
 block_queue = ChainListener().start()
 

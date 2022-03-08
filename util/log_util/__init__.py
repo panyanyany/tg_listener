@@ -6,6 +6,7 @@ import os
 import sys
 import types
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import yaml
 import codecs
@@ -431,6 +432,16 @@ def setup2(module_name):
     set_independent_levels(module_name, [logging.ERROR, logging.CRITICAL])
 
 
+default_ignore_names = [
+    'peewee*',
+    'urllib3*',
+    'PIL*',
+    # 'scrapy.utils.log*',
+    'util.*',
+    'py.warnings*'
+]
+
+
 def setup3(cmd_level=1, max_age=3 * 24 * 60, ignore_names=None):
     """
     :param cmd_level:
@@ -440,35 +451,36 @@ def setup3(cmd_level=1, max_age=3 * 24 * 60, ignore_names=None):
     :return:
     """
     args = sys.argv[:cmd_level]
+    project_root = Path(__file__).parent.parent.parent
 
     for i, arg in enumerate(args):
         if arg.endswith('.py'):
+            # 如果直接在 IDE 里运行, 会出现绝对路径, 比如：
+            # /Users/xxx/Library/Caches/pypoetry/virtualenvs/yyy-xp3-MCh4-py3.9/bin/python /private/var/www/xxx/yyy/scripts/listen_chain.py
+            # 所以需要把文件的绝对路径转为相对路径，方便后面生成日志路径
+            if str(project_root) in arg:
+                arg = arg.replace(str(project_root), '').lstrip('/')
             args[i] = arg[:-3]
-    dir_path = '/'.join(args)
 
-    # 不要源码根目录, 否则会出现 logs/src/lps/cli.log 的效果
-    # 修正后效果：logs/lps/cli.log
-    cwd_name = os.path.basename(os.getcwd())
+    dir_path = '/'.join(args)
     parts = dir_path.split('/')
-    if parts[0] == cwd_name:
-        parts = parts[1:]
+
+    # # 不要源码根目录, 否则会出现 logs/src/lps/cli.log 的效果
+    # # 修正后效果：logs/lps/cli.log
+    # cwd_name = os.path.basename(os.getcwd())
+    # if parts[0] == cwd_name:
+    #     # print('parts[0] == cwd_name')
+    #     parts = parts[1:]
 
     dir_path = '/'.join(parts)
     name = os.path.basename(dir_path)
 
-    filename = 'logs/{dir_path}/{name}.log'.format(dir_path=dir_path, name=name)
-    dirname = os.path.dirname(filename)
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-    logging.info('logfile: %s', filename)
+    logfile = Path(__file__).parent.parent.parent.joinpath(
+        'logs/{dir_path}/{name}.log'.format(dir_path=dir_path, name=name))
+    if not logfile.parent.exists():
+        logfile.parent.mkdir(parents=True)
+    logging.info('logfile: %s', logfile)
     logging.basicConfig(level=logging.DEBUG, handlers=[])
-    setup(ignore_names=ignore_names or [
-        'peewee*',
-        'urllib3*',
-        'PIL*',
-        # 'scrapy.utils.log*',
-        'util.*',
-        'py.warnings*'
-    ], filename=filename,
+    setup(ignore_names=ignore_names or default_ignore_names, filename=str(logfile),
           rotate=False,
           max_age=max_age)
