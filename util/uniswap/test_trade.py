@@ -91,10 +91,18 @@ def test_from_transaction():
                          amount_out=14684305240671903553278779239,
                          hash='')
          },
+        {'input': '0x4d78ba4f991028b06a715a2809ea2ba0fee43d0fcb9e8d854ce476f8ecdef679',
+         'name': 'swapETHForExactTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0xc29057b7fa51bbbe3d100255eaf07c4eaa550952',
+                         token_in='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+                         token_out='0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', amount_in=2523462800000000000,
+                         amount_out=964000000000000000000, hash='')
+         },
     ]
     cur_dir = Path(__file__).parent
     # print()
-    for testdata in testdata_list[:]:
+    for testdata in testdata_list[-1:]:
         txh = testdata['input']
         tx = w3.eth.get_transaction(txh)
         rec: TxReceipt = w3.eth.get_transaction_receipt(txh)

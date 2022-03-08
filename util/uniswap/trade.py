@@ -42,7 +42,8 @@ class Trade:
         amount_in = 0
         amount_out = 0
 
-        if fn_name in ['swapExactETHForTokens', 'swapExactETHForTokensSupportingFeeOnTransferTokens']:
+        if fn_name in ['swapExactETHForTokens', 'swapExactETHForTokensSupportingFeeOnTransferTokens',
+                       'swapETHForExactTokens']:
             amount_in = tx['value']
 
         logs = []
