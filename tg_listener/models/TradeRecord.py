@@ -12,6 +12,9 @@ class TradeRecord(BaseModel):
     to_address = CharField()
     direction = CharField()
 
+    amount = CharField()
+    usdt_amount = DecimalField()
+
     D_BUY = 'BUY'
     D_SELL = 'SELL'
 
@@ -19,4 +22,3 @@ class TradeRecord(BaseModel):
         indexes = (
             (('address', 'day'), True),
         )
-

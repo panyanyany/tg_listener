@@ -28,7 +28,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     ]
     last_time = {}
     lock = threading.Lock()
-    interval = 0.2
+    interval = 0.05
 
     def __init__(self, endpoint_uri: Optional[Union[URI, str]] = None, request_kwargs: Optional[Any] = None) -> None:
         super().__init__(endpoint_uri, request_kwargs)
@@ -44,7 +44,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
                         self.last_time[endpoint_uri] = datetime.now()
                         return endpoint_uri
             # self.logger.debug('---- waiting: no endpoint available')
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.05)
 
     async def make_request(self, method: RPCEndpoint, params: Any) -> RPCResponse:
         self.endpoint_uri = await self.pick_endpoint()

@@ -1,5 +1,5 @@
 import asyncio
-import datetime
+import logging
 import queue
 from threading import Thread
 
@@ -10,12 +10,13 @@ from web3.types import BlockData
 
 
 class ChainListener:
-    def __init__(self):
-        provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
-        w3 = Web3(Web3.HTTPProvider(provider))
-        w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
+    def __init__(self, w3=None):
+        if not w3:
+            provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
+            w3 = Web3(Web3.HTTPProvider(provider))
+            w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
         self.w3 = w3
-        self.block_queue = queue.Queue()
+        self.queue = queue.Queue()
 
     async def handle_event(self, i: HexBytes):
         # block_hash = i.hex()
@@ -25,10 +26,8 @@ class ChainListener:
                 break
             except:
                 await asyncio.sleep(0.2)
-        self.block_queue.put_nowait(block)
-        # dt = datetime.datetime.fromtimestamp(block['timestamp'])
-        # print('===== Block hash:  ', i.hex(), block['number'], dt)
-        # and whatever
+        self.queue.put_nowait(block)
+        logging.info('got new block')
 
     async def log_loop(self, event_filter, poll_interval):
         while True:
@@ -38,7 +37,7 @@ class ChainListener:
 
     def start(self):
         Thread(target=self.run, daemon=True).start()
-        return self.block_queue
+        return self.queue
 
     def run(self):
         block_filter = self.w3.eth.filter('latest')

@@ -2,7 +2,7 @@ import logging
 
 from tg_listener.db import init_database
 from tg_listener.models.AddressStat import make_stat
-from tg_listener.repo.listener import Listener
+from tg_listener.repo.tg_listener_repo import Listener
 
 db = init_database()
 
