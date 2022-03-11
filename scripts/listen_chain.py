@@ -16,7 +16,7 @@ from util.log_util import setup3, default_ignore_names
 from util.uniswap.trade import Trade
 from util.web3.http_providers import AsyncConcurrencyHTTPProvider
 
-start_monitoring(seconds_frozen=10, test_interval=100)
+# start_monitoring(seconds_frozen=20, test_interval=1000)
 
 
 setup3(ignore_names=['web3.*', 'asyncio'] + default_ignore_names)
@@ -50,6 +50,7 @@ async def main():
             f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
             f", {block['hash'].hex()}, {block['number']}, {dt}"
             f", delta={(now - dt).total_seconds()}"
+            f", queue={block_queue.qsize()}"
         )
 
         # 把结果转换成可读交易类型

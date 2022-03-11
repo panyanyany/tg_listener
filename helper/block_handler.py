@@ -34,6 +34,9 @@ def extract_router_transactions(txs: List[TxData]):
 
 
 async def load_receipts(w3, txs: List[TxData]) -> List[ExtendedTxData]:
+    if len(txs) == 0:
+        return txs
+
     txs2 = []
     for tx in txs:
         tx2 = ExtendedTxData.from_tx_data(tx)

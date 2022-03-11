@@ -28,7 +28,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     ]
     last_time = {}
     lock = threading.Lock()
-    interval = 0.05
+    interval = 0.1
 
     def __init__(self, endpoint_uri: Optional[Union[URI, str]] = None, request_kwargs: Optional[Any] = None) -> None:
         super().__init__(endpoint_uri, request_kwargs)

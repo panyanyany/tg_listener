@@ -30,9 +30,16 @@ class ChainListener:
         logging.info('got new block')
 
     async def log_loop(self, event_filter, poll_interval):
+        latest = 0
         while True:
-            for event in event_filter.get_new_entries():
-                await self.handle_event(event)
+            # 这玩意会卡住
+            # for event in event_filter.get_new_entries():
+            #     await self.handle_event(event)
+            n = self.w3.eth.get_block_number()
+            if n != latest:
+                block = self.w3.eth.get_block(n, full_transactions=True)
+                self.queue.put_nowait(block)
+                latest = n
             await asyncio.sleep(poll_interval)
 
     def start(self):
