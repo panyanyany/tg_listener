@@ -8,8 +8,10 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from web3.types import BlockData
 
+from util.asyncio.cancelable import Cancelable
 
-class ChainListener:
+
+class ChainListener(Cancelable):
     def __init__(self, w3=None):
         if not w3:
             provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
@@ -31,7 +33,7 @@ class ChainListener:
 
     async def log_loop(self, event_filter, poll_interval):
         latest = 0
-        while True:
+        while self.is_running():
             # 这玩意会卡住
             # for event in event_filter.get_new_entries():
             #     await self.handle_event(event)
@@ -43,6 +45,7 @@ class ChainListener:
             await asyncio.sleep(poll_interval)
 
     def start(self):
+        super().start()
         Thread(target=self.run, daemon=True).start()
         return self.queue
 
