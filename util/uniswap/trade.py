@@ -62,7 +62,7 @@ class Trade:
                 last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'])
             elif dlog['event'] == 'Swap':
                 self.handle_swap(operator, fn_name, dlog, i, receipt['logs'])
-            print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
+            # print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
         # 最后一个可能是其他的 router
         if self.amount_out == 0:
