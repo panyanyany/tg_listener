@@ -55,9 +55,7 @@ class BlockHandler(Cancelable):
                     f", queue={self.block_queue.qsize()}"
                 )
 
-            # 把结果转换成可读交易类型
-            for tx in swap_transactions:
-                self.swap_queue.put_nowait(tx)
+            self.swap_queue.put_nowait(swap_transactions)
             for liq in liq_transactions:
                 self.liq_queue.put_nowait(liq)
                 # trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)

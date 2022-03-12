@@ -21,17 +21,18 @@ class SwapHandler(Cancelable):
     async def run(self):
         while self.is_running():
             try:
-                tx = self.swap_queue.get_nowait()
+                txs = self.swap_queue.get_nowait()
             except QueueEmpty:
                 await asyncio.sleep(0.1)
                 continue
 
-            trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)
-            if not trade:
-                continue
+            for tx in txs:
+                trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)
+                if not trade:
+                    continue
 
-            if trade.amount_in == 0 or trade.amount_out == 0:
-                logger.warning(str(trade))
+                if trade.amount_in == 0 or trade.amount_out == 0:
+                    logger.warning(str(trade))
         logger.info('swap handler stopped')
 
 

@@ -39,7 +39,11 @@ class ChainListener(Cancelable):
             # 这玩意会卡住
             # for event in event_filter.get_new_entries():
             #     await self.handle_event(event)
-            n = await self.w3.eth.get_block_number()
+            try:
+                n = await self.w3.eth.get_block_number()
+            except:
+                continue
+
             if n != latest:
                 try:
                     block = await self.w3.eth.get_block(n, full_transactions=True)
