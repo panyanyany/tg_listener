@@ -104,7 +104,8 @@ def test_from_transaction():
          'data': 'tx01',
          'result': Trade(operator='0xbe4b18882cd168a99653f852d9278d6d1d0e7634',
                          token_in='0x0efb5FD2402A0967B92551d6AF54De148504A115',
-                         token_out='0xC9882dEF23bc42D53895b8361D0b1EDC7570Bc6A', amount_in=98423455848077094, amount_out=20000000,
+                         token_out='0xC9882dEF23bc42D53895b8361D0b1EDC7570Bc6A', amount_in=98423455848077094,
+                         amount_out=20000000,
                          hash='')
          },
         {'input': '0x533f42756301aa1e26a6a50c836706e2e748e381020ebab524f17295406cbcc7',
@@ -125,6 +126,15 @@ def test_from_transaction():
         #                  token_out='0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', amount_in=2523462800000000000,
         #                  amount_out=964000000000000000000, hash='')
         #  },
+        # amount_out 也是 0
+        {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
+         'name': 'swapETHForExactTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0x7e194da04f528272f479a4ae0932f7ac91dd6220',
+                         token_in='0xcD9bc85C6b675DA994F172Debb6Db9BDD6727FE7',
+                         token_out='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', amount_in=387142211041309,
+                         amount_out=0, hash='0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f')
+         },
     ]
     cur_dir = Path(__file__).parent
     # print()

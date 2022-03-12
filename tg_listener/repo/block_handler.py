@@ -48,10 +48,10 @@ class BlockHandler(Cancelable):
             if self.block_queue.qsize() >= 0:
                 logger.warning(
                     f"{now}"
-                    f", len(txs)={len(block['transactions'])}"
+                    f", len(txs)={len(block['transactions']):03}"
                     f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
                     f", {block['hash'].hex()}, {block['number']}, {dt}"
-                    f", delta={(now - dt).total_seconds()}"
+                    f", delta={(now - dt).total_seconds():.1f}s"
                     f", queue={self.block_queue.qsize()}"
                 )
 
