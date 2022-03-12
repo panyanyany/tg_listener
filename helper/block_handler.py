@@ -53,14 +53,8 @@ async def load_receipts(w3, txs: List[TxData]) -> List[ExtendedTxData]:
                 tx.receipt = await w3.eth.get_transaction_receipt(tx.hash)
                 return
             except:
-                try:
-                    loop = asyncio.get_running_loop()
-                except:
-                    return
-                # 没有loop的话写log会出异常
-                logger.warning('retry')
+                # logger.warning('retry')
                 await asyncio.sleep(1)
-                continue
 
     # await asyncio.sleep(1)
     await asyncio.wait([
@@ -70,5 +64,7 @@ async def load_receipts(w3, txs: List[TxData]) -> List[ExtendedTxData]:
     for tx in txs2:
         if not tx.receipt:
             failed_cnt += 1
-    logger.warning(f"{failed_cnt}/{len(txs2)}")
+
+    if failed_cnt > 0:
+        logger.warning(f"fail/total: {failed_cnt}/{len(txs2)}")
     return txs2

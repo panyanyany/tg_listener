@@ -45,14 +45,15 @@ class Worker(Cancelable):
 
             dt = datetime.fromtimestamp(block['timestamp'])
             now = datetime.now()
-            logging.info(
-                f"{now}"
-                f", len(txs)={len(block['transactions'])}"
-                f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
-                f", {block['hash'].hex()}, {block['number']}, {dt}"
-                f", delta={(now - dt).total_seconds()}"
-                f", queue={block_queue.qsize()}"
-            )
+            if block_queue.qsize() > 5:
+                logging.warning(
+                    f"{now}"
+                    f", len(txs)={len(block['transactions'])}"
+                    f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
+                    f", {block['hash'].hex()}, {block['number']}, {dt}"
+                    f", delta={(now - dt).total_seconds()}"
+                    f", queue={block_queue.qsize()}"
+                )
 
             # 把结果转换成可读交易类型
             trades = []
@@ -60,6 +61,7 @@ class Worker(Cancelable):
                 trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)
                 if not trade:
                     continue
+
                 if trade.amount_in == 0 or trade.amount_out == 0:
                     print(trade)
 
