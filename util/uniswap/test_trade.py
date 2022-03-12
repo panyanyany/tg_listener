@@ -99,6 +99,14 @@ def test_from_transaction():
                          token_out='0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', amount_in=2522916503436603191,
                          amount_out=964000000000000000000, hash='')
          },
+        {'input': '0xb3e6c2dd010d6f0dd833184b0c5034b862ecc98953de556ffa4898cac287d23d',
+         'name': 'swapETHForExactTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0xbe4b18882cd168a99653f852d9278d6d1d0e7634',
+                         token_in='0x0efb5FD2402A0967B92551d6AF54De148504A115',
+                         token_out='0xC9882dEF23bc42D53895b8361D0b1EDC7570Bc6A', amount_in=0, amount_out=20000000,
+                         hash='')
+         },
         # 有点奇怪，amount_out 是 0
         # {'input': '0x21d95c96c408f76e6f2ac57274818c474343bfc916d9ba18b335a048c1f730a4',
         #  'name': 'swapETHForExactTokens',
