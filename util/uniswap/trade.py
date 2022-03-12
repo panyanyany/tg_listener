@@ -9,6 +9,7 @@ from web3.types import TxData, TxReceipt, EventData
 
 from util.bsc.constants import router, router2
 from util.bsc.pancake_swap.factory import factory
+from util.bsc.token import has_canonical
 from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
 from util.eth.erc20 import Erc20
 from util.eth.log_decoder.log_decoder import LogDecoder
@@ -81,6 +82,8 @@ class Trade:
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
         paths = fn_inputs['path']
+        if not has_canonical(paths):
+            return
         # print(f'paths: {paths}')
 
         self = cls(operator=operator, token_in=paths[0], token_out=paths[-1], amount_in=0, amount_out=0,

@@ -141,9 +141,9 @@ def test_from_transaction():
         # pp(dict(rec))
 
         trade = Trade.from_transaction(tx, rec)
-        # print()
-        # print(trade)
-        # print()
+        print()
+        print(trade)
+        print()
         if trade:
             trade.hash = ''
         if testdata['result']:
