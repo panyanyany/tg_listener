@@ -1,28 +1,38 @@
+import asyncio
 import logging
+from asyncio import Queue
+from asyncio.queues import QueueEmpty
 from datetime import datetime
 
 from web3 import Web3
-from web3.eth import AsyncEth
-from web3.middleware import async_geth_poa_middleware
 from web3.types import BlockData
 
 from helper.block_helper import extract_router_transactions, load_receipts
 from util.asyncio.cancelable import Cancelable
-from util.uniswap.trade import Trade
-from util.web3.http_providers import AsyncConcurrencyHTTPProvider
+
+logger = logging.getLogger(__name__)
 
 
 class BlockHandler(Cancelable):
-    def __init__(self, block_queue):
-        w3 = Web3(AsyncConcurrencyHTTPProvider(), modules={'eth': (AsyncEth,)}, middlewares=[])
-        w3.middleware_onion.inject(async_geth_poa_middleware, layer=0)  # 注入poa中间件
+    def __init__(self, block_queue: Queue, w3: Web3):
         self.w3 = w3
         self.block_queue = block_queue
+        self.swap_queue = Queue()
+        self.liq_queue = Queue()
 
-    async def main(self):
+    async def run(self):
+        await self.loop()
+        logger.info('block_handler stopped')
+
+    async def loop(self):
         while self.is_running():
             # 等待新的区块
-            block: BlockData = self.block_queue.get()
+            try:
+                # 在同一线程，不要用 await queue.get(), 会由于生产者队列为空导致一直阻塞，无法退出
+                block: BlockData = self.block_queue.get_nowait()
+            except QueueEmpty:
+                await asyncio.sleep(0.1)
+                continue
 
             # 提取 uniswap 相关交易: swap & liq
             swap_transactions, liq_transactions = extract_router_transactions(block['transactions'])
@@ -35,8 +45,8 @@ class BlockHandler(Cancelable):
 
             dt = datetime.fromtimestamp(block['timestamp'])
             now = datetime.now()
-            if self.block_queue.qsize() > 0:
-                logging.warning(
+            if self.block_queue.qsize() >= 0:
+                logger.warning(
                     f"{now}"
                     f", len(txs)={len(block['transactions'])}"
                     f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
@@ -46,11 +56,15 @@ class BlockHandler(Cancelable):
                 )
 
             # 把结果转换成可读交易类型
-            trades = []
             for tx in swap_transactions:
-                trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)
-                if not trade:
-                    continue
-
-                if trade.amount_in == 0 or trade.amount_out == 0:
-                    print(trade)
+                self.swap_queue.put_nowait(tx)
+            for liq in liq_transactions:
+                self.liq_queue.put_nowait(liq)
+                # trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)
+                # if not trade:
+                #     continue
+                #
+                # if trade.amount_in == 0 or trade.amount_out == 0:
+                #     logger.warning(str(trade))
+                # else:
+                #     self.tx_queue.put_nowait(trade)

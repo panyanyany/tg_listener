@@ -1,6 +1,6 @@
 import asyncio
 import logging
-import queue
+from asyncio import Queue
 from threading import Thread
 
 from hexbytes import HexBytes
@@ -10,53 +10,46 @@ from web3.types import BlockData
 
 from util.asyncio.cancelable import Cancelable
 
+logger = logging.getLogger(__name__)
+
 
 class ChainListener(Cancelable):
-    def __init__(self, w3=None):
-        if not w3:
-            provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
-            w3 = Web3(Web3.HTTPProvider(provider))
-            w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
+    def __init__(self, w3: Web3 = None):
+        # if not w3:
+        #     provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
+        #     w3 = Web3(Web3.HTTPProvider(provider))
+        #     w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
         self.w3 = w3
-        self.queue = queue.Queue()
+        self.queue = Queue()
 
     async def handle_event(self, i: HexBytes):
         # block_hash = i.hex()
         while True:
             try:
-                block: BlockData = self.w3.eth.get_block(i, full_transactions=True)
+                block: BlockData = await self.w3.eth.get_block(i, full_transactions=True)
                 break
             except:
                 await asyncio.sleep(0.2)
         self.queue.put_nowait(block)
         logging.info('got new block')
 
-    async def log_loop(self, event_filter, poll_interval):
+    async def loop(self, event_filter, poll_interval):
         latest = 0
         while self.is_running():
             # 这玩意会卡住
             # for event in event_filter.get_new_entries():
             #     await self.handle_event(event)
-            n = self.w3.eth.get_block_number()
+            n = await self.w3.eth.get_block_number()
             if n != latest:
-                block = self.w3.eth.get_block(n, full_transactions=True)
+                try:
+                    block = await self.w3.eth.get_block(n, full_transactions=True)
+                except:
+                    continue
                 self.queue.put_nowait(block)
                 latest = n
             await asyncio.sleep(poll_interval)
 
-    def start(self):
-        super().start()
-        Thread(target=self.run, daemon=True).start()
-        return self.queue
-
-    def run(self):
-        block_filter = self.w3.eth.filter('latest')
-        # tx_filter = w3.eth.filter('pending')
-        loop = asyncio.new_event_loop()
-        # asyncio.set_event_loop(loop)
-        try:
-            loop.run_until_complete(
-                self.log_loop(block_filter, 0.25),
-            )
-        finally:
-            loop.close()
+    async def run(self):
+        # block_filter = self.w3.eth.filter('latest')
+        await self.loop(None, 0.25)
+        logger.info('chain listener stopped')
