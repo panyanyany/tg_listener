@@ -1,7 +1,7 @@
 import json
 import pickle
-from dataclasses import dataclass
-from typing import Union
+from dataclasses import dataclass, field
+from typing import Union, Any, List
 
 import redis
 from multicall import Multicall, Call
@@ -40,6 +40,8 @@ class Trade:
     amount_out: int
 
     hash: str = ''
+
+    logs_sync: List[EventData] = field(default_factory=list)
 
     log_decoder = LogDecoder()
     router_decoder = Decoder(pancake_swap_router_signatures)
@@ -87,7 +89,7 @@ class Trade:
         # print(f'paths: {paths}')
 
         self = cls(operator=operator, token_in=paths[0], token_out=paths[-1], amount_in=0, amount_out=0,
-                   hash=tx['hash'].hex(), )
+                   hash=tx['hash'].hex(), logs_sync=[])
 
         raw_amount_in = fn_inputs.get('amountIn', 0)
 
@@ -111,6 +113,7 @@ class Trade:
                 self.handle_swap(operator, fn_name, dlog, i, receipt['logs'])
             elif dlog['event'] == 'Sync':
                 # self.handle_sync(paths, sync_cnt, dlog)
+                self.logs_sync.append(dlog)
                 sync_cnt += 1
             # print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 

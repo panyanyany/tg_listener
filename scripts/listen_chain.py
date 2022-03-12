@@ -10,12 +10,13 @@ from web3.middleware import async_geth_poa_middleware
 
 from tg_listener.repo.block_handler import BlockHandler
 from tg_listener.repo.chain_listener import ChainListener
+from tg_listener.repo.log_handler import SyncHandler
 from tg_listener.repo.transaction_handler import SwapHandler, LiqHandler
 from util.log_util import setup3, default_ignore_names
 from util.web3.http_providers import AsyncConcurrencyHTTPProvider
 from util.web3.util import async_bsc_web3
 
-start_monitoring(seconds_frozen=20, test_interval=1000)
+# start_monitoring(seconds_frozen=20, test_interval=1000)
 
 setup3(ignore_names=['web3.*', 'asyncio'] + default_ignore_names)
 w3 = async_bsc_web3
@@ -30,11 +31,13 @@ if __name__ == "__main__":
 
     swap_handler = SwapHandler(block_handler.swap_queue, w3=w3)
     liq_handler = LiqHandler(block_handler.liq_queue, w3=w3)
+    log_handler = SyncHandler(swap_handler.trade_queue, w3=w3)
 
     chain_listener.start()
     block_handler.start()
     swap_handler.start()
     liq_handler.start()
+    log_handler.start()
 
 
     def cancel():
@@ -46,6 +49,8 @@ if __name__ == "__main__":
         swap_handler.stop()
         logging.info('stopping liq_handler')
         liq_handler.stop()
+        logging.info('stopping log_handler')
+        log_handler.stop()
 
 
     for signal in [SIGINT, SIGTERM]:
@@ -58,6 +63,7 @@ if __name__ == "__main__":
             block_handler.run(),
             swap_handler.run(),
             liq_handler.run(),
+            log_handler.run(),
         )
 
 

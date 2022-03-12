@@ -1,7 +1,6 @@
 import asyncio
 import logging
-import queue
-from asyncio.queues import QueueEmpty
+from asyncio.queues import QueueEmpty, Queue
 from threading import Thread
 
 from web3 import Web3
@@ -13,10 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 class SwapHandler(Cancelable):
-    def __init__(self, swap_queue: queue.Queue, w3: Web3):
+    def __init__(self, swap_queue: Queue, w3: Web3):
         self.w3 = w3
         self.swap_queue = swap_queue
-        self.queue = queue.Queue()
+        self.trade_queue = Queue()
 
     async def run(self):
         while self.is_running():
@@ -31,6 +30,7 @@ class SwapHandler(Cancelable):
                 if not trade:
                     continue
 
+                self.trade_queue.put_nowait(trade)
                 # logger.info(trade.to_human())
                 if trade.amount_in == 0 or trade.amount_out == 0:
                     logger.warning(str(trade))
@@ -38,10 +38,10 @@ class SwapHandler(Cancelable):
 
 
 class LiqHandler(Cancelable):
-    def __init__(self, liq_queue: queue.Queue, w3: Web3):
+    def __init__(self, liq_queue: Queue, w3: Web3):
         self.w3 = w3
         self.liq_queue = liq_queue
-        self.queue = queue.Queue()
+        self.queue = Queue()
 
     async def run(self):
         while self.is_running():
