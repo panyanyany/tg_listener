@@ -104,8 +104,17 @@ def test_from_transaction():
          'data': 'tx01',
          'result': Trade(operator='0xbe4b18882cd168a99653f852d9278d6d1d0e7634',
                          token_in='0x0efb5FD2402A0967B92551d6AF54De148504A115',
-                         token_out='0xC9882dEF23bc42D53895b8361D0b1EDC7570Bc6A', amount_in=0, amount_out=20000000,
+                         token_out='0xC9882dEF23bc42D53895b8361D0b1EDC7570Bc6A', amount_in=98423455848077094, amount_out=20000000,
                          hash='')
+         },
+        {'input': '0x533f42756301aa1e26a6a50c836706e2e748e381020ebab524f17295406cbcc7',
+         'name': 'swapETHForExactTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0x5d9c02df43eee4dcd943a8ff40e870a2ce39779f',
+                         token_in='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+                         token_out='0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56', amount_in=18665459964044354,
+                         amount_out=7000000000000000000,
+                         hash='0x533f42756301aa1e26a6a50c836706e2e748e381020ebab524f17295406cbcc7')
          },
         # 有点奇怪，amount_out 是 0
         # {'input': '0x21d95c96c408f76e6f2ac57274818c474343bfc916d9ba18b335a048c1f730a4',
@@ -135,6 +144,8 @@ def test_from_transaction():
         print()
         if trade:
             trade.hash = ''
+        if testdata['result']:
+            testdata['result'].hash = ''
         assert trade == testdata['result']
 
 

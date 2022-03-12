@@ -73,7 +73,7 @@ class Trade:
     def handle_swap(self, operator, fn_name, dlog, i, raw_logs):
         if i == len(raw_logs) - 1:
             if self.amount_in == 0:
-                self.amount_in = dlog['args']['amount1In']
+                self.amount_in = dlog['args']['amount1In'] or dlog['args']['amount0In']
             if self.amount_out == 0:
                 self.amount_out = dlog['args']['amount1Out']
 
