@@ -18,7 +18,7 @@ class LogDecoder:
         self.abi_events = [abi for abi in self.contract.abi if abi["type"] == "event"]
 
     def decode(self, log: LogReceipt) -> Union[EventData, None]:
-        """把日志解码为转账事件
+        """把日志解码为 转账 或 swap 事件
         https://medium.com/coinmonks/unlocking-the-secrets-of-an-ethereum-transaction-3a33991f696c
         """
         receipt_event_signature_hex = self.w3.toHex(log['topics'][0])
@@ -47,6 +47,6 @@ class LogDecoder:
                 #   'transactionHash': HexBytes('0xe4aa32946a1019fb8924bd91f3abef4e84c08d71540502217b45cf7912a58179')
                 #   'transactionIndex': 135,
                 # }
-                if decoded_log['event'] != 'Transfer':
+                if decoded_log['event'] not in ('Transfer', 'Swap'):
                     return
                 return decoded_log
