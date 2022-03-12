@@ -47,6 +47,6 @@ class LogDecoder:
                 #   'transactionHash': HexBytes('0xe4aa32946a1019fb8924bd91f3abef4e84c08d71540502217b45cf7912a58179')
                 #   'transactionIndex': 135,
                 # }
-                if decoded_log['event'] not in ('Transfer', 'Swap'):
+                if decoded_log['event'] not in ('Transfer', 'Swap', 'Sync'):
                     return
                 return decoded_log

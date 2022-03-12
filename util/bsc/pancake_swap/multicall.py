@@ -1,17 +1,21 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Union
 
 from dacite import from_dict
 from web3 import Web3
 
 from util.bsc import constants
+from util.web3.util import bsc_web3
 
 
 class Multicall:
     def __init__(self, web3: Web3):
         self.web3 = web3
+        with Path(__file__).parent.joinpath('data/MultiCall/abi.json').open() as fp:
+            abi = fp.read()
         self.c_multi_call = web3.eth.contract(address=web3.toChecksumAddress(constants.multi_call),
-                                              abi=open('./resources/bsc/MultiCall/abi.json').read())
+                                              abi=abi)
 
     def get_pair_info_with_price(self, pair_address):
         pair_info = self.c_multi_call.functions.getPairInfoWithPrice(self.web3.toChecksumAddress(pair_address),
@@ -22,6 +26,9 @@ class Multicall:
     def get_token_info(self, address):
         token_info = self.c_multi_call.functions.getTokenInfo(self.web3.toChecksumAddress(address)).call()
         return TokenInfo(*token_info)
+
+
+multicall = Multicall(bsc_web3)
 
 
 @dataclass

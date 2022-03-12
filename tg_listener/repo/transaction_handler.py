@@ -31,6 +31,7 @@ class SwapHandler(Cancelable):
                 if not trade:
                     continue
 
+                # logger.info(trade.to_human())
                 if trade.amount_in == 0 or trade.amount_out == 0:
                     logger.warning(str(trade))
         logger.info('swap handler stopped')

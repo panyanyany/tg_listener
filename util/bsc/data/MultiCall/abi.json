@@ -1,0 +1,567 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "bnbBusdPairAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getBnbPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "bnbPriceBusd",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pairAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "farmAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "bnbBusdPairAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getPairInfoWithFarmTVL",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "pairAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "decimals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "decimals",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "balanceOfPair",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalSupply",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "busdPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalBusdAmountOfPair",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Multicall.Token",
+            "name": "token0",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "decimals",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "balanceOfPair",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalSupply",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "busdPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalBusdAmountOfPair",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Multicall.Token",
+            "name": "token1",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBusdAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "farmTVL",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Multicall.Pair",
+        "name": "pairInfo",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pairAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "bnbBusdPairAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getPairInfoWithPrice",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "pairAddress",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "decimals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "decimals",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "balanceOfPair",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalSupply",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "busdPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalBusdAmountOfPair",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Multicall.Token",
+            "name": "token0",
+            "type": "tuple"
+          },
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "addr",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "internalType": "string",
+                "name": "symbol",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "decimals",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "balanceOfPair",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalSupply",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "busdPrice",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "totalBusdAmountOfPair",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct Multicall.Token",
+            "name": "token1",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBusdAmount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "farmTVL",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Multicall.Pair",
+        "name": "pairInfo",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "pairAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getPairTokenInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addr",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "decimals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "balanceOfPair",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "busdPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBusdAmountOfPair",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Multicall.Token[]",
+        "name": "tokenInfo",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getTokenInfo",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addr",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "decimals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "balanceOfPair",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "busdPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBusdAmountOfPair",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Multicall.Token",
+        "name": "tokenInfo",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "tokenAddresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "getTokenInfos",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "addr",
+            "type": "address"
+          },
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "symbol",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "decimals",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "balanceOfPair",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalSupply",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "busdPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "totalBusdAmountOfPair",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Multicall.Token[]",
+        "name": "tokenInfo",
+        "type": "tuple[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "tokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "userAddress",
+        "type": "address"
+      }
+    ],
+    "name": "getUserBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "userBalance",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "tokenAddresses",
+        "type": "address[]"
+      },
+      {
+        "internalType": "address[]",
+        "name": "userAddresses",
+        "type": "address[]"
+      }
+    ],
+    "name": "getUserBalances",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "userBalances",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

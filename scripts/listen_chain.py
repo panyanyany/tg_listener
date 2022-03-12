@@ -13,12 +13,12 @@ from tg_listener.repo.chain_listener import ChainListener
 from tg_listener.repo.transaction_handler import SwapHandler, LiqHandler
 from util.log_util import setup3, default_ignore_names
 from util.web3.http_providers import AsyncConcurrencyHTTPProvider
+from util.web3.util import async_bsc_web3
 
 start_monitoring(seconds_frozen=20, test_interval=1000)
 
 setup3(ignore_names=['web3.*', 'asyncio'] + default_ignore_names)
-w3 = Web3(AsyncConcurrencyHTTPProvider(), modules={'eth': (AsyncEth,)}, middlewares=[])
-w3.middleware_onion.inject(async_geth_poa_middleware, layer=0)  # 注入poa中间件
+w3 = async_bsc_web3
 
 # asyncio.run(main())
 

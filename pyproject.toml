@@ -23,6 +23,7 @@ web3 = "5.28.0"
 PyYAML = "^6.0"
 concurrent-log-handler = "^0.9.20"
 hanging-threads = "^2.0.5"
+redis = "^4.1.4"
 
 [tool.poetry.dev-dependencies]
 

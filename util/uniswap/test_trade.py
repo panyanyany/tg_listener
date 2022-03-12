@@ -117,30 +117,22 @@ def test_from_transaction():
                          amount_out=7000000000000000000,
                          hash='0x533f42756301aa1e26a6a50c836706e2e748e381020ebab524f17295406cbcc7')
          },
-        # 有点奇怪，amount_out 是 0
-        # {'input': '0x21d95c96c408f76e6f2ac57274818c474343bfc916d9ba18b335a048c1f730a4',
+        # # amount_out 是 0
+        # {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
         #  'name': 'swapETHForExactTokens',
         #  'data': 'tx01',
-        #  'result': Trade(operator='0xc29057b7fa51bbbe3d100255eaf07c4eaa550952',
-        #                  token_in='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-        #                  token_out='0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d', amount_in=2523462800000000000,
-        #                  amount_out=964000000000000000000, hash='')
+        #  'result': Trade(operator='0x7e194da04f528272f479a4ae0932f7ac91dd6220',
+        #                  token_in='0xcD9bc85C6b675DA994F172Debb6Db9BDD6727FE7',
+        #                  token_out='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', amount_in=387142211041309,
+        #                  amount_out=0, hash='0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f')
         #  },
-        # amount_out 也是 0
-        {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
-         'name': 'swapETHForExactTokens',
-         'data': 'tx01',
-         'result': Trade(operator='0x7e194da04f528272f479a4ae0932f7ac91dd6220',
-                         token_in='0xcD9bc85C6b675DA994F172Debb6Db9BDD6727FE7',
-                         token_out='0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c', amount_in=387142211041309,
-                         amount_out=0, hash='0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f')
-         },
     ]
     cur_dir = Path(__file__).parent
     # print()
     for testdata in testdata_list[:]:
         txh = testdata['input']
         tx = w3.eth.get_transaction(txh)
+        # print(txh)
         rec: TxReceipt = w3.eth.get_transaction_receipt(txh)
 
         # print()
@@ -149,9 +141,9 @@ def test_from_transaction():
         # pp(dict(rec))
 
         trade = Trade.from_transaction(tx, rec)
-        print()
-        print(trade)
-        print()
+        # print()
+        # print(trade)
+        # print()
         if trade:
             trade.hash = ''
         if testdata['result']:
