@@ -1,3 +1,4 @@
+import dataclasses
 import json
 import pickle
 from dataclasses import dataclass, field
@@ -7,13 +8,14 @@ import redis
 from multicall import Multicall, Call
 from web3.types import TxData, TxReceipt, EventData
 
-from util.bsc.constants import router, router2
+from util.bsc.constants import router, router2, cake, usdc
 from util.bsc.pancake_swap.factory import factory
 from util.bsc.token import has_canonical
 from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
 from util.eth.erc20 import Erc20
 from util.eth.log_decoder.log_decoder import LogDecoder
 from util.bsc.constants import wbnb, busd, usdt
+from util.web3.pair import PricePair, sort_pair
 from util.web3.util import bsc_web3, async_bsc_web3
 
 StdToken = {
@@ -41,37 +43,15 @@ class Trade:
 
     hash: str = ''
 
+    price_pair: PricePair = None
+
     logs_sync: List[EventData] = field(default_factory=list)
 
     log_decoder = LogDecoder()
     router_decoder = Decoder(pancake_swap_router_signatures)
 
-    def to_human(self):
-        token_quote = None
-        amount_quote = None
-        amount_usd = None
-
-        if self.token_in.lower() in StdToken:
-            op = 'BUY'
-            token_quote = self.token_out
-            token_base = self.token_in
-            amount_quote = self.amount_out
-            amount_base = self.amount_in
-        else:
-            op = 'SELL'
-            token_quote = self.token_in
-            token_base = self.token_out
-            amount_quote = self.amount_in
-            amount_base = self.amount_out
-
-        if token_base.lower() in (busd, usdt):
-            amount_usd = amount_base / (10 ** 18)
-        elif token_base.lower() in (wbnb,):
-            amount_usd = amount_base * 400 / (10 ** 18)
-        else:
-            amount_usd = f'{amount_base} {token_name(token_base)}'
-
-        return f"{self.hash} {token_quote} {op} {amount_usd}"
+    def to_sorted_pair(self):
+        return sort_pair(self.token_in, self.token_out, self.amount_in, self.amount_out)
 
     @classmethod
     def from_transaction(cls, tx: TxData, receipt: TxReceipt):
@@ -88,8 +68,8 @@ class Trade:
             return
         # print(f'paths: {paths}')
 
-        self = cls(operator=operator, token_in=paths[0], token_out=paths[-1], amount_in=0, amount_out=0,
-                   hash=tx['hash'].hex(), logs_sync=[])
+        self = cls(operator=operator, token_in=paths[0].lower(), token_out=paths[-1].lower(), amount_in=0, amount_out=0,
+                   hash=tx['hash'].hex().lower(), logs_sync=[])
 
         raw_amount_in = fn_inputs.get('amountIn', 0)
 
@@ -197,6 +177,25 @@ class Trade:
         else:
             # print('no price')
             pass
+
+    @classmethod
+    def calc_price(cls, dlog, token0, token1, decimals0, decimals1):
+        pair = sort_pair(token0, token1, dlog['args']['reserve0'], dlog['args']['reserve1'], decimals0=decimals0,
+                         decimals1=decimals1)
+        if not pair:
+            return None
+        quote_res_human = pair.quote_res / (10 ** pair.quote_decimals)
+        base_res_human = pair.base_res / (10 ** 18)
+
+        pair = PricePair(**dataclasses.asdict(pair))
+        pair.price = base_res_human / quote_res_human
+        if pair.base_token in [busd, usdt, usdc]:
+            pair.price_in['usd'] = pair.price
+        elif pair.base_token in [wbnb]:
+            pair.price_in['eth'] = pair.price
+        elif pair.base_token in [cake]:
+            pair.price_in['cake'] = pair.price
+        return pair
 
     def handle_swap(self, operator, fn_name, dlog, i, raw_logs):
         if i == len(raw_logs) - 1:
