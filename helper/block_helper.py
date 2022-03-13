@@ -3,6 +3,7 @@ import logging
 from datetime import datetime
 from typing import List
 
+from web3.exceptions import TransactionNotFound
 from web3.types import TxData
 
 from util.uniswap.trade import Trade
@@ -53,8 +54,10 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
             try:
                 tx.receipt = await w3.eth.get_transaction_receipt(tx.hash)
                 return
+            except TransactionNotFound:
+                pass
             except BaseException as e:
-                logger.warning('get receipt: %s', e)
+                logger.warning('get receipt: %s, type=%s', e, type(e))
                 await asyncio.sleep(1)
 
     # await asyncio.sleep(1)
