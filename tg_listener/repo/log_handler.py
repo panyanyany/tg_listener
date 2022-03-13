@@ -5,16 +5,13 @@ from asyncio.queues import QueueEmpty
 from datetime import datetime
 from typing import List
 
-from multicall import Multicall, Call
-from multicall.constants import MULTICALL2_ADDRESSES, MULTICALL2_BYTECODE
-from multicall.multicall import get_multicall_map
 from web3 import Web3
 
 from util.asyncio.cancelable import Cancelable
-from util.bsc.constants import busd, usdt, wbnb
+from util.multicall.async_multicall import AsyncMulticall, AsyncCall
 from util.redis.redis_util import RedisUtil
 from util.uniswap.trade import Trade
-from util.web3.util import bsc_web3
+from util.web3.util import async_bsc_web3
 
 RDB = RedisUtil()
 logger = logging.getLogger(__name__)
@@ -33,7 +30,7 @@ class SyncHandler(Cancelable):
         return RDB.set('bsc:' + key, val)
 
     async def run(self):
-        max_secs = 20
+        max_secs = 10
         # max_trades = 100
         last_time = datetime.now()
 
@@ -53,8 +50,8 @@ class SyncHandler(Cancelable):
 
     async def handle_trades(self, trades: List[Trade]):
         # logger.info('handle_trades')
-        self.cache_all_pairs(trades)
-        self.cache_all_decimals(trades)
+        await self.cache_all_pairs(trades)
+        await self.cache_all_decimals(trades)
 
         # 计算交易后价格
         for trade in trades:
@@ -95,7 +92,7 @@ class SyncHandler(Cancelable):
         key = 'decimals:' + token
         return self.cache_set(key, val)
 
-    def cache_all_decimals(self, trades):
+    async def cache_all_decimals(self, trades):
         """ 缓存所有代币的 decimals """
         all_tokens = set()
         cache_cnt = 0
@@ -122,15 +119,15 @@ class SyncHandler(Cancelable):
             calls = []
             for token in to_get_decimals:
                 calls += [
-                    Call(token, ['decimals()(uint8)', ], [[token, None]]),
+                    AsyncCall(token, ['decimals()(uint8)', ], [[token, None]]),
                 ]
             # logger.info('decimals to cache: %s', len(calls))
-            multi = Multicall(calls, _w3=bsc_web3)
-            results = multi()
+            multi = AsyncMulticall(calls, _w3=async_bsc_web3)
+            results = await multi()
             for token, decimals in results.items():
                 self.cache_set_decimals(token, decimals)
 
-    def cache_all_pairs(self, trades):
+    async def cache_all_pairs(self, trades):
         """ 缓存所有 lp 信息 """
         all_pair_addrs = set()
         cache_cnt = 0
@@ -149,12 +146,12 @@ class SyncHandler(Cancelable):
             calls = []
             for pair_addr in all_pair_addrs:
                 calls += [
-                    Call(pair_addr, ['token0()(address)', ], [[pair_addr + ':token0', None]]),
-                    Call(pair_addr, ['token1()(address)', ], [[pair_addr + ':token1', None]]),
+                    AsyncCall(pair_addr, ['token0()(address)', ], [[pair_addr + ':token0', None]]),
+                    AsyncCall(pair_addr, ['token1()(address)', ], [[pair_addr + ':token1', None]]),
                 ]
 
-            multi = Multicall(calls, _w3=bsc_web3)
-            results = multi()
+            multi = AsyncMulticall(calls, _w3=async_bsc_web3)
+            results = await multi()
             all_pairs = {}
             for key, val in results.items():
                 pair_addr, token_name = key.split(':')
