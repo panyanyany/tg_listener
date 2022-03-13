@@ -1,6 +1,6 @@
 import dataclasses
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Any
 
 from eth_typing import BlockNumber, HexStr, ChecksumAddress
 from hexbytes import HexBytes
@@ -29,7 +29,10 @@ class ExtendedTxData:
     maxPriorityFeePerGas: Wei = None
     chainId: int = None
     accessList: AccessList = None
+
+    # 跟 TxData 不同之处
     receipt: TxReceipt = None
+    fn_details: Any = None
 
     def to_tx_data(self) -> TxData:
         d = dataclasses.asdict(self)

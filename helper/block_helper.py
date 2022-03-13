@@ -15,16 +15,17 @@ class BlockHandler:
     pass
 
 
-def extract_router_transactions(txs: List[TxData]):
+def extract_router_transactions(txs: List[ExtendedTxData]):
     # 检索出 swap 类型的交易
     swap_cnt = 0
-    swap_transactions: [TxData] = []
-    liq_transactions: [TxData] = []
+    swap_transactions: [ExtendedTxData] = []
+    liq_transactions: [ExtendedTxData] = []
     for tx in txs:
-        tx: TxData
+        tx: ExtendedTxData
         fn_details = Trade.router_decoder.decode(tx.input)
         if not fn_details:
             continue
+        tx.fn_details = fn_details
         fn_name = fn_details[0].fn_name
         if 'swap' in fn_name.lower():
             swap_cnt += 1
@@ -35,14 +36,14 @@ def extract_router_transactions(txs: List[TxData]):
     return swap_transactions, liq_transactions
 
 
-async def load_receipts(w3, txs: List[TxData]) -> List[ExtendedTxData]:
+async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
     if len(txs) == 0:
         return txs
 
-    txs2 = []
-    for tx in txs:
-        tx2 = ExtendedTxData.from_tx_data(tx)
-        txs2.append(tx2)
+    # txs2 = []
+    # for tx in txs:
+    #     tx2 = ExtendedTxData.from_tx_data(tx)
+    #     txs2.append(tx2)
 
     # 请求交易结果
     async def get_receipt(tx: ExtendedTxData):
@@ -58,13 +59,13 @@ async def load_receipts(w3, txs: List[TxData]) -> List[ExtendedTxData]:
 
     # await asyncio.sleep(1)
     await asyncio.wait([
-        get_receipt(tx) for tx in txs2
+        get_receipt(tx) for tx in txs
     ], timeout=5)
     failed_cnt = 0
-    for tx in txs2:
+    for tx in txs:
         if not tx.receipt:
             failed_cnt += 1
 
     if failed_cnt > 0:
-        logger.warning(f"fail/total: {failed_cnt}/{len(txs2)}")
-    return txs2
+        logger.warning(f"fail/total: {failed_cnt}/{len(txs)}")
+    return txs

@@ -3,12 +3,15 @@ import logging
 from asyncio import Queue
 from asyncio.queues import QueueEmpty
 from datetime import datetime
+from typing import List
 
 from web3 import Web3
 from web3.types import BlockData
 
 from helper.block_helper import extract_router_transactions, load_receipts
 from util.asyncio.cancelable import Cancelable
+from util.bsc.constants import busd, usdt, usdc, wbnb, cake
+from util.web3.transaction import ExtendedTxData
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +27,12 @@ class BlockHandler(Cancelable):
         await self.loop()
         logger.info('block_handler stopped')
 
+    def all_in_canonical(self, paths: List[str]):
+        for token in paths:
+            if token.lower() not in [busd, usdt, usdc, wbnb, cake]:
+                return False
+        return True
+
     async def loop(self):
         while self.is_running():
             # 等待新的区块
@@ -34,14 +43,21 @@ class BlockHandler(Cancelable):
                 await asyncio.sleep(0.1)
                 continue
 
+            txs = []
+            for tx in block['transactions']:
+                tx2 = ExtendedTxData.from_tx_data(tx)
+                txs.append(tx2)
+
             # 提取 uniswap 相关交易: swap & liq
-            swap_transactions, liq_transactions = extract_router_transactions(block['transactions'])
-            # 加载交易结果
-            txs = await load_receipts(self.w3, swap_transactions + liq_transactions)
-            # 不成功的不要
-            txs = filter(lambda e: e.receipt and e.receipt.status == 1, txs)
-            # 再次提取 uniswap 相关交易: swap & liq
             swap_transactions, liq_transactions = extract_router_transactions(txs)
+            # 如果是权威货币之间互相交易，也不要
+            swap_transactions = list(
+                filter(lambda e: not self.all_in_canonical(e.fn_details[1]['path']), swap_transactions))
+            # 加载交易结果
+            await load_receipts(self.w3, swap_transactions + liq_transactions)
+            # 不成功的不要
+            swap_transactions = list(filter(lambda e: e.receipt and e.receipt.status == 1, swap_transactions))
+            liq_transactions = list(filter(lambda e: e.receipt and e.receipt.status == 1, liq_transactions))
 
             dt = datetime.fromtimestamp(block['timestamp'])
             now = datetime.now()

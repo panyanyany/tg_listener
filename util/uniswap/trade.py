@@ -192,7 +192,7 @@ class Trade:
         if pair.base_token in [busd, usdt, usdc]:
             pair.price_in['usd'] = pair.price
         elif pair.base_token in [wbnb]:
-            pair.price_in['eth'] = pair.price
+            pair.price_in['bnb'] = pair.price
         elif pair.base_token in [cake]:
             pair.price_in['cake'] = pair.price
         return pair
