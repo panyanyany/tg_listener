@@ -62,7 +62,7 @@ class BlockHandler(Cancelable):
             dt = datetime.fromtimestamp(block['timestamp'])
             now = datetime.now()
             if self.block_queue.qsize() >= 0:
-                logger.warning(
+                logger.info(
                     f"{now}"
                     f", len(txs)={len(block['transactions']):03}"
                     f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"

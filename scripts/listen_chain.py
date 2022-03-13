@@ -1,4 +1,8 @@
-# main()
+import time
+
+from util.log_util import setup3, default_ignore_names
+from util.web3.http_providers import AsyncConcurrencyHTTPProvider
+
 import asyncio
 import logging
 from signal import SIGTERM, SIGINT
@@ -7,15 +11,13 @@ from tg_listener.repo.block_handler import BlockHandler
 from tg_listener.repo.chain_listener import ChainListener
 from tg_listener.repo.log_handler import SyncHandler
 from tg_listener.repo.transaction_handler import SwapHandler, LiqHandler
-from util.log_util import setup3, default_ignore_names
 from util.web3.util import async_bsc_web3
+
+setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - set(['util.*'])))
 
 # start_monitoring(seconds_frozen=20, test_interval=1000)
 
-setup3(ignore_names=['web3.*', 'asyncio'] + default_ignore_names)
 w3 = async_bsc_web3
-
-# asyncio.run(main())
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()

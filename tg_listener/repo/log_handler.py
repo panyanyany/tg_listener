@@ -52,9 +52,12 @@ class SyncHandler(Cancelable):
                     await asyncio.sleep(0.1)
                     continue
             else:
-                await self.handle_trades(trades)
-                trades = []
-                last_time = datetime.now()
+                try:
+                    await self.handle_trades(trades)
+                    trades = []
+                    last_time = datetime.now()
+                except BaseException as e:
+                    logger.error('handle_trades: %s', e)
 
             if (datetime.now() - last_time_get_price).total_seconds() > max_secs_get_price:
                 try:

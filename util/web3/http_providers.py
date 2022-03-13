@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import threading
 from datetime import datetime
 from typing import Any, Optional, Union
@@ -8,9 +9,10 @@ from web3 import AsyncHTTPProvider
 from web3._utils.request import async_make_post_request
 from web3.types import RPCEndpoint, RPCResponse
 
+logger = logging.getLogger(__name__)
+
 
 class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
-
     endpoints = [
         "https://bsc-dataseed.binance.org/",
         "https://bsc-dataseed1.binance.org/",
@@ -29,6 +31,8 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     last_time = {}
     lock = threading.Lock()
     interval = 0.1
+
+    error_stat = {}
 
     def __init__(self, endpoint_uri: Optional[Union[URI, str]] = None, request_kwargs: Optional[Any] = None) -> None:
         super().__init__(endpoint_uri, request_kwargs)
@@ -52,11 +56,20 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
         self.logger.debug("Making request HTTP. URI: %s, Method: %s",
                           self.endpoint_uri, method)
         request_data = self.encode_rpc_request(method, params)
-        raw_response = await async_make_post_request(
-            self.endpoint_uri,
-            request_data,
-            **self.get_request_kwargs()
-        )
+        try:
+            raw_response = await async_make_post_request(
+                self.endpoint_uri,
+                request_data,
+                **self.get_request_kwargs()
+            )
+        # except asyncio.TimeoutError as e:
+        except BaseException as e:
+            AsyncConcurrencyHTTPProvider.error_stat.setdefault(self.endpoint_uri, 0)
+            AsyncConcurrencyHTTPProvider.error_stat[self.endpoint_uri] += 1
+            if AsyncConcurrencyHTTPProvider.error_stat[self.endpoint_uri] > 5:
+                logger.warning("endpoint too many errors: %s", AsyncConcurrencyHTTPProvider.error_stat)
+            raise
+
         response = self.decode_rpc_response(raw_response)
         self.logger.debug("Getting response HTTP. URI: %s, "
                           "Method: %s, Response: %s",
