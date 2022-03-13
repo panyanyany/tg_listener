@@ -66,7 +66,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
         except BaseException as e:
             AsyncConcurrencyHTTPProvider.error_stat.setdefault(self.endpoint_uri, 0)
             AsyncConcurrencyHTTPProvider.error_stat[self.endpoint_uri] += 1
-            if AsyncConcurrencyHTTPProvider.error_stat[self.endpoint_uri] > 5:
+            if AsyncConcurrencyHTTPProvider.error_stat[self.endpoint_uri] % 5 == 1:
                 logger.warning("endpoint too many errors: %s", AsyncConcurrencyHTTPProvider.error_stat)
             raise
 
