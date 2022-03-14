@@ -29,7 +29,7 @@ def load_stat():
         md: AddressStat
         if not md.symbol:
             continue
-        if md.now_busd_amount <= 100 and md.cnt == 1:
+        if md.now_busd_amount <= 100 or md.cnt == 1:
             continue
         records.append({
             '代币符号': md.symbol,
