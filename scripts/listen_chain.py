@@ -1,5 +1,6 @@
 import time
 
+from tg_listener.repo.dividend_handler import DividendHandler
 from util.log_util import setup3, default_ignore_names
 from util.web3.http_providers import AsyncConcurrencyHTTPProvider
 
@@ -28,25 +29,25 @@ if __name__ == "__main__":
     swap_handler = SwapHandler(block_handler.swap_queue, w3=w3)
     liq_handler = LiqHandler(block_handler.liq_queue, w3=w3)
     log_handler = SyncHandler(swap_handler.trade_queue, w3=w3)
+    div_handler = DividendHandler(log_handler.extended_trade_queue, w3=w3)
 
-    chain_listener.start()
-    block_handler.start()
-    swap_handler.start()
-    liq_handler.start()
-    log_handler.start()
+    handlers = [
+        chain_listener,
+        block_handler,
+        swap_handler,
+        liq_handler,
+        log_handler,
+        div_handler,
+    ]
+
+    for h in handlers:
+        h.start()
 
 
     def cancel():
-        logging.info('stopping listener')
-        chain_listener.stop()
-        logging.info('stopping worker')
-        block_handler.stop()
-        logging.info('stopping swap_handler')
-        swap_handler.stop()
-        logging.info('stopping liq_handler')
-        liq_handler.stop()
-        logging.info('stopping log_handler')
-        log_handler.stop()
+        for h in handlers:
+            logging.info(f'stopping {h.__class__.__name__}')
+            h.stop()
 
 
     for signal in [SIGINT, SIGTERM]:
@@ -55,11 +56,7 @@ if __name__ == "__main__":
 
     async def main():
         await asyncio.gather(
-            chain_listener.run(),
-            block_handler.run(),
-            swap_handler.run(),
-            liq_handler.run(),
-            log_handler.run(),
+            *[h.run() for h in handlers],
         )
 
 

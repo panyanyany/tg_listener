@@ -21,10 +21,12 @@ logger = logging.getLogger(__name__)
 
 
 class SyncHandler(Cancelable):
+    """通过 Sync 日志来计算交易后价格"""
+
     def __init__(self, trade_queue: Queue, w3: Web3):
         self.w3 = w3
         self.trade_queue = trade_queue
-        self.queue = Queue()
+        self.extended_trade_queue = Queue()
         self.bnb_price = 0
         self.cake_price = 0
 
@@ -114,6 +116,7 @@ class SyncHandler(Cancelable):
                 logger.warning('no quote found in log_pairs: txh=%s', trade.hash)
                 continue
             trade.price_pair = log_pairs[trade_pair.quote_token]
+            self.extended_trade_queue.put_nowait(trade)
             # logger.info('trade: %s', trade.price_pair)
 
     def cache_get_decimals(self, token):

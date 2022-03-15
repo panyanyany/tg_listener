@@ -47,6 +47,8 @@ class Trade:
 
     logs_sync: List[EventData] = field(default_factory=list)
 
+    is_dividend: bool = False
+
     log_decoder = LogDecoder()
     router_decoder = Decoder(pancake_swap_router_signatures)
 
@@ -82,12 +84,14 @@ class Trade:
         logs = []
         last_value = 0
         sync_cnt = 0
+        transfer_cnt = 0
         for i, log in enumerate(receipt['logs']):
             logs.append(dict(log))
             dlog: Union[EventData, None] = cls.log_decoder.decode(log)
             if not dlog:
                 continue
             if dlog['event'] == 'Transfer':
+                transfer_cnt += 1
                 last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'])
             elif dlog['event'] == 'Swap':
                 self.handle_swap(operator, fn_name, dlog, i, receipt['logs'])
@@ -97,6 +101,9 @@ class Trade:
                 sync_cnt += 1
             # print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
+        if transfer_cnt > 4:
+            # 转账日志大于4个，极有可能是分红币
+            self.is_dividend = True
         # 最后一个可能是其他的 router
         if self.amount_out == 0:
             self.amount_out = last_value
