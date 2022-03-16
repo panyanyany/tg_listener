@@ -4,7 +4,7 @@ from typing import Union, Any
 
 from eth_typing import BlockNumber, HexStr, ChecksumAddress
 from hexbytes import HexBytes
-from web3.types import TxData, AccessList, Wei, Nonce, TxReceipt
+from web3.types import TxData, AccessList, Wei, Nonce, TxReceipt, BlockData
 
 
 @dataclass
@@ -33,6 +33,7 @@ class ExtendedTxData:
     # 跟 TxData 不同之处
     receipt: TxReceipt = None
     fn_details: Any = None
+    timestamp: int = 0
 
     def to_tx_data(self) -> TxData:
         d = dataclasses.asdict(self)
@@ -43,8 +44,9 @@ class ExtendedTxData:
         return TxData(**d)
 
     @classmethod
-    def from_tx_data(cls, tx: TxData):
+    def from_tx_data(cls, block: BlockData, tx: TxData):
         tx = dict(tx)
         tx['from_'] = tx['from']
+        tx['timestamp'] = block['timestamp']
         del tx['from']
         return cls(**tx)

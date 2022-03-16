@@ -45,7 +45,7 @@ class BlockHandler(Cancelable):
 
             txs = []
             for tx in block['transactions']:
-                tx2 = ExtendedTxData.from_tx_data(tx)
+                tx2 = ExtendedTxData.from_tx_data(block, tx)
                 txs.append(tx2)
 
             # 提取 uniswap 相关交易: swap & liq

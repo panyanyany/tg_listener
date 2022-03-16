@@ -3,10 +3,13 @@ import logging
 from asyncio.queues import QueueEmpty, Queue
 from threading import Thread
 
+import pandas
 from web3 import Web3
 
+from tg_listener.repo.arctic_repo import arctic_db
 from util.asyncio.cancelable import Cancelable
 from util.uniswap.trade import Trade
+from util.web3.transaction import ExtendedTxData
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +28,12 @@ class SwapHandler(Cancelable):
                 await asyncio.sleep(0.1)
                 continue
 
+            ticks = []
+            buys = []
+            sells = []
             for tx in txs:
-                trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)
+                tx: ExtendedTxData
+                trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt, tx.timestamp)
                 if not trade:
                     continue
 
@@ -34,6 +41,14 @@ class SwapHandler(Cancelable):
                 # logger.info(trade.to_human())
                 if trade.amount_in == 0 or trade.amount_out == 0:
                     logger.warning(str(trade))
+                else:
+                    price_pair = trade.price_pair
+                    arctic_db.add_ticks(price_pair.quote_token, [{
+                        'timestamp': trade.timestamp,
+                        'price': price_pair.price_in['usd'],
+                    }])
+                    ticks.append({
+                    })
         logger.info('swap handler stopped')
 
 

@@ -14,7 +14,7 @@ from tg_listener.repo.log_handler import SyncHandler
 from tg_listener.repo.transaction_handler import SwapHandler, LiqHandler
 from util.web3.util import async_bsc_web3
 
-setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - set(['util.*'])))
+setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'util.*'}))
 
 # start_monitoring(seconds_frozen=20, test_interval=1000)
 
@@ -26,22 +26,23 @@ if __name__ == "__main__":
     chain_listener = ChainListener(w3=w3)
     block_handler = BlockHandler(chain_listener.queue, w3=w3)
 
+    # block_handler 的下游
     swap_handler = SwapHandler(block_handler.swap_queue, w3=w3)
     liq_handler = LiqHandler(block_handler.liq_queue, w3=w3)
-    log_handler = SyncHandler(swap_handler.trade_queue, w3=w3)
-    div_handler = DividendHandler(log_handler.extended_trade_queue, w3=w3)
+
+    log_sync_handler = SyncHandler(swap_handler.trade_queue, w3=w3)
+
+    div_handler = DividendHandler(log_sync_handler.extended_trade_queue, w3=w3)
 
     handlers = [
         chain_listener,
         block_handler,
         swap_handler,
         liq_handler,
-        log_handler,
+        log_sync_handler,
         div_handler,
     ]
-
-    for h in handlers:
-        h.start()
+    [h.start() for h in handlers]
 
 
     def cancel():

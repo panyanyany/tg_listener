@@ -41,6 +41,8 @@ class Trade:
     amount_in: int
     amount_out: int
 
+    timestamp: int
+
     hash: str = ''
 
     price_pair: PricePair = None
@@ -56,7 +58,7 @@ class Trade:
         return sort_pair(self.token_in, self.token_out, self.amount_in, self.amount_out)
 
     @classmethod
-    def from_transaction(cls, tx: TxData, receipt: TxReceipt):
+    def from_transaction(cls, tx: TxData, receipt: TxReceipt, timestamp=0):
         fn_details = cls.router_decoder.decode(tx['input'])
         if not fn_details:
             return
@@ -71,6 +73,7 @@ class Trade:
         # print(f'paths: {paths}')
 
         self = cls(operator=operator, token_in=paths[0].lower(), token_out=paths[-1].lower(), amount_in=0, amount_out=0,
+                   timestamp=timestamp,
                    hash=tx['hash'].hex().lower(), logs_sync=[])
 
         raw_amount_in = fn_inputs.get('amountIn', 0)
