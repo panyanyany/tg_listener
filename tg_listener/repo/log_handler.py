@@ -23,10 +23,10 @@ logger = logging.getLogger(__name__)
 class SyncHandler(Cancelable):
     """通过 Sync 日志来计算交易后价格"""
 
-    def __init__(self, trade_queue: Queue, w3: Web3):
+    def __init__(self, trades_queue: Queue, w3: Web3):
         self.w3 = w3
-        self.trade_queue = trade_queue
-        self.extended_trade_queue = Queue()
+        self.trades_queue = trades_queue
+        self.price_trades_queue = Queue()
         self.bnb_price = 0
         self.cake_price = 0
 
@@ -37,7 +37,7 @@ class SyncHandler(Cancelable):
         return RDB.set('bsc:' + key, val)
 
     async def run(self):
-        max_secs = 10
+        max_secs = 5
         max_secs_get_price = 60
 
         last_time = datetime.now()
@@ -48,8 +48,7 @@ class SyncHandler(Cancelable):
         while self.is_running():
             if (datetime.now() - last_time).total_seconds() < max_secs:
                 try:
-                    trade = self.trade_queue.get_nowait()
-                    trades.append(trade)
+                    trades += self.trades_queue.get_nowait()
                 except QueueEmpty:
                     await asyncio.sleep(0.1)
                     continue
@@ -83,6 +82,7 @@ class SyncHandler(Cancelable):
         await self.cache_all_decimals(trades)
 
         # 计算交易后价格
+        price_trades = []
         for trade in trades:
             log_pairs = {}
             for log in trade.logs_sync:
@@ -116,8 +116,10 @@ class SyncHandler(Cancelable):
                 logger.warning('no quote found in log_pairs: txh=%s', trade.hash)
                 continue
             trade.price_pair = log_pairs[trade_pair.quote_token]
-            self.extended_trade_queue.put_nowait(trade)
-            # logger.info('trade: %s', trade.price_pair)
+            price_trades.append(trade)
+        self.price_trades_queue.put_nowait(price_trades)
+        price_trades = []
+        # logger.info('trade: %s', trade.price_pair)
 
     def cache_get_decimals(self, token):
         key = 'decimals:' + token

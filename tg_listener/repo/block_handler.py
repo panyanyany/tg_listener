@@ -20,7 +20,7 @@ class BlockHandler(Cancelable):
     def __init__(self, block_queue: Queue, w3: Web3):
         self.w3 = w3
         self.block_queue = block_queue
-        self.swap_queue = Queue()
+        self.swaps_queue = Queue()
         self.liq_queue = Queue()
 
     async def run(self):
@@ -71,7 +71,7 @@ class BlockHandler(Cancelable):
                     f", queue={self.block_queue.qsize()}"
                 )
 
-            self.swap_queue.put_nowait(swap_transactions)
+            self.swaps_queue.put_nowait(swap_transactions)
             for liq in liq_transactions:
                 self.liq_queue.put_nowait(liq)
                 # trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt)

@@ -1,6 +1,6 @@
 import time
 
-from tg_listener.repo.dividend_handler import DividendHandler
+from tg_listener.repo.db_handler import DbHandler
 from util.log_util import setup3, default_ignore_names
 from util.web3.http_providers import AsyncConcurrencyHTTPProvider
 
@@ -27,18 +27,18 @@ if __name__ == "__main__":
     block_handler = BlockHandler(chain_listener.queue, w3=w3)
 
     # block_handler 的下游
-    swap_handler = SwapHandler(block_handler.swap_queue, w3=w3)
-    liq_handler = LiqHandler(block_handler.liq_queue, w3=w3)
+    swap_handler = SwapHandler(block_handler.swaps_queue, w3=w3)
+    # liq_handler = LiqHandler(block_handler.liq_queue, w3=w3)
 
-    log_sync_handler = SyncHandler(swap_handler.trade_queue, w3=w3)
+    log_sync_handler = SyncHandler(swap_handler.trades_queue, w3=w3)
 
-    div_handler = DividendHandler(log_sync_handler.extended_trade_queue, w3=w3)
+    div_handler = DbHandler(log_sync_handler.price_trades_queue, block_handler.liq_queue, w3=w3)
 
     handlers = [
         chain_listener,
         block_handler,
         swap_handler,
-        liq_handler,
+        # liq_handler,
         log_sync_handler,
         div_handler,
     ]

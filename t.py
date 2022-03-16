@@ -1,6 +1,15 @@
 import numpy as np
+import pandas
 import pandas as pd
 
-dates = pd.date_range('2022-01-01', '2022-02-01')
-df = pd.DataFrame(np.random.randn(6, 4), columns=list('ABCD'), index=dates[:6])
-print(df)
+from tg_listener.repo.arctic_repo import arctic_db
+
+print(arctic_db.lib.list_symbols())
+for s in arctic_db.lib.list_symbols():
+    # arctic_db.lib.delete(s)
+    # continue
+    data = arctic_db.lib.read(s)
+    print(data)
+    # if len(data) < 50:
+    #     continue
+    # print(s, len(data))

@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import logging
 import pickle
 from dataclasses import dataclass, field
 from typing import Union, Any, List
@@ -25,6 +26,8 @@ StdToken = {
 }
 
 RDB = redis.Redis(host='localhost', port=6379, db=0)
+
+logger = logging.getLogger(__name__)
 
 
 def token_name(token):
@@ -90,7 +93,11 @@ class Trade:
         transfer_cnt = 0
         for i, log in enumerate(receipt['logs']):
             logs.append(dict(log))
-            dlog: Union[EventData, None] = cls.log_decoder.decode(log)
+            try:
+                dlog: Union[EventData, None] = cls.log_decoder.decode(log)
+            except BaseException as e:
+                logger.debug('cls.log_decoder.decode, i=%s, hash=%s', i, tx['hash'].hex(), exc_info=e)
+                continue
             if not dlog:
                 continue
             if dlog['event'] == 'Transfer':
