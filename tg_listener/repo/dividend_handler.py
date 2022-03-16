@@ -23,7 +23,7 @@ class DividendHandler(Cancelable):
             try:
                 trade: Trade = self.trade_queue.get_nowait()
                 # 分红币
-                if trade.is_dividend and (not trade.price_pair.quote_token in token_exists):
+                if trade.is_dividend and (trade.price_pair.quote_token not in token_exists):
                     token_exists[trade.price_pair.quote_token] = True
                     logger.info(f'dividend: https://poocoin.app/tokens/{trade.price_pair.quote_token}')
             except QueueEmpty:
