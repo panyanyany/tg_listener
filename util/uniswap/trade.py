@@ -44,7 +44,7 @@ class Trade:
     amount_in: int
     amount_out: int
 
-    timestamp: int
+    timestamp: int = 0
 
     hash: str = ''
 

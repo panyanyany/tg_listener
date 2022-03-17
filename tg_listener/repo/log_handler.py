@@ -76,6 +76,42 @@ class SyncHandler(Cancelable):
         self.cake_price = pair_info.token_0.busd_price_human
         logger.info('cake price: %s', self.cake_price)
 
+    def handle_trade(self, trade: Trade):
+        log_pairs = {}
+        for log in trade.logs_sync:
+            pair_addr = log['address'].lower()
+            pair_info = self.cache_get(pair_addr)
+            decimals0 = self.cache_get_decimals(pair_info['token0'])
+            decimals1 = self.cache_get_decimals(pair_info['token1'])
+            # if trade_pair.quote_token not in list(pair_info.values()):
+            #     continue
+
+            log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'], decimals0=decimals0,
+                                        decimals1=decimals1)
+            if not log_pair:
+                continue
+            if 'usd' not in log_pair.price_in:
+                if 'bnb' in log_pair.price_in:
+                    log_pair.price_in['usd'] = log_pair.price_in['bnb'] * self.bnb_price
+                elif 'cake' in log_pair.price_in:
+                    log_pair.price_in['usd'] = log_pair.price_in['cake'] * self.cake_price
+            # logger.info('trade log: %s', log_pair)
+            # print(log_pair)
+            log_pairs[log_pair.quote_token] = log_pair
+            # break
+
+        trade_pair = trade.to_sorted_pair()
+        if not trade_pair:
+            # 这个交易不是直接用 usdt/busd/bnb 来完成的
+            # logger.warning('trade obj sort pair failed: %s', str(trade))
+            return trade
+
+        if trade_pair.quote_token not in log_pairs:
+            logger.warning('no quote found in log_pairs: txh=%s', trade.hash)
+            return trade
+        trade.price_pair = log_pairs[trade_pair.quote_token]
+        return trade
+
     async def handle_trades(self, trades: List[Trade]):
         # logger.info('handle_trades')
         await self.cache_all_pairs(trades)
@@ -84,38 +120,9 @@ class SyncHandler(Cancelable):
         # 计算交易后价格
         price_trades = []
         for trade in trades:
-            log_pairs = {}
-            for log in trade.logs_sync:
-                pair_addr = log['address'].lower()
-                pair_info = self.cache_get(pair_addr)
-                decimals0 = self.cache_get_decimals(pair_info['token0'])
-                decimals1 = self.cache_get_decimals(pair_info['token1'])
-                # if trade_pair.quote_token not in list(pair_info.values()):
-                #     continue
-
-                log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'], decimals0=decimals0,
-                                            decimals1=decimals1)
-                if not log_pair:
-                    continue
-                if 'usd' not in log_pair.price_in:
-                    if 'bnb' in log_pair.price_in:
-                        log_pair.price_in['usd'] = log_pair.price_in['bnb'] * self.bnb_price
-                    elif 'cake' in log_pair.price_in:
-                        log_pair.price_in['usd'] = log_pair.price_in['cake'] * self.bnb_price
-                # logger.info('trade log: %s', log_pair)
-                log_pairs[log_pair.quote_token] = log_pair
-                # break
-
-            trade_pair = trade.to_sorted_pair()
-            if not trade_pair:
-                # 这个交易不是直接用 usdt/busd/bnb 来完成的
-                # logger.warning('trade obj sort pair failed: %s', str(trade))
+            trade = self.handle_trade(trade)
+            if not trade.price_pair:
                 continue
-
-            if trade_pair.quote_token not in log_pairs:
-                logger.warning('no quote found in log_pairs: txh=%s', trade.hash)
-                continue
-            trade.price_pair = log_pairs[trade_pair.quote_token]
             price_trades.append(trade)
         self.price_trades_queue.put_nowait(price_trades)
         price_trades = []
