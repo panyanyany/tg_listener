@@ -5,7 +5,7 @@ description = ""
 authors = ["panyanyany <568397440@qq.com>"]
 
 [tool.poetry.dependencies]
-python = "3.8.*"
+python = "3.8.8"
 click = "^8.0.3"
 python-socks = {extras = ["asyncio"], version = "^2.0.0"}
 Telethon = "^1.24.0"
@@ -26,6 +26,7 @@ hanging-threads = "^2.0.5"
 redis = "^4.1.4"
 numpy = "1.18.3"
 arctic = {git = "https://github.com/man-group/arctic.git"}
+Flask = "^2.0.3"
 
 [tool.poetry.dev-dependencies]
 
