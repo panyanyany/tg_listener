@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import List
 
 import pandas
-from pandas import MultiIndex
+from pandas import MultiIndex, Index
 from web3 import Web3
 
 from tg_listener.repo.arctic_repo import arctic_db
@@ -58,11 +58,16 @@ class DbHandler(Cancelable):
             exists.add(key)
 
             # dt = pandas.datetime(dt.year, dt.month, dt.day)
-            df = pandas.DataFrame(d, index=MultiIndex.from_tuples(
-                [(dt, trade.price_pair.quote_token)], names=['date', 'token']))
-            print(trade.price_pair.quote_token)
-            print(df)
-            arctic_db.add_ticks(trade.price_pair.quote_token, df)
+            df = pandas.DataFrame(d, index=Index([dt], name='date'))
+            try:
+                arctic_db.add_ticks(trade.price_pair.quote_token, df)
+            except BaseException as e:
+                logger.error(
+                    f'add_ticks failed: hash={trade.hash}'
+                    f', token={trade.price_pair.quote_token}'
+                    f', date={dt}'
+                    f', ts={trade.timestamp}',
+                    exc_info=e)
 
     async def handle_tx(self, tx: ExtendedTxData):
         pass

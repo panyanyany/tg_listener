@@ -14,8 +14,8 @@ class ArcticRepo:
         self.lib: ChunkStore = a[lib_name]
 
     def add_ticks(self, token, ticks):
-        key = f'{token}_tick'
-        self.lib.write(key, ticks)
+        key = f'{token}:tick'
+        self.lib.append(key, ticks, upsert=True)
 
     def add_buy(self, token, ticks):
         self.lib.append(f'{token}:buy', ticks, upsert=True)
