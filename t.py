@@ -6,19 +6,7 @@ from datetime import datetime as dt
 
 from tg_listener.repo.arctic_repo import arctic_db
 
-df = DataFrame(data={'data': [1, 2, 3]},
-               index=Index([dt(2016, 1, 1, 1, 1, 1),
-                            dt(2016, 1, 2, 1, 1, 2),
-                            dt(2016, 1, 3, 2, 1, 3), ],
-                           name='date'))
-
-arctic_db.lib.append('test', df, upsert=True)
-
-df = DataFrame(data={'data': [1, 2, 3]},
-               index=Index([dt(2016, 1, 1, 1, 1, 11),
-                            dt(2016, 1, 2, 1, 1, 22),
-                            dt(2016, 1, 3, 2, 1, 33), ],
-                           name='date'))
-arctic_db.lib.append('test', df, upsert=True)
-print(arctic_db.lib.read('test'))
-print(arctic_db.lib.get_info('test'))
+data = arctic_db.lib.delete('0x69b14e8d3cebfdd8196bfe530954a0c226e5008e:tick',
+                            chunk_range=pd.date_range('2022-03-17 09:51:01', '2022-03-17 09:51:16', freq='S'))
+data = arctic_db.lib.read('0x69b14e8d3cebfdd8196bfe530954a0c226e5008e:tick')
+print(data.head())
