@@ -5,7 +5,7 @@ description = ""
 authors = ["panyanyany <568397440@qq.com>"]
 
 [tool.poetry.dependencies]
-python = "3.8.8"
+python = "3.8.*"
 click = "^8.0.3"
 python-socks = {extras = ["asyncio"], version = "^2.0.0"}
 Telethon = "^1.24.0"
