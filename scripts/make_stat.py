@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from tg_listener.repo.arctic_repo import arctic_db
 
@@ -6,17 +7,31 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', None)
 
+db = arctic_db.db_tick
 
-# data = arctic_db.db_tick.read('0x00e1656e45f18ec6747f5a8496fd39b50b38396d:tick')
-# with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-#     print(data[data['price'] > 21])
-# data = data.resample('15min')['price'].agg(['first', 'last'])
-# data['diff'] = 100 * (data['last'] - data['first']) / data['first']
-# print(data)
-# exit()
 
-symbols = arctic_db.db_tick.list_symbols()
-for sym in symbols:
-    info = arctic_db.db_tick.get_info(sym)
-    if info['len'] > 2:
-        print(sym, info)
+def filter_token(token):
+    data = arctic_db.db_tick.read(f'{token}:tick')
+    # with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+    #     print(data.loc['2022-03-18 06:50:00':'2022-03-18 06:59:59'])
+    # exit()
+    data = data.resample('15min')['price'].agg(['first', 'last'])
+    data['diff'] = (data['last'] - data['first']) / data['first']
+    if data.iloc[-1]['diff'] > 1:
+        print('--- token:', token)
+        print(data)
+    return
+
+    symbols = arctic_db.db_tick.list_symbols()
+    for sym in symbols:
+        info = arctic_db.db_tick.get_info(sym)
+        if info['len'] > 100:
+            print(sym, info)
+
+
+for sym in db.list_symbols():
+    info = db.get_info(sym)
+    if info['len'] < 10:
+        continue
+    token = sym.split(':')[0]
+    filter_token(token)

@@ -23,6 +23,8 @@ StdToken = {
     wbnb: 'BNB',
     busd: 'BUSD',
     usdt: 'USDT',
+    usdc: 'USDC',
+    cake: 'CAKE',
 }
 
 RDB = redis.Redis(host='localhost', port=6379, db=0)
@@ -30,7 +32,7 @@ RDB = redis.Redis(host='localhost', port=6379, db=0)
 logger = logging.getLogger(__name__)
 
 
-def token_name(token):
+def get_token_name(token):
     return StdToken.get(token.lower(), token.lower())
 
 
