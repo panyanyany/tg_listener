@@ -13,6 +13,7 @@ class LpService(base_service.BaseService):
     async def batch_process(self):
         if len(self.items) == 0:
             return
+        self.items = list(set(self.items))
         # logger.info(f'lp service - 1: items={len(self.items)}')
         calls = []
         for pair_addr in self.items:

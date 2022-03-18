@@ -85,22 +85,9 @@ class SyncHandler(Cancelable):
         for log in trade.logs_sync:
             pair_addr = log['address'].lower()
 
-            ts = datetime.now()
             pair_info = await lp_service.inst.get(pair_addr)
-            diff = (datetime.now() - ts).total_seconds()
-            logger.debug(f'get pair_info, diff={diff}')
-
-            ts = datetime.now()
             decimals0 = await token_service.inst.get(pair_info['token0'].lower())
-            diff = (datetime.now() - ts).total_seconds()
-            logger.debug(f'get decimals0, diff={diff}')
-
-            ts = datetime.now()
             decimals1 = await token_service.inst.get(pair_info['token1'].lower())
-            diff = (datetime.now() - ts).total_seconds()
-            logger.debug(f'get decimals1, diff={diff}')
-            # if trade_pair.quote_token not in list(pair_info.values()):
-            #     continue
 
             log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'], decimals0=decimals0,
                                         decimals1=decimals1)
@@ -158,20 +145,13 @@ class SyncHandler(Cancelable):
 
     async def cache_all_decimals(self, trades):
         """ 缓存所有代币的 decimals """
-        all_tokens = set()
-        cache_cnt = 0
-        uncache_cnt = 0
-
         for trade in trades:
             for log in trade.logs_sync:
                 pair_addr = log['address'].lower()
                 pair_info = await lp_service.inst.get(pair_addr)
 
-                all_tokens.add(pair_info['token0'].lower())
-                all_tokens.add(pair_info['token1'].lower())
-
-        for token in all_tokens:
-            token_service.inst.add(token)
+                token_service.inst.add(pair_info['token0'].lower())
+                token_service.inst.add(pair_info['token1'].lower())
 
     async def cache_all_pairs(self, trades):
         """ 缓存所有 lp 信息 """
@@ -179,41 +159,3 @@ class SyncHandler(Cancelable):
             for log in trade.logs_sync:
                 pair_addr = log['address'].lower()
                 lp_service.inst.add(pair_addr)
-
-    async def cache_all_pairs2(self, trades):
-        """ 缓存所有 lp 信息 """
-        all_pair_addrs = set()
-        cache_cnt = 0
-        uncache_cnt = 0
-        for trade in trades:
-            for log in trade.logs_sync:
-                pair_addr = log['address'].lower()
-                if self.cache_get(pair_addr) is None:
-                    all_pair_addrs.add(pair_addr)
-                    uncache_cnt += 1
-                else:
-                    cache_cnt += 1
-
-        # logger.info('pairs to cache: %s vs %s', uncache_cnt, cache_cnt)
-        if len(all_pair_addrs) > 0:
-            calls = []
-            for pair_addr in all_pair_addrs:
-                calls += [
-                    AsyncCall(pair_addr, ['token0()(address)', ], [[pair_addr + ':token0', None]]),
-                    AsyncCall(pair_addr, ['token1()(address)', ], [[pair_addr + ':token1', None]]),
-                ]
-
-            multi = AsyncMulticall(calls, _w3=async_bsc_web3)
-            results = await multi()
-            all_pairs = {}
-            for key, val in results.items():
-                pair_addr, token_name = key.split(':')
-                pair_info = all_pairs.get(pair_addr, {})
-                pair_info[token_name] = val
-
-                all_pairs[pair_addr] = pair_info
-
-            for pair_addr, info in all_pairs.items():
-                info['token0'] = info['token0'].lower()
-                info['token1'] = info['token1'].lower()
-                self.cache_set(pair_addr, info)
