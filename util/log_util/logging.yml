@@ -8,7 +8,7 @@ formatters:
     tofile:
         # format: "%(asctime)s|%(lvlname)s|%(name)s:%(funcName)s|> %(message)s"
         format: "%(process)d [%(asctime)s] [%(levelname)s] %(name)s|> %(message)s" # 实践发现 logger name 和 funcName 好像没啥必要, lvlname 不容易肉眼区分
-        datefmt: '%m-%d %H:%M'
+        datefmt: '%m-%d %H:%M:%S'
     tocons:
         format: "%(asctime)s|%(levelname)s|> %(message)s"
         # datefmt: '%H:%M:%S'

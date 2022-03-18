@@ -14,7 +14,7 @@ class LogDecoder:
         self.w3 = w3
         self.contract = self.w3.eth.contract(self.w3.toChecksumAddress(constants.busd),
                                              abi=open(
-                                                 Path(__file__).parent.joinpath('./data/erc20_event_abi.json')).read())
+                                                 Path(__file__).parent.joinpath('./data/liquidity_event_abi.json')).read())
         self.abi_events = [abi for abi in self.contract.abi if abi["type"] == "event"]
 
     def decode(self, log: LogReceipt) -> Union[EventData, None]:
@@ -47,6 +47,6 @@ class LogDecoder:
                 #   'transactionHash': HexBytes('0xe4aa32946a1019fb8924bd91f3abef4e84c08d71540502217b45cf7912a58179')
                 #   'transactionIndex': 135,
                 # }
-                if decoded_log['event'] not in ('Transfer', 'Swap', 'Sync'):
-                    return
+                # if decoded_log['event'] not in ('Transfer', 'Swap', 'Sync'):
+                #     return
                 return decoded_log

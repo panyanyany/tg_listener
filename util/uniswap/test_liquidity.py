@@ -34,7 +34,7 @@ def test_from_transaction():
          },
     ]
     cur_dir = Path(__file__).parent
-    for testdata in testdata_list[1:]:
+    for testdata in testdata_list[:]:
         txh = testdata['input']
         tx = w3.eth.get_transaction(txh)
         # print(txh)

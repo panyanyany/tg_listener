@@ -24,16 +24,13 @@ class BaseService(cancelable.CancelableTiktok):
 
     def add(self, item):
         if self.rdb.exists(item):
-            return
+            return True
         self.queue.put_nowait(item)
+        return False
 
     async def get_item(self):
-        try:
-            self.items += [self.queue.get_nowait()]
-            if len(self.items) > 10:
-                await self.batch_process()
-        except QueueEmpty:
-            pass
+        while self.queue.qsize():
+            self.items.append(self.queue.get_nowait())
 
     async def get(self, lp_addr):
         """拿信息，没有就等待"""

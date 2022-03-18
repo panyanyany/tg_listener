@@ -64,6 +64,7 @@ if __name__ == "__main__":
         )
 
 
+    logging.info('everything start')
     try:
         # main_task = asyncio.ensure_future(block_handler.main())
         # loop.run_until_complete(main_task)

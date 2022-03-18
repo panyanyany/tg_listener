@@ -10,6 +10,9 @@ logger = logging.getLogger(__name__)
 
 class TokenService(base_service.BaseService):
     async def batch_process(self):
+        if len(self.items) == 0:
+            return
+        logger.info(f'token service - 1: items={len(self.items)}')
         calls = []
         for token in self.items:
             calls += [
@@ -26,6 +29,7 @@ class TokenService(base_service.BaseService):
         for token, decimals in results.items():
             self.rdb.set(token, decimals)
 
+        logger.info(f'token service - 2: items={len(self.items)}')
         self.clear()
 
 

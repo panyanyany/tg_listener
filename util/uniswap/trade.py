@@ -72,15 +72,18 @@ class Trade:
         if not fn_details:
             fn_details = cls.router_decoder.decode(tx['input'])
             if not fn_details:
+                # print('----- 1')
                 return
         if receipt['status'] != 1 or len(receipt['logs']) == 0:
+            # print('----- 2')
             return
         operator = tx['from'].lower()
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
         paths = fn_inputs['path']
-        if not has_canonical(paths):
-            return
+        # if not has_canonical(paths):
+        #     print('----- 3', paths)
+        #     return
         # print(f'paths: {paths}')
 
         self = cls(operator=operator, token_in=paths[0].lower(), token_out=paths[-1].lower(), amount_in=0, amount_out=0,

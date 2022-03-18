@@ -32,6 +32,7 @@ class Liquidity:
         if receipt['status'] != 1 or len(receipt['logs']) == 0:
             return
 
+        operator = tx['from'].lower()
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
         if fn_name.startswith('add'):
@@ -62,13 +63,22 @@ class Liquidity:
             if not dlog:
                 continue
 
+            # print(dlog['event'], dict(dlog))
             if dlog['event'] == 'Sync':
                 # 拿 lp 地址
                 lp_addr = dlog['address'].lower()
             elif dlog['event'] == 'Transfer':
-                if dlog['args']['to'].lower() == lp_addr:
-                    tokens.append(dlog['address'])
+                if method_type == 'add' and dlog['args']['to'].lower() == lp_addr:
+                    tokens.append(dlog['address'].lower())
                     amounts.append(dlog['args']['value'])
+                if method_type == 'remove' and dlog['args']['to'].lower() == operator:
+                    tokens.append(dlog['address'].lower())
+                    amounts.append(dlog['args']['value'])
+            elif dlog['event'] == 'Withdrawal':
+                if method_type == 'remove' and 'ETH' in fn_name:
+                    """removeLiquidityETH* 之类的方法，eth 返回记录会出现在 Withdrawal 事件里, 而且不是直接返回给 op 的"""
+                    tokens.append(dlog['address'].lower())
+                    amounts.append(dlog['args']['wad'])
 
         self = cls(method_type=method_type, token0=tokens[0], token1=tokens[1], amount0=amounts[0], amount1=amounts[1])
         return self

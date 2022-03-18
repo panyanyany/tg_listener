@@ -22,17 +22,6 @@ class ChainListener(Cancelable):
         self.w3 = w3
         self.queue = Queue()
 
-    async def handle_event(self, i: HexBytes):
-        # block_hash = i.hex()
-        while True:
-            try:
-                block: BlockData = await self.w3.eth.get_block(i, full_transactions=True)
-                break
-            except:
-                await asyncio.sleep(0.2)
-        self.queue.put_nowait(block)
-        logging.info('got new block')
-
     async def loop(self, event_filter, poll_interval):
         latest = 0
         while self.is_running():

@@ -84,9 +84,21 @@ class SyncHandler(Cancelable):
         log_pairs = {}
         for log in trade.logs_sync:
             pair_addr = log['address'].lower()
+
+            ts = datetime.now()
             pair_info = await lp_service.inst.get(pair_addr)
-            decimals0 = await token_service.inst.get(pair_info['token0'])
-            decimals1 = await token_service.inst.get(pair_info['token1'])
+            diff = (datetime.now() - ts).total_seconds()
+            logger.debug(f'get pair_info, diff={diff}')
+
+            ts = datetime.now()
+            decimals0 = await token_service.inst.get(pair_info['token0'].lower())
+            diff = (datetime.now() - ts).total_seconds()
+            logger.debug(f'get decimals0, diff={diff}')
+
+            ts = datetime.now()
+            decimals1 = await token_service.inst.get(pair_info['token1'].lower())
+            diff = (datetime.now() - ts).total_seconds()
+            logger.debug(f'get decimals1, diff={diff}')
             # if trade_pair.quote_token not in list(pair_info.values()):
             #     continue
 
@@ -117,9 +129,12 @@ class SyncHandler(Cancelable):
         return trade
 
     async def handle_trades(self, trades: List[Trade]):
-        # logger.info('handle_trades')
+        if len(trades) == 0:
+            return
+        logger.info(f'handle_trades - 1: trades={len(trades)}')
         await self.cache_all_pairs(trades)
         await self.cache_all_decimals(trades)
+        logger.info(f'handle_trades - 2: trades={len(trades)}')
 
         # 计算交易后价格
         price_trades = []
@@ -128,6 +143,7 @@ class SyncHandler(Cancelable):
             if not trade.price_pair:
                 continue
             price_trades.append(trade)
+        logger.info(f'handle_trades - 3: price_trades={len(price_trades)}')
         self.price_trades_queue.put_nowait(price_trades)
         price_trades = []
         # logger.info('trade: %s', trade.price_pair)

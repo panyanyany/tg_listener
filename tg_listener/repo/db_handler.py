@@ -43,12 +43,14 @@ class DbHandler(Cancelable):
                 continue
 
             if trades:
+                logger.info(f'trades={len(trades)}')
                 await self.handle_trade(trades)
             if liq:
                 await self.handle_liq(liq)
 
     async def handle_trade(self, trades: List[Trade]):
         exists = set()
+        added = 0
         for trade in trades:
             d = {'price': trade.price_pair.price_in['usd'], 'hash': trade.hash}
             dt = datetime.fromtimestamp(trade.timestamp)
@@ -65,6 +67,7 @@ class DbHandler(Cancelable):
                 # 更新池子
                 arctic_db.update_stat(trade.price_pair.quote_token,
                                       pool={name: trade.price_pair.base_res / (10 ** trade.price_pair.base_decimals)})
+                added += 1
             except BaseException as e:
                 logger.error(
                     f'add_ticks failed: hash={trade.hash}'
@@ -73,5 +76,8 @@ class DbHandler(Cancelable):
                     f', ts={trade.timestamp}',
                     exc_info=e)
 
+        logger.info(f'db ticks inserted: {added}')
+
     async def handle_liq(self, liq: ExtendedTxData):
-        logger.info(f'liq changed: {liq.hash.hex()} %s', liq.fn_details)
+        # logger.info(f'liq changed: {liq.hash.hex()} %s', liq.fn_details)
+        pass

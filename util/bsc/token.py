@@ -1,6 +1,6 @@
-from util.bsc.constants import busd, usdt, wbnb
+from util.bsc.constants import busd, usdt, wbnb, usdc
 
-canonicals = [busd, usdt, wbnb]
+canonicals = [busd, usdt, wbnb, usdc]
 
 
 def has_canonical(tokens):

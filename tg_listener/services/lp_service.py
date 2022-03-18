@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 class LpService(base_service.BaseService):
 
     async def batch_process(self):
+        if len(self.items) == 0:
+            return
+        # logger.info(f'lp service - 1: items={len(self.items)}')
         calls = []
         for pair_addr in self.items:
             calls += [
@@ -38,6 +41,7 @@ class LpService(base_service.BaseService):
             info['token1'] = info['token1'].lower()
             self.rdb.set(pair_addr, info)
 
+        logger.info(f'lp service - 2: items={len(self.items)}')
         self.clear()
 
 

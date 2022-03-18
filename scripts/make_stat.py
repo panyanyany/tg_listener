@@ -31,7 +31,8 @@ def filter_token(token):
 
 for sym in db.list_symbols():
     info = db.get_info(sym)
-    if info['len'] < 10:
+    # print(info)
+    if info['len'] < 5:
         continue
     token = sym.split(':')[0]
     filter_token(token)
