@@ -18,14 +18,18 @@ class PriceService(base_service.TimedService):
         return await self.get(cake)
 
     async def process(self):
-        bnb_price = Multicall(web3=bsc_web3).get_bnb_price() / (10 ** 12)
-        logger.info('bnb price: %s', bnb_price)
-        self.rdb.set(wbnb, bnb_price)
+        try:
+            bnb_price = Multicall(web3=bsc_web3).get_bnb_price() / (10 ** 12)
+            logger.info('bnb price: %s', bnb_price)
+            self.rdb.set(wbnb, bnb_price)
 
-        pair_info = Multicall(web3=bsc_web3).get_pair_info_with_price(cake_busd_pair)
-        cake_price = pair_info.token_0.busd_price_human
-        logger.info('cake price: %s', cake_price)
-        self.rdb.set(cake, cake_price)
+            pair_info = Multicall(web3=bsc_web3).get_pair_info_with_price(cake_busd_pair)
+            cake_price = pair_info.token_0.busd_price_human
+            logger.info('cake price: %s', cake_price)
+            self.rdb.set(cake, cake_price)
+        except BaseException as e:
+            logger.debug(str(e), exc_info=e)
+            logger.warning(str(e))
 
 
 inst = PriceService()
