@@ -31,7 +31,7 @@ class SwapHandler(Cancelable):
             trades = []
             for tx in txs:
                 tx: ExtendedTxData
-                trade = Trade.from_transaction(tx.to_tx_data(), tx.receipt, tx.timestamp)
+                trade = Trade.from_extended_tx(tx)
                 if not trade:
                     continue
 

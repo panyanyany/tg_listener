@@ -17,6 +17,7 @@ from util.eth.erc20 import Erc20
 from util.eth.log_decoder.log_decoder import LogDecoder
 from util.bsc.constants import wbnb, busd, usdt
 from util.web3.pair import PricePair, sort_pair
+from util.web3.transaction import ExtendedTxData
 from util.web3.util import bsc_web3, async_bsc_web3
 
 StdToken = {
@@ -63,10 +64,15 @@ class Trade:
         return sort_pair(self.token_in, self.token_out, self.amount_in, self.amount_out)
 
     @classmethod
-    def from_transaction(cls, tx: TxData, receipt: TxReceipt, timestamp=0):
-        fn_details = cls.router_decoder.decode(tx['input'])
+    def from_extended_tx(cls, tx: ExtendedTxData):
+        return cls.from_transaction(tx.to_tx_data(), tx.receipt, fn_details=tx.fn_details, timestamp=tx.timestamp)
+
+    @classmethod
+    def from_transaction(cls, tx: TxData, receipt: TxReceipt, timestamp=0, fn_details=None):
         if not fn_details:
-            return
+            fn_details = cls.router_decoder.decode(tx['input'])
+            if not fn_details:
+                return
         if receipt['status'] != 1 or len(receipt['logs']) == 0:
             return
         operator = tx['from'].lower()
@@ -121,81 +127,6 @@ class Trade:
             self.amount_out = last_value
         # print(f'amount_in={amount_in}/{raw_amount_in}, amount_out={amount_out}')
         return self
-
-    def handle_sync(self, paths, sync_index, dlog):
-        """根据 LP 变化，分析出交易后价格"""
-        # token0 = paths[sync_index].lower()
-        # token1 = paths[sync_index + 1].lower()
-        # key0 = token0 + ':' + token1
-        # key1 = token1 + ':' + token0
-        #
-        # # 拿 lp 地址
-        # pair_addr = RDB.get(key0) or RDB.get(key1)
-        # if not pair_addr:
-        #     pair_addr = factory.get_pair(token0, token1)
-        #     pair_addr = pair_addr.lower()
-        #     RDB.set(key0, str(pair_addr).encode())
-        # else:
-        #     pair_addr = bytes(pair_addr).decode()
-        pair_addr = dlog['address'].lower()
-
-        # 拿 lp 里的 token0 和 token1
-        pair_info = RDB.get(pair_addr)
-        if not pair_info:
-            multi = Multicall([
-                Call(pair_addr, ['token0()(address)', ], [['token0', None]]),
-                Call(pair_addr, ['token1()(address)', ], [['token1', None]]),
-            ], _w3=bsc_web3)
-            pair_info = multi()
-            RDB.set(pair_addr, json.dumps(pair_info).encode())
-        else:
-            pair_info = json.loads(bytes(pair_info).decode())
-
-        # print(pair_info)
-
-        token0 = pair_info['token0'].lower()
-        token1 = pair_info['token1'].lower()
-        res0 = dlog['args']['reserve0']
-        res1 = dlog['args']['reserve1']
-
-        price_ok = True
-        for std in [busd, usdt, wbnb]:
-            price_ok = True
-            if token0 == std:
-                base_token = token0
-                base_res = res0
-                quote_token = token1
-                quote_res = res1
-            elif token1 == std:
-                base_token = token1
-                base_res = res1
-                quote_token = token0
-                quote_res = res0
-            else:
-                price_ok = False
-
-            if price_ok:
-                break
-
-        if price_ok:
-            # 拿 quote 的 decimals
-            key = "decimals:" + quote_token
-            quote_decimals = RDB.get(key)
-            if quote_decimals is None:
-                quote_decimals = Erc20(quote_token, web3=bsc_web3).decimals()
-                RDB.set(key, pickle.dumps(quote_decimals))
-            else:
-                quote_decimals = pickle.loads(quote_decimals)
-
-            quote_res_human = quote_res / (10 ** quote_decimals)
-            base_res_human = base_res / (10 ** 18)
-
-            # print('quote', quote_res)
-            # print('base ', base_res)
-            # print(f"{token_name(quote_token)} price: {base_res_human / quote_res_human} {token_name(base_token)}")
-        else:
-            # print('no price')
-            pass
 
     @classmethod
     def calc_price(cls, dlog, token0, token1, decimals0, decimals1):

@@ -1,0 +1,71 @@
+import dataclasses
+import logging
+from typing import Union
+
+from web3.types import TxData, TxReceipt, EventData
+
+from util.bsc.constants import wbnb
+from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
+from util.eth.log_decoder.log_decoder import LogDecoder
+
+logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class Liquidity:
+    method_type: str
+
+    quote_token: str
+    quote_amount: int
+
+    base_token: str
+    base_amount: int
+
+    log_decoder = LogDecoder()
+    router_decoder = Decoder(pancake_swap_router_signatures)
+
+    @classmethod
+    def from_transaction(cls, tx: TxData, receipt: TxReceipt, timestamp=0):
+        fn_details = cls.router_decoder.decode(tx['input'])
+        if not fn_details:
+            return
+        if receipt['status'] != 1 or len(receipt['logs']) == 0:
+            return
+
+        fn_name = fn_details[0].fn_name
+        fn_inputs = fn_details[1]
+        print(fn_name, fn_inputs)
+        if fn_name.startswith('add'):
+            method_type = 'add'
+        else:
+            method_type = 'remove'
+
+        if fn_name in ['addLiquidity', 'removeLiquidity', 'removeLiquidityWithPermit']:
+            token0 = fn_inputs['tokenA']
+            token1 = fn_inputs['tokenB']
+        elif fn_name in ['addLiquidityETH', 'removeLiquidityETH', 'removeLiquidityETHSupportingFeeOnTransferTokens',
+                         'removeLiquidityETHWithPermit', 'removeLiquidityETHWithPermitSupportingFeeOnTransferTokens']:
+            token0 = fn_inputs['token']
+            token1 = wbnb
+
+        logs = []
+        lp_addr = ''
+        print('logs:')
+        for i, log in enumerate(receipt['logs']):
+            logs.append(dict(log))
+            try:
+                dlog: Union[EventData, None] = cls.log_decoder.decode(log)
+            except BaseException as e:
+                logger.debug('cls.log_decoder.decode, i=%s, hash=%s', i, tx['hash'].hex(), exc_info=e)
+                continue
+            if not dlog:
+                continue
+
+            print(dlog)
+            if dlog['event'] == 'Sync':
+                lp_addr = dlog['address'].lower()
+
+        # if fn_name in ['addLiquidityETH']:
+        #     # addLiquidityETH {'token': '0x2054601f4aD0133F0282F3eba0F4A4Ef35630930', 'amountTokenDesired': 120000000000000000000, 'amountTokenMin': 115800000000000000000, 'amountETHMin': 1265719824869964415, 'to': '0x35d07887989F8dc40E49e3daad933Aa23E385182', 'deadline': 1647568403}
+        #     pass
+        # self = cls(method_type=method_type, fn_inputs)

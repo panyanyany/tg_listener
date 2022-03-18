@@ -74,4 +74,4 @@ class DbHandler(Cancelable):
                     exc_info=e)
 
     async def handle_liq(self, liq: ExtendedTxData):
-        logger.info('liq changed: %s', liq.fn_details)
+        logger.info(f'liq changed: {liq.hash.hex()} %s', liq.fn_details)

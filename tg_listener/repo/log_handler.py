@@ -8,6 +8,7 @@ from typing import List
 from requests import ReadTimeout
 from web3 import Web3
 
+from tg_listener.services import lp_service, token_service
 from util.asyncio.cancelable import Cancelable
 from util.bsc.constants import cake_busd_pair
 from util.bsc.pancake_swap.multicall import Multicall
@@ -47,6 +48,7 @@ class SyncHandler(Cancelable):
         self.get_bnb_price()
         while self.is_running():
             if (datetime.now() - last_time).total_seconds() < max_secs:
+                # 拿队列
                 try:
                     trades += self.trades_queue.get_nowait()
                 except QueueEmpty:
@@ -54,10 +56,12 @@ class SyncHandler(Cancelable):
                     continue
             else:
                 try:
+                    # 处理交易
                     await self.handle_trades(trades)
                     trades = []
                     last_time = datetime.now()
                 except BaseException as e:
+                    logger.debug('error detail', exc_info=e)
                     logger.error('handle_trades: %s', e)
 
             if (datetime.now() - last_time_get_price).total_seconds() > max_secs_get_price:
@@ -76,13 +80,13 @@ class SyncHandler(Cancelable):
         self.cake_price = pair_info.token_0.busd_price_human
         logger.info('cake price: %s', self.cake_price)
 
-    def handle_trade(self, trade: Trade):
+    async def handle_trade(self, trade: Trade):
         log_pairs = {}
         for log in trade.logs_sync:
             pair_addr = log['address'].lower()
-            pair_info = self.cache_get(pair_addr)
-            decimals0 = self.cache_get_decimals(pair_info['token0'])
-            decimals1 = self.cache_get_decimals(pair_info['token1'])
+            pair_info = await lp_service.inst.get(pair_addr)
+            decimals0 = await token_service.inst.get(pair_info['token0'])
+            decimals1 = await token_service.inst.get(pair_info['token1'])
             # if trade_pair.quote_token not in list(pair_info.values()):
             #     continue
 
@@ -120,7 +124,7 @@ class SyncHandler(Cancelable):
         # 计算交易后价格
         price_trades = []
         for trade in trades:
-            trade = self.handle_trade(trade)
+            trade = await self.handle_trade(trade)
             if not trade.price_pair:
                 continue
             price_trades.append(trade)
@@ -145,33 +149,22 @@ class SyncHandler(Cancelable):
         for trade in trades:
             for log in trade.logs_sync:
                 pair_addr = log['address'].lower()
-                pair_info = self.cache_get(pair_addr)
+                pair_info = await lp_service.inst.get(pair_addr)
 
                 all_tokens.add(pair_info['token0'].lower())
                 all_tokens.add(pair_info['token1'].lower())
 
-        to_get_decimals = set()
         for token in all_tokens:
-            if self.cache_get_decimals(token) is None:
-                to_get_decimals.add(token)
-                uncache_cnt += 1
-            else:
-                cache_cnt += 1
-
-        # logger.info('decimals to cache: %s vs %s', uncache_cnt, cache_cnt)
-        if len(to_get_decimals) > 0:
-            calls = []
-            for token in to_get_decimals:
-                calls += [
-                    AsyncCall(token, ['decimals()(uint8)', ], [[token, None]]),
-                ]
-            # logger.info('decimals to cache: %s', len(calls))
-            multi = AsyncMulticall(calls, _w3=async_bsc_web3)
-            results = await multi()
-            for token, decimals in results.items():
-                self.cache_set_decimals(token, decimals)
+            token_service.inst.add(token)
 
     async def cache_all_pairs(self, trades):
+        """ 缓存所有 lp 信息 """
+        for trade in trades:
+            for log in trade.logs_sync:
+                pair_addr = log['address'].lower()
+                lp_service.inst.add(pair_addr)
+
+    async def cache_all_pairs2(self, trades):
         """ 缓存所有 lp 信息 """
         all_pair_addrs = set()
         cache_cnt = 0

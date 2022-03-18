@@ -29,7 +29,7 @@ class ExcelAsCsv:
     def reader(cls, file_path):
         xlsx_data = pyexcel_xlsx.get_data(file_path)
         fieldnames = None
-        for sheet, sheet_data in xlsx_data.items():
+        for sheet, sheet_data in xlsx_data.lp_addresses():
             if len(sheet_data) == 0:
                 continue
             if fieldnames is None:
