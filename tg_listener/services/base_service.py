@@ -51,3 +51,37 @@ class BaseService(cancelable.CancelableTiktok):
 
     async def batch_process(self):
         raise NotImplemented
+
+
+class TimedService(cancelable.Cancelable):
+    interval = 60
+
+    def __init__(self):
+        self.rdb = redis_util.RedisUtil(prefix=self.__class__.__name__)
+
+    async def get(self, lp_addr):
+        """拿信息，没有就等待"""
+        if self.rdb.exists(lp_addr):
+            return self.rdb.get(lp_addr)
+
+        while self.is_running():
+            if self.rdb.exists(lp_addr):
+                return self.rdb.get(lp_addr)
+            else:
+                await asyncio.sleep(0.1)
+        raise ServiceStopped(self.__class__.__name__)
+
+    async def run(self):
+        last_time = None
+        while self.is_running():
+            if not last_time:
+                await self.process()
+                last_time = datetime.now()
+            elif (datetime.now() - last_time).total_seconds() > self.interval:
+                await self.process()
+                last_time = datetime.now()
+            else:
+                await asyncio.sleep(0.1)
+
+    async def process(self):
+        raise NotImplemented

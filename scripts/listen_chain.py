@@ -1,7 +1,7 @@
 import time
 
 from tg_listener.repo.db_handler import DbHandler
-from tg_listener.services import lp_service, token_service
+from tg_listener.services import lp_service, token_service, price_service
 from util.log_util import setup3, default_ignore_names
 from util.web3.http_providers import AsyncConcurrencyHTTPProvider
 
@@ -44,6 +44,7 @@ if __name__ == "__main__":
         div_handler,
         lp_service.inst,
         token_service.inst,
+        price_service.inst,
     ]
     [h.start() for h in handlers]
 

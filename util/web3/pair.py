@@ -1,3 +1,4 @@
+import dataclasses
 from dataclasses import dataclass, Field, field
 from typing import Optional, Dict
 
@@ -20,6 +21,32 @@ class SortedPair:
 class PricePair(SortedPair):
     price_in: Dict[str, float] = field(default_factory=dict)
     price: float = 0
+
+    bnb_price: float = 0
+    cake_price: float = 0
+
+    @classmethod
+    def from_sorted_pair(cls, pair):
+        return PricePair(**dataclasses.asdict(pair))
+
+    def calc(self):
+        pair = self
+        quote_res_human = pair.quote_res / (10 ** pair.quote_decimals)
+        base_res_human = pair.base_res / (10 ** 18)
+        pair.price = base_res_human / quote_res_human
+        if pair.base_token in [busd, usdt, usdc]:
+            pair.price_in['usd'] = pair.price
+        elif pair.base_token in [wbnb]:
+            pair.price_in['bnb'] = pair.price
+        elif pair.base_token in [cake]:
+            pair.price_in['cake'] = pair.price
+
+        if 'usd' not in pair.price_in:
+            if 'bnb' in pair.price_in and self.bnb_price:
+                pair.price_in['usd'] = pair.price_in['bnb'] * self.bnb_price
+            elif 'cake' in pair.price_in and self.cake_price:
+                pair.price_in['usd'] = pair.price_in['cake'] * self.cake_price
+        return self
 
 
 def sort_pair(token0, token1, res0, res1, decimals0=None, decimals1=None) -> Optional[SortedPair]:

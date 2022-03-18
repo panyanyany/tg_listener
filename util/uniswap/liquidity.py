@@ -5,6 +5,7 @@ from typing import Union
 from web3.types import TxData, TxReceipt, EventData
 
 from util.bsc.constants import wbnb
+from util.bsc.token import canonicals, get_token_name
 from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
 from util.eth.log_decoder.log_decoder import LogDecoder
 
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
-class Liquidity:
+class LiquidityChange:
     method_type: str
 
     token0: str
@@ -20,6 +21,12 @@ class Liquidity:
 
     token1: str
     amount1: int
+
+    timestamp: int = 0
+    hash: str = ''
+    operator: str = ''
+
+    amount_in: dict = dataclasses.field(default_factory=dict)
 
     log_decoder = LogDecoder()
     router_decoder = Decoder(pancake_swap_router_signatures)
@@ -80,7 +87,12 @@ class Liquidity:
                     tokens.append(dlog['address'].lower())
                     amounts.append(dlog['args']['wad'])
 
-        self = cls(method_type=method_type, token0=tokens[0], token1=tokens[1], amount0=amounts[0], amount1=amounts[1])
+        self = cls(method_type=method_type, token0=tokens[0], token1=tokens[1], amount0=amounts[0], amount1=amounts[1],
+                   timestamp=timestamp, hash=tx['hash'].hex(), operator=operator)
+        if self.token0 in canonicals:
+            self.amount_in[get_token_name(self.token0)] = self.amount0
+        elif self.token1 in canonicals:
+            self.amount_in[get_token_name(self.token1)] = self.amount1
         return self
         # if fn_name in ['addLiquidityETH']:
         #     # addLiquidityETH {'token': '0x2054601f4aD0133F0282F3eba0F4A4Ef35630930', 'amountTokenDesired': 120000000000000000000, 'amountTokenMin': 115800000000000000000, 'amountETHMin': 1265719824869964415, 'to': '0x35d07887989F8dc40E49e3daad933Aa23E385182', 'deadline': 1647568403}

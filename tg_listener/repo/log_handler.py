@@ -8,7 +8,7 @@ from typing import List
 from requests import ReadTimeout
 from web3 import Web3
 
-from tg_listener.services import lp_service, token_service
+from tg_listener.services import lp_service, token_service, price_service
 from util.asyncio.cancelable import Cancelable
 from util.bsc.constants import cake_busd_pair
 from util.bsc.pancake_swap.multicall import Multicall
@@ -28,8 +28,8 @@ class SyncHandler(Cancelable):
         self.w3 = w3
         self.trades_queue = trades_queue
         self.price_trades_queue = Queue()
-        self.bnb_price = 0
-        self.cake_price = 0
+        # self.bnb_price = 0
+        # self.cake_price = 0
 
     def cache_get(self, key):
         return RDB.get('bsc:' + key)
@@ -45,7 +45,7 @@ class SyncHandler(Cancelable):
         last_time_get_price = datetime.now()
 
         trades = []
-        self.get_bnb_price()
+        # self.get_bnb_price()
         while self.is_running():
             if (datetime.now() - last_time).total_seconds() < max_secs:
                 # 拿队列
@@ -66,19 +66,19 @@ class SyncHandler(Cancelable):
 
             if (datetime.now() - last_time_get_price).total_seconds() > max_secs_get_price:
                 try:
-                    self.get_bnb_price()
+                    # self.get_bnb_price()
                     last_time_get_price = datetime.now()
                 except ReadTimeout as e:
                     pass
                 except BaseException as e:
                     logger.error('get bnb price', exc_info=e)
 
-    def get_bnb_price(self):
-        self.bnb_price = Multicall(web3=bsc_web3).get_bnb_price() / (10 ** 12)
-        logger.info('bnb price: %s', self.bnb_price)
-        pair_info = Multicall(web3=bsc_web3).get_pair_info_with_price(cake_busd_pair)
-        self.cake_price = pair_info.token_0.busd_price_human
-        logger.info('cake price: %s', self.cake_price)
+    # def get_bnb_price(self):
+    #     self.bnb_price = Multicall(web3=bsc_web3).get_bnb_price() / (10 ** 12)
+    #     logger.info('bnb price: %s', self.bnb_price)
+    #     pair_info = Multicall(web3=bsc_web3).get_pair_info_with_price(cake_busd_pair)
+    #     self.cake_price = pair_info.token_0.busd_price_human
+    #     logger.info('cake price: %s', self.cake_price)
 
     async def handle_trade(self, trade: Trade):
         log_pairs = {}
@@ -90,14 +90,11 @@ class SyncHandler(Cancelable):
             decimals1 = await token_service.inst.get(pair_info['token1'].lower())
 
             log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'], decimals0=decimals0,
-                                        decimals1=decimals1)
+                                        decimals1=decimals1,
+                                        bnb_price=await price_service.inst.get_bnb_price(),
+                                        cake_price=await price_service.inst.get_cake_price())
             if not log_pair:
                 continue
-            if 'usd' not in log_pair.price_in:
-                if 'bnb' in log_pair.price_in:
-                    log_pair.price_in['usd'] = log_pair.price_in['bnb'] * self.bnb_price
-                elif 'cake' in log_pair.price_in:
-                    log_pair.price_in['usd'] = log_pair.price_in['cake'] * self.cake_price
             # logger.info('trade log: %s', log_pair)
             # print(log_pair)
             log_pairs[log_pair.quote_token] = log_pair

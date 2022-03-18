@@ -9,8 +9,12 @@ from pandas import MultiIndex, Index
 from web3 import Web3
 
 from tg_listener.repo.arctic_repo import arctic_db
+from tg_listener.services import token_service, price_service
 from util.asyncio.cancelable import Cancelable
-from util.uniswap.trade import Trade, get_token_name
+from util.uniswap.liquidity import LiquidityChange
+from util.uniswap.trade import Trade
+from util.bsc.token import get_token_name, canonicals, StdToken
+from util.web3.pair import sort_pair, PricePair
 from util.web3.transaction import ExtendedTxData
 
 logger = logging.getLogger(__name__)
@@ -78,6 +82,27 @@ class DbHandler(Cancelable):
 
         logger.info(f'db ticks inserted: {added}')
 
-    async def handle_liq(self, liq: ExtendedTxData):
+    async def handle_liq(self, liq_tx: ExtendedTxData):
         # logger.info(f'liq changed: {liq.hash.hex()} %s', liq.fn_details)
-        pass
+        liq = LiquidityChange.from_transaction(liq_tx.to_tx_data(), liq_tx.receipt, timestamp=liq_tx.timestamp)
+        decimals0 = await token_service.inst.get(liq.token0)
+        decimals1 = await token_service.inst.get(liq.token1)
+        pair = sort_pair(liq.token0, liq.token1, liq.amount0, liq.amount1, decimals0, decimals1)
+        if not pair:
+            return
+
+        price_pair = PricePair.from_sorted_pair(pair)
+        price_pair.bnb_price = await price_service.inst.get_bnb_price()
+        price_pair.cake_price = await price_service.inst.get_cake_price()
+        price_pair.calc()
+
+        # logger.info('liq changed: %s, price_pair=%s', liq, price_pair)
+        dt = datetime.fromtimestamp(liq.timestamp)
+
+        amount_in = dict(zip(StdToken.values(), [0, 0, 0, 0, 0]))
+        amount_in[get_token_name(price_pair.base_token)] = price_pair.base_res / (10 ** price_pair.base_decimals)
+
+        # logger.info('amount_in: %s', amount_in)
+        d = {'hash': liq.hash, 'value': price_pair.price_in['usd'], 'operator': liq.operator, **amount_in}
+        df = pandas.DataFrame(d, index=Index([dt], name='date'))
+        arctic_db.add_liq(price_pair.quote_token, liq.method_type, df, amount_in)

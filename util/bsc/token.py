@@ -1,6 +1,6 @@
-from util.bsc.constants import busd, usdt, wbnb, usdc
+from util.bsc.constants import busd, usdt, wbnb, usdc, cake
 
-canonicals = [busd, usdt, wbnb, usdc]
+canonicals = [busd, usdt, wbnb, usdc, cake]
 
 
 def has_canonical(tokens):
@@ -17,3 +17,16 @@ def all_canonical(tokens):
         if token not in canonicals:
             return False
     return True
+
+
+StdToken = {
+    wbnb: 'BNB',
+    busd: 'BUSD',
+    usdt: 'USDT',
+    usdc: 'USDC',
+    cake: 'CAKE',
+}
+
+
+def get_token_name(token):
+    return StdToken.get(token.lower(), token.lower())

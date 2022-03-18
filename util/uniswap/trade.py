@@ -1,40 +1,20 @@
 import dataclasses
-import json
 import logging
-import pickle
 from dataclasses import dataclass, field
-from typing import Union, Any, List
+from typing import Union, List
 
 import redis
-from multicall import Multicall, Call
 from web3.types import TxData, TxReceipt, EventData
 
-from util.bsc.constants import router, router2, cake, usdc
-from util.bsc.pancake_swap.factory import factory
-from util.bsc.token import has_canonical
+from util.bsc.constants import router, router2
 from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
-from util.eth.erc20 import Erc20
 from util.eth.log_decoder.log_decoder import LogDecoder
-from util.bsc.constants import wbnb, busd, usdt
 from util.web3.pair import PricePair, sort_pair
 from util.web3.transaction import ExtendedTxData
-from util.web3.util import bsc_web3, async_bsc_web3
-
-StdToken = {
-    wbnb: 'BNB',
-    busd: 'BUSD',
-    usdt: 'USDT',
-    usdc: 'USDC',
-    cake: 'CAKE',
-}
 
 RDB = redis.Redis(host='localhost', port=6379, db=0)
 
 logger = logging.getLogger(__name__)
-
-
-def get_token_name(token):
-    return StdToken.get(token.lower(), token.lower())
 
 
 @dataclass
@@ -130,22 +110,13 @@ class Trade:
         return self
 
     @classmethod
-    def calc_price(cls, dlog, token0, token1, decimals0, decimals1):
+    def calc_price(cls, dlog, token0, token1, decimals0, decimals1, bnb_price=None, cake_price=None):
         pair = sort_pair(token0, token1, dlog['args']['reserve0'], dlog['args']['reserve1'], decimals0=decimals0,
                          decimals1=decimals1)
         if not pair:
             return None
-        quote_res_human = pair.quote_res / (10 ** pair.quote_decimals)
-        base_res_human = pair.base_res / (10 ** 18)
 
-        pair = PricePair(**dataclasses.asdict(pair))
-        pair.price = base_res_human / quote_res_human
-        if pair.base_token in [busd, usdt, usdc]:
-            pair.price_in['usd'] = pair.price
-        elif pair.base_token in [wbnb]:
-            pair.price_in['bnb'] = pair.price
-        elif pair.base_token in [cake]:
-            pair.price_in['cake'] = pair.price
+        pair = PricePair(**dataclasses.asdict(pair), bnb_price=bnb_price, cake_price=cake_price).calc()
         return pair
 
     def handle_swap(self, operator, fn_name, dlog, i, raw_logs):
