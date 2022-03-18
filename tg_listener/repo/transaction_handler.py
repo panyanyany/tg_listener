@@ -8,7 +8,7 @@ from web3 import Web3
 
 from tg_listener.repo.arctic_repo import arctic_db
 from util.asyncio.cancelable import Cancelable
-from util.bsc.token import has_canonical
+from util.bsc.token import has_canonical, all_canonical
 from util.uniswap.trade import Trade
 from util.web3.transaction import ExtendedTxData
 
@@ -37,6 +37,8 @@ class SwapHandler(Cancelable):
                     continue
 
                 if not has_canonical([trade.token_in, trade.token_out]):
+                    continue
+                if all_canonical([trade.token_in, trade.token_out]):
                     continue
                 # logger.info(trade.to_human())
                 if trade.amount_in == 0 or trade.amount_out == 0:

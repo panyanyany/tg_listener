@@ -437,7 +437,7 @@ default_ignore_names = [
     'urllib3*',
     'PIL*',
     # 'scrapy.utils.log*',
-    'util.*',
+    # 'util.*',
     'py.warnings*'
 ]
 

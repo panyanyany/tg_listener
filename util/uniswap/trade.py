@@ -98,12 +98,10 @@ class Trade:
                        ]:
             self.amount_in = tx['value']
 
-        logs = []
         last_value = 0
         sync_cnt = 0
         transfer_cnt = 0
         for i, log in enumerate(receipt['logs']):
-            logs.append(dict(log))
             try:
                 dlog: Union[EventData, None] = cls.log_decoder.decode(log)
             except BaseException as e:

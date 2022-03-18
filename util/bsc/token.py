@@ -9,3 +9,11 @@ def has_canonical(tokens):
         if token in canonicals:
             return True
     return False
+
+
+def all_canonical(tokens):
+    for token in tokens:
+        token = token.lower()
+        if token not in canonicals:
+            return False
+    return True
