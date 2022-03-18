@@ -87,6 +87,9 @@ class LiquidityChange:
                     tokens.append(dlog['address'].lower())
                     amounts.append(dlog['args']['wad'])
 
+        if len(tokens) != 2:
+            logger.warning(f'tokens == {len(tokens)}, txh={tx["hash"].hex()}', len(tokens))
+            return
         self = cls(method_type=method_type, token0=tokens[0], token1=tokens[1], amount0=amounts[0], amount1=amounts[1],
                    timestamp=timestamp, hash=tx['hash'].hex(), operator=operator)
         if self.token0 in canonicals:

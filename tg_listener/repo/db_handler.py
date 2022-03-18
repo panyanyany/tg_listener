@@ -85,6 +85,8 @@ class DbHandler(Cancelable):
     async def handle_liq(self, liq_tx: ExtendedTxData):
         # logger.info(f'liq changed: {liq.hash.hex()} %s', liq.fn_details)
         liq = LiquidityChange.from_transaction(liq_tx.to_tx_data(), liq_tx.receipt, timestamp=liq_tx.timestamp)
+        if not liq:
+            return
         decimals0 = await token_service.inst.get(liq.token0)
         decimals1 = await token_service.inst.get(liq.token1)
         pair = sort_pair(liq.token0, liq.token1, liq.amount0, liq.amount1, decimals0, decimals1)
