@@ -31,8 +31,14 @@ class PricePair(SortedPair):
 
     def calc(self):
         pair = self
-        quote_res_human = pair.quote_res / (10 ** pair.quote_decimals)
-        base_res_human = pair.base_res / (10 ** 18)
+        if pair.quote_decimals > 0:
+            quote_res_human = pair.quote_res / (10 ** pair.quote_decimals)
+        else:
+            quote_res_human = pair.quote_res
+        if pair.base_decimals > 0:
+            base_res_human = pair.base_res / (10 ** pair.base_decimals)
+        else:
+            base_res_human = pair.base_res
         pair.price = base_res_human / quote_res_human
         if pair.base_token in [busd, usdt, usdc]:
             pair.price_in['usd'] = pair.price

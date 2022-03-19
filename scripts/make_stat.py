@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import dateutil.parser
 import pandas as pd
@@ -17,18 +17,18 @@ pd.set_option('max_colwidth', None)
 db = arctic_db.db_tick
 
 
-def filter_token(token):
-    stat = arctic_db.get_stat(token)
+def filter_token(stat, token):
+    # stat = arctic_db.get_stat(token)
     last_dt: datetime = stat['last_tick_at']
-    diff = (datetime.now() - last_dt).total_seconds() / 60
-    if diff > 30:
+    idle = (datetime.now() - last_dt).total_seconds() / 60
+    if idle > 15:
         return
     data = arctic_db.db_tick.read(f'{token}:tick')
-    data = data.resample('15min')['price'].agg(['first', 'last'])
+    data = data.resample('1min')['price'].agg(['first', 'last'])
     data['diff'] = (data['last'] - data['first']) / data['first']
-    if data.iloc[-1]['diff'] > 1:
+    if data.iloc[-1]['diff'] > .2:
         print(data.tail())
-        print('--- token:', token, stat.get('is_dividend'), stat['pools'])
+        print(f'--- token: https://poocoin.app/tokens/{token}', stat.get('is_dividend'), stat['pools'])
 
     return
 
@@ -39,9 +39,20 @@ def filter_token(token):
             print(sym, info)
 
 
-for sym in db.list_symbols(partial_match=':tick'):
+dt = datetime.now() - timedelta(minutes=15)
+print(dt)
+stats = arctic_db.db_data.stats.find({"last_tick_at": {"$gte": dt}})
+
+# print(stats.count())
+# print(len(db.list_symbols(partial_match=':tick')))
+# exit()
+
+for stat in stats:
+    sym = f"{stat['token']}:tick"
+    if not db.has_symbol(sym):
+        continue
     info = db.get_info(sym)
     if info['len'] < 5:
         continue
     token = sym.split(':')[0]
-    filter_token(token)
+    filter_token(stat, token)
