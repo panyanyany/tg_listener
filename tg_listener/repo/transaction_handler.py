@@ -42,7 +42,7 @@ class SwapHandler(Cancelable):
                     continue
                 # logger.info(trade.to_human())
                 if trade.amount_in == 0 or trade.amount_out == 0:
-                    logger.warning(str(trade))
+                    logger.warning('amount_out is 0: %s', str(trade))
                 else:
                     trades.append(trade)
             logger.info(f'swap handler: trades={len(trades)}')

@@ -67,6 +67,7 @@ class Trade:
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
         paths = list(map(lambda e: e.lower(), fn_inputs['path']))
+        swap_receipt = fn_inputs['to'].lower()
         # if not has_canonical(paths):
         #     print('----- 3', paths)
         #     return
@@ -97,7 +98,7 @@ class Trade:
                 continue
             if dlog['event'] == 'Transfer':
                 transfer_cnt += 1
-                last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'], paths)
+                last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'], paths, swap_receipt)
             elif dlog['event'] == 'Swap':
                 self.handle_swap(operator, fn_name, dlog, i, receipt['logs'])
             elif dlog['event'] == 'Sync':
@@ -141,7 +142,7 @@ class Trade:
             if self.amount_out == 0:
                 self.amount_out = dlog['args']['amount1Out']
 
-    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs, paths):
+    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs, paths, swap_receipt):
         _from = dlog['args']['from'].lower()
         to = dlog['args']['to'].lower()
         contract = dlog['address'].lower()
@@ -155,7 +156,7 @@ class Trade:
             if contract == wbnb:
                 # wbnb 的数量从 withdrawal 里拿
                 pass
-            elif to == operator:
+            elif to == operator or to == swap_receipt:  # 有时候swap得到的token是可以转给别人的
                 self.amount_out += dlog['args']['value']
 
         to = dlog['args']['to'].lower()
