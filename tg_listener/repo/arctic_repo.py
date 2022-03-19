@@ -53,7 +53,13 @@ class ArcticRepo:
 
         self.update_stat(token, pools=stat['pools'])
 
-    def update_stat(self, token, last_tick_at=None, pools=None):
+    def get_stat(self, token):
+        stats: Collection = self.db_data.stats
+        cond = {"token": token}
+        stat = stats.find_one(cond)
+        return stat
+
+    def update_stat(self, token, last_tick_at=None, pools=None, is_dividend=False):
         stats: Collection = self.db_data.stats
         cond = {"token": token}
         stat = stats.find_one(cond)
@@ -65,6 +71,8 @@ class ArcticRepo:
         if pools:
             stat.setdefault('pools', {})
             stat['pools'].update(pools)
+        if is_dividend:
+            stat['is_dividend'] = is_dividend
         stats.update_one(cond, {"$set": stat})
         return stat
 

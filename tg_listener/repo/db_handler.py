@@ -63,14 +63,26 @@ class DbHandler(Cancelable):
             exists.add(key)
 
             name = get_token_name(trade.price_pair.base_token)
+            direction = 'BUY' if trade.token_in == trade.price_pair.base_token else 'SELL'
+            if trade.price_pair.base_token == trade.token_in:
+                value = trade.amount_in / (10 ** trade.price_pair.base_decimals)
+            elif trade.price_pair.base_token == trade.token_out:
+                value = trade.amount_out / (10 ** trade.price_pair.base_decimals)
+            else:
+                value = 0
             pools = {name: trade.price_pair.base_res / (10 ** trade.price_pair.base_decimals)}
-            d = {'price': trade.price_pair.price_in['usd'], 'hash': trade.hash, **pools}
+            d = {'price': trade.price_pair.price_in['usd'],
+                 'hash': trade.hash,
+                 'direction': direction,
+                 'value': value,
+                 'operator': trade.operator,
+                 **pools}
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
             try:
                 arctic_db.add_ticks(trade.price_pair.quote_token, df)
                 # 更新池子
                 arctic_db.update_stat(trade.price_pair.quote_token,
-                                      pools=pools)
+                                      pools=pools, is_dividend=trade.is_dividend)
                 added += 1
             except BaseException as e:
                 logger.error(
