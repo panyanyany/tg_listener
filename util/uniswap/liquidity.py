@@ -40,6 +40,7 @@ class LiquidityChange:
             return
 
         operator = tx['from'].lower()
+        tx_contract = tx['to'].lower()
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
         if fn_name.startswith('add'):
@@ -54,11 +55,15 @@ class LiquidityChange:
                          'removeLiquidityETHWithPermit', 'removeLiquidityETHWithPermitSupportingFeeOnTransferTokens']:
             token0 = fn_inputs['token']
             token1 = wbnb
+        else:
+            logger.warning('invalid liq function: %s, hash=%s', fn_name, tx['hex'].hex())
+            return
 
         logs = []
         lp_addr = ''
-        tokens = []
-        amounts = []
+        tokens = [token0.lower(), token1.lower()]
+        amounts = dict(zip(tokens, [0, 0]))
+
         for i in range(len(receipt['logs']) - 1, -1, -1):
             log = receipt['logs'][i]
             logs.append(dict(log))
@@ -70,27 +75,34 @@ class LiquidityChange:
             if not dlog:
                 continue
 
-            # print(dlog['event'], dict(dlog))
+            contract = dlog['address'].lower()
             if dlog['event'] == 'Sync':
                 # 拿 lp 地址
                 lp_addr = dlog['address'].lower()
             elif dlog['event'] == 'Transfer':
-                if method_type == 'add' and dlog['args']['to'].lower() == lp_addr:
-                    tokens.append(dlog['address'].lower())
-                    amounts.append(dlog['args']['value'])
-                if method_type == 'remove' and dlog['args']['to'].lower() == operator:
-                    tokens.append(dlog['address'].lower())
-                    amounts.append(dlog['args']['value'])
-            elif dlog['event'] == 'Withdrawal':
-                if method_type == 'remove' and 'ETH' in fn_name:
-                    """removeLiquidityETH* 之类的方法，eth 返回记录会出现在 Withdrawal 事件里, 而且不是直接返回给 op 的"""
-                    tokens.append(dlog['address'].lower())
-                    amounts.append(dlog['args']['wad'])
+                if method_type == 'add':
+                    if contract in amounts:
+                        if dlog['args']['to'].lower() == lp_addr:
+                            amounts[contract] += dlog['args']['value']
+                if method_type == 'remove':
+                    if contract in amounts:
+                        if dlog['args']['from'].lower() == lp_addr:
+                            amounts[contract] += dlog['args']['value']
+                            # print(f"---- send {contract}: {dlog['args']['value']} = {amounts[contract]}")
+                        # elif dlog['args']['from'].lower() == tx_contract:
+                        #     amounts[contract] += dlog['args']['value']
+                        #     print(f"---- router send {contract}: {dlog['args']['value']} = {amounts[contract]}")
+            # elif dlog['event'] == 'Withdrawal':
+            #     if method_type == 'remove' and 'ETH' in fn_name:
+            #         """removeLiquidityETH* 之类的方法，eth 返回记录会出现在 Withdrawal 事件里, 而且不是直接返回给 op 的"""
+            #         tokens.append(dlog['address'].lower())
+            #         amounts.append(dlog['args']['wad'])
 
         if len(tokens) != 2:
             logger.warning(f'tokens == {len(tokens)}, txh={tx["hash"].hex()}')
             return
-        self = cls(method_type=method_type, token0=tokens[0], token1=tokens[1], amount0=amounts[0], amount1=amounts[1],
+        self = cls(method_type=method_type, token0=tokens[0], token1=tokens[1], amount0=amounts[tokens[0]],
+                   amount1=amounts[tokens[1]],
                    timestamp=timestamp, hash=tx['hash'].hex(), operator=operator)
         if self.token0 in canonicals:
             self.amount_in[get_token_name(self.token0)] = self.amount0

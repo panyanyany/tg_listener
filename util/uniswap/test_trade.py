@@ -7,6 +7,7 @@ from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from web3.types import TxData, TxReceipt
 
+from util.uniswap import test_util
 from util.uniswap.trade import Trade
 
 
@@ -183,19 +184,7 @@ def test_from_transaction():
         # if txh != '0x105e3130bf0027eceeeabaf52db3f63f4a08f7b4da4718c5326f26b56a1f97a4':
         #     continue
         print('------- testing:', txh)
-        try:
-            module = importlib.import_module('util.uniswap.data.tx_and_receipt.' + txh)
-            tx = module.tx_data
-            rec = module.receipt_data
-        except ModuleNotFoundError:
-            tx = w3.eth.get_transaction(txh)
-            rec: TxReceipt = w3.eth.get_transaction_receipt(txh)
-            filepath = Path(__file__).parent.joinpath('data', 'tx_and_receipt', txh + '.py')
-            with filepath.open('w+') as fp:
-                fp.write("from hexbytes import HexBytes\n")
-                fp.write("from web3.datastructures import AttributeDict\n")
-                fp.write(f"tx_data = {str(tx)}\n")
-                fp.write(f"receipt_data = {str(rec)}\n")
+        tx, rec = test_util.get_tx_n_receipt(txh)
 
         # print()
         # pp(dict(tx))
