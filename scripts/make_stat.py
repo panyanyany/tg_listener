@@ -21,9 +21,11 @@ def filter_token(stat, token):
     # stat = arctic_db.get_stat(token)
     last_dt: datetime = stat['last_tick_at']
     idle = (datetime.now() - last_dt).total_seconds() / 60
-    if idle > 15:
+    if idle > 5:
         return
     data = arctic_db.db_tick.read(f'{token}:tick')
+    # print(data[['price', 'hash', 'value']].tail())
+    # print(token)
     data = data.resample('1min')['price'].agg(['first', 'last'])
     data['diff'] = (data['last'] - data['first']) / data['first']
     if data.iloc[-1]['diff'] > .2:
@@ -39,8 +41,7 @@ def filter_token(stat, token):
             print(sym, info)
 
 
-dt = datetime.now() - timedelta(minutes=15)
-print(dt)
+dt = datetime.now() - timedelta(minutes=5)
 stats = arctic_db.db_data.stats.find({"last_tick_at": {"$gte": dt}})
 
 # print(stats.count())

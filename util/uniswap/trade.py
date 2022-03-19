@@ -37,7 +37,7 @@ class Trade:
 
     hash: str = ''
 
-    price_pair: PricePair = None
+    price_pair: PricePair = None  # 注意: 这个东西只是用来计算价格的，跟 set(token_in, token_out) 很可能不一致
 
     logs_sync: List[EventData] = field(default_factory=list)
 

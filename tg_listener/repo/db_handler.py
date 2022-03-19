@@ -9,12 +9,12 @@ from pandas import MultiIndex, Index
 from web3 import Web3
 
 from tg_listener.repo.arctic_repo import arctic_db
-from tg_listener.services import token_service, price_service
+from tg_listener.services import token_service, price_service, lp_service
 from util.asyncio.cancelable import Cancelable
 from util.bsc.constants import wbnb, cake, usdt, busd, usdc
 from util.uniswap.liquidity import LiquidityChange
 from util.uniswap.trade import Trade
-from util.bsc.token import get_token_name, canonicals, StdToken
+from util.bsc.token import get_token_name, canonicals, StdToken, has_canonical
 from util.web3.pair import sort_pair, PricePair
 from util.web3.transaction import ExtendedTxData
 
@@ -65,22 +65,25 @@ class DbHandler(Cancelable):
 
             name = get_token_name(trade.price_pair.base_token)
             direction = 'BUY' if trade.token_in == trade.price_pair.base_token else 'SELL'
-            if trade.price_pair.base_token == trade.token_in:
-                value = trade.amount_in / (10 ** trade.price_pair.base_decimals)
+            if has_canonical([trade.token_in]):
+                value = trade.amount_in
                 value_token = trade.token_in
-            elif trade.price_pair.base_token == trade.token_out:
-                value = trade.amount_out / (10 ** trade.price_pair.base_decimals)
+            elif has_canonical([trade.token_out]):
+                value = trade.amount_out
                 value_token = trade.token_out
             else:
                 value = 0
                 value_token = ''
 
+            decimals = await token_service.inst.get(value_token)
             if value_token == wbnb:
-                value = value * await price_service.inst.get_bnb_price()
+                value = (value / (10 ** decimals)) * await price_service.inst.get_bnb_price()
             elif value_token == cake:
-                value = value * await price_service.inst.get_cake_price()
+                decimals = await token_service.inst.get(value_token)
+                value = (value / (10 ** decimals)) * await price_service.inst.get_cake_price()
             elif value_token in [usdt, usdc, busd]:
-                value = value
+                value = (value / (10 ** decimals))
+
             pools = {name: trade.price_pair.base_res / (10 ** trade.price_pair.base_decimals)}
             d = {'price': trade.price_pair.price_in['usd'],
                  'hash': trade.hash,
