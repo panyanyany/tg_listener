@@ -77,7 +77,7 @@ def test_from_transaction():
          'data': 'tx01',
          'result': Trade(operator='0xfc0e59008d817fd57d90a7b1bab6ffb92cbadb07',
                          token_in='0x15104336cf1c5bb4281ed1e12fecc5a1197e5e36',
-                         token_out='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', amount_in=540000000000000000000000000,
+                         token_out='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', amount_in=600000000000000000000000000,
                          amount_out=191021198742087862,
                          hash='')
          },
@@ -117,6 +117,17 @@ def test_from_transaction():
                          amount_out=7000000000000000000,
                          hash='0x533f42756301aa1e26a6a50c836706e2e748e381020ebab524f17295406cbcc7')
          },
+        {'input': '0x47e40fc2d5c8b662904c8a00819a0c945fe4def94570e464f38709564e16bc2d',
+         'name': 'swapExactTokensForETHSupportingFeeOnTransferTokens',
+         'data': 'tx01',
+         'result': Trade(operator='0x6cb9cde9a33cd5eaeac2fc4b94571aed8d42d8db',
+                         token_in='0xb0dbf009458759b7d5905d889e873b6127567958',
+                         token_out='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+                         amount_in=122868206380017714359106479551,
+                         amount_out=305475729657822028,
+                         )
+
+         },
         # # amount_out 是 0
         # {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
         #  'name': 'swapETHForExactTokens',
@@ -131,6 +142,9 @@ def test_from_transaction():
     # print()
     for testdata in testdata_list[:]:
         txh = testdata['input']
+        # if txh != '0x105e3130bf0027eceeeabaf52db3f63f4a08f7b4da4718c5326f26b56a1f97a4':
+        #     continue
+        print('------- testing:', txh)
         tx = w3.eth.get_transaction(txh)
         # print(txh)
         rec: TxReceipt = w3.eth.get_transaction_receipt(txh)

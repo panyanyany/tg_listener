@@ -6,7 +6,7 @@ from typing import Union, List
 import redis
 from web3.types import TxData, TxReceipt, EventData
 
-from util.bsc.constants import router, router2
+from util.bsc.constants import router, router2, wbnb
 from util.eth.abi_force_decoder.decoder import Decoder, pancake_swap_router_signatures
 from util.eth.log_decoder.log_decoder import LogDecoder
 from util.web3.pair import PricePair, sort_pair
@@ -15,6 +15,12 @@ from util.web3.transaction import ExtendedTxData
 RDB = redis.Redis(host='localhost', port=6379, db=0)
 
 logger = logging.getLogger(__name__)
+
+functions_send_eth = {
+    'swapETHForExactTokens',
+    'swapExactETHForTokens',
+    'swapExactETHForTokensSupportingFeeOnTransferTokens',
+}
 
 
 @dataclass
@@ -60,13 +66,13 @@ class Trade:
         operator = tx['from'].lower()
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
-        paths = fn_inputs['path']
+        paths = list(map(lambda e: e.lower(), fn_inputs['path']))
         # if not has_canonical(paths):
         #     print('----- 3', paths)
         #     return
         # print(f'paths: {paths}')
 
-        self = cls(operator=operator, token_in=paths[0].lower(), token_out=paths[-1].lower(), amount_in=0, amount_out=0,
+        self = cls(operator=operator, token_in=paths[0], token_out=paths[-1], amount_in=0, amount_out=0,
                    timestamp=timestamp,
                    hash=tx['hash'].hex().lower(), logs_sync=[])
 
@@ -91,22 +97,31 @@ class Trade:
                 continue
             if dlog['event'] == 'Transfer':
                 transfer_cnt += 1
-                last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'])
+                last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'], paths)
             elif dlog['event'] == 'Swap':
                 self.handle_swap(operator, fn_name, dlog, i, receipt['logs'])
             elif dlog['event'] == 'Sync':
                 # self.handle_sync(paths, sync_cnt, dlog)
                 self.logs_sync.append(dlog)
                 sync_cnt += 1
+            elif dlog['event'] == 'Withdrawal':
+                self.handle_withdrawal(operator, fn_name, dlog, paths)
             # print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
         if transfer_cnt > 4:
             # 转账日志大于4个，极有可能是分红币
             self.is_dividend = True
-        # 最后一个可能是其他的 router
-        if self.amount_out == 0:
-            self.amount_out = last_value
+        # # 最后一个可能是其他的 router
+        # if self.amount_out == 0:
+        #     self.amount_out = last_value
         # print(f'amount_in={amount_in}/{raw_amount_in}, amount_out={amount_out}')
+
+        if fn_name in (
+                'swapExactTokensForETHSupportingFeeOnTransferTokens',
+                'swapExactTokensForETHSupportingFeeOnTransferTokens'):
+            # 由于有一部分 amount_in 作为手续费消耗掉了，所以日志中看不到，得从参数里拿
+            self.amount_in = fn_inputs.get('amountIn')
+
         return self
 
     @classmethod
@@ -126,22 +141,42 @@ class Trade:
             if self.amount_out == 0:
                 self.amount_out = dlog['args']['amount1Out']
 
-    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs):
+    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs, paths):
         _from = dlog['args']['from'].lower()
-        if _from == operator:
-            self.amount_in += dlog['args']['value']
-        elif _from == router:
-            if fn_name == 'swapETHForExactTokens':
-                self.amount_in += dlog['args']['value']
+        to = dlog['args']['to'].lower()
+        contract = dlog['address'].lower()
+        # 计算 in
+        if contract == paths[0]:
+            if fn_name not in functions_send_eth:
+                if _from == operator:
+                    self.amount_in += dlog['args']['value']
+                    # print(f'in ---- contract:{contract}, from={_from}', dlog['args']['value'], self.amount_in)
+        elif contract == paths[-1]:  # 计算 out
+            if contract == wbnb:
+                # wbnb 的数量从 withdrawal 里拿
+                pass
+            elif to == operator:
+                self.amount_out += dlog['args']['value']
 
         to = dlog['args']['to'].lower()
         last_value = dlog['args']['value']
-        # router2 在这个交易会用到： 0xfcd695e238155d01a42e7fe0a3e668e32a8932e8df81b4e657910d4df08e3016
-        if to in [router, operator, router2]:
-            # 分红币分的同等数量的不知道啥玩意
-            if _from == '0x0000000000000000000000000000000000000000':
-                pass
-            else:
-                self.amount_out += dlog['args']['value']
+        # # router2 在这个交易会用到： 0xfcd695e238155d01a42e7fe0a3e668e32a8932e8df81b4e657910d4df08e3016
+        # if to in [router, operator, router2]:
+        #     # 分红币分的同等数量的不知道啥玩意
+        #     if _from == '0x0000000000000000000000000000000000000000':
+        #         pass
+        #     else:
+        #         self.amount_out += dlog['args']['value']
 
         return last_value
+
+    def handle_withdrawal(self, operator, fn_name, dlog, paths):
+        contract = dlog['address'].lower()
+        if fn_name not in functions_send_eth:
+            if contract == paths[0]:
+                pass
+            elif contract == paths[-1]:
+                if contract == wbnb:
+                    # 不要加，因为真可能出现多个 withdrawal: 0x105e3130bf0027eceeeabaf52db3f63f4a08f7b4da4718c5326f26b56a1f97a4
+                    self.amount_out = dlog['args']['wad']
+                    # print(f'out ---- contract:{contract}, withdrawal:', dlog['args']['wad'], self.amount_out)

@@ -11,6 +11,7 @@ from web3 import Web3
 from tg_listener.repo.arctic_repo import arctic_db
 from tg_listener.services import token_service, price_service
 from util.asyncio.cancelable import Cancelable
+from util.bsc.constants import wbnb, cake, usdt, busd, usdc
 from util.uniswap.liquidity import LiquidityChange
 from util.uniswap.trade import Trade
 from util.bsc.token import get_token_name, canonicals, StdToken
@@ -66,10 +67,20 @@ class DbHandler(Cancelable):
             direction = 'BUY' if trade.token_in == trade.price_pair.base_token else 'SELL'
             if trade.price_pair.base_token == trade.token_in:
                 value = trade.amount_in / (10 ** trade.price_pair.base_decimals)
+                value_token = trade.token_in
             elif trade.price_pair.base_token == trade.token_out:
                 value = trade.amount_out / (10 ** trade.price_pair.base_decimals)
+                value_token = trade.token_out
             else:
                 value = 0
+                value_token = ''
+
+            if value_token == wbnb:
+                value = value * await price_service.inst.get_bnb_price()
+            elif value_token == cake:
+                value = value * await price_service.inst.get_cake_price()
+            elif value_token in [usdt, usdc, busd]:
+                value = value
             pools = {name: trade.price_pair.base_res / (10 ** trade.price_pair.base_decimals)}
             d = {'price': trade.price_pair.price_in['usd'],
                  'hash': trade.hash,
@@ -77,6 +88,7 @@ class DbHandler(Cancelable):
                  'value': value,
                  'operator': trade.operator,
                  **pools}
+            logger.debug('trade: %s, d: %s', trade, d)
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
             try:
                 arctic_db.add_ticks(trade.price_pair.quote_token, df)
