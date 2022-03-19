@@ -39,7 +39,11 @@ class PricePair(SortedPair):
             base_res_human = pair.base_res / (10 ** pair.base_decimals)
         else:
             base_res_human = pair.base_res
-        pair.price = base_res_human / quote_res_human
+
+        if quote_res_human > 0:
+            pair.price = base_res_human / quote_res_human
+        else:
+            pair.price = 0
         if pair.base_token in [busd, usdt, usdc]:
             pair.price_in['usd'] = pair.price
         elif pair.base_token in [wbnb]:

@@ -63,8 +63,9 @@ class DbHandler(Cancelable):
                 continue
             exists.add(key)
 
+            # 判断交易方向：BUY / SELL
             name = get_token_name(trade.price_pair.base_token)
-            direction = 'BUY' if trade.token_in == trade.price_pair.base_token else 'SELL'
+            direction = 'BUY' if has_canonical([trade.token_in]) else 'SELL'
             if has_canonical([trade.token_in]):
                 value = trade.amount_in
                 value_token = trade.token_in
@@ -133,5 +134,6 @@ class DbHandler(Cancelable):
 
         # logger.info('amount_in: %s', amount_in)
         d = {'hash': liq.hash, 'value': price_pair.price_in['usd'], 'operator': liq.operator, **amount_in}
+        logger.debug('liq changed: liq=%s, price_pair=%s, d=%s', liq, price_pair, d)
         df = pandas.DataFrame(d, index=Index([dt], name='date'))
         arctic_db.add_liq(price_pair.quote_token, liq.method_type, df, amount_in)

@@ -6,4 +6,15 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', None)
 
-print(arctic_db.db_tick.read('0x9d4451151a8de5b545a1bc6c8fdeb9d94a2868e1:tick'))
+token = '0x337fab272a8572a3b1c33ff0ae14c59591a8d8e2'
+
+data = arctic_db.db_tick.read(f'{token}:tick')
+print(data.tail())
+data = data[data['direction'] == 'SELL']
+print(len(data))
+print(data.tail())
+
+data = arctic_db.db_tick.read(f'{token}:liq:add')
+print(data.tail())
+data = arctic_db.db_tick.read(f'{token}:liq:remove')
+print(data.tail())
