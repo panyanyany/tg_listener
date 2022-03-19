@@ -1,3 +1,4 @@
+import importlib
 import json
 from pathlib import Path
 
@@ -45,7 +46,7 @@ def test_from_transaction():
          'result': Trade(operator='0x70e4995ef0b0730fe9a0ad711f4adeb6557c3fb3',
                          token_in='0xe9e7cea3dedca5984780bafc599bd69add087d56',
                          token_out='0x3b3691d4c3ec75660f203f41adc6296a494404d0', amount_in=50027534254641814483,
-                         amount_out=1241013201)
+                         amount_out=1266340001)
          },
         {'input': '0xa7d8e9dfe5a4d53bce5e08d36415660b1f8f25401545c998e5cc6fc4dc959bb5',
          'name': 'swapETHForExactTokens',
@@ -137,7 +138,33 @@ def test_from_transaction():
                          amount_in=291467591201096034,
                          amount_out=39895802382150,
                          )
-
+         },
+        {'input': '0xa51e860834428373abe2295bbfd2f3973f9d5eab70ceaf5f4123d9d13179675b',
+         'name': 'swapExactTokensForTokensSupportingFeeOnTransferTokens',
+         'data': 'wbnb没有withdrawal',
+         'result': Trade(operator='0x8e7d8abc43054baf1d9aa2d5e2e7c1ff6ac08065',
+                         token_in='0xd9ea58350bf120e2169a35fa1afc31975b07de01',
+                         token_out='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c', amount_in=869720953980004597760,
+                         amount_out=641064815265531439,
+                         )
+         },
+        {'input': '0x1bdba7049a089b5d50daa1afe0ece91eb20f9d2952c5a366fadb9093dd5514b4',
+         'name': 'swapTokensForExactETH',
+         'data': '山寨wbnb',
+         'result': Trade(operator='0xf51b652888967f0331196b60829c78be0e08582c',
+                         token_in='0x55d398326f99059ff775485246999027b3197955',
+                         token_out='0x0efb5fd2402a0967b92551d6af54de148504a115', amount_in=24638250666181341371,
+                         amount_out=60000000000000000,
+                         )
+         },
+        {'input': '0x74cf431de42b6f58a7cb02908033fb05704da2ed55d2a1b87daf957696805ab5',
+         'name': 'swapExactTokensForETH',
+         'data': '山寨wbnb',
+         'result': Trade(operator='0x56c8f040d488d703d67a7e66323a11e9aad0d415',
+                         token_in='0x55d398326f99059ff775485246999027b3197955',
+                         token_out='0x0efb5fd2402a0967b92551d6af54de148504a115', amount_in=20000000000000000000,
+                         amount_out=47731047819855843,
+                         )
          },
         # # amount_out 是 0
         # {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
@@ -156,9 +183,19 @@ def test_from_transaction():
         # if txh != '0x105e3130bf0027eceeeabaf52db3f63f4a08f7b4da4718c5326f26b56a1f97a4':
         #     continue
         print('------- testing:', txh)
-        tx = w3.eth.get_transaction(txh)
-        # print(txh)
-        rec: TxReceipt = w3.eth.get_transaction_receipt(txh)
+        try:
+            module = importlib.import_module('util.uniswap.data.tx_and_receipt.' + txh)
+            tx = module.tx_data
+            rec = module.receipt_data
+        except ModuleNotFoundError:
+            tx = w3.eth.get_transaction(txh)
+            rec: TxReceipt = w3.eth.get_transaction_receipt(txh)
+            filepath = Path(__file__).parent.joinpath('data', 'tx_and_receipt', txh + '.py')
+            with filepath.open('w+') as fp:
+                fp.write("from hexbytes import HexBytes\n")
+                fp.write("from web3.datastructures import AttributeDict\n")
+                fp.write(f"tx_data = {str(tx)}\n")
+                fp.write(f"receipt_data = {str(rec)}\n")
 
         # print()
         # pp(dict(tx))

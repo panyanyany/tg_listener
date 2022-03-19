@@ -64,6 +64,7 @@ class Trade:
             # print('----- 2')
             return
         operator = tx['from'].lower()
+        contract = tx['to'].lower()
         fn_name = fn_details[0].fn_name
         fn_inputs = fn_details[1]
         paths = list(map(lambda e: e.lower(), fn_inputs['path']))
@@ -98,7 +99,8 @@ class Trade:
                 continue
             if dlog['event'] == 'Transfer':
                 transfer_cnt += 1
-                last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'], paths, swap_receipt)
+                last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'], paths, swap_receipt,
+                                                  contract)
             elif dlog['event'] == 'Swap':
                 self.handle_swap(operator, fn_name, dlog, i, receipt['logs'])
             elif dlog['event'] == 'Sync':
@@ -122,6 +124,10 @@ class Trade:
                 'swapExactTokensForETHSupportingFeeOnTransferTokens'):
             # 由于有一部分 amount_in 作为手续费消耗掉了，所以日志中看不到，得从参数里拿
             self.amount_in = fn_inputs.get('amountIn')
+        if fn_name in ('swapTokensForExactETH',
+                       'swapTokensForExactTokens'):
+            # exact* 方法
+            self.amount_out = fn_inputs.get('amountOut')
 
         return self
 
@@ -142,7 +148,7 @@ class Trade:
             if self.amount_out == 0:
                 self.amount_out = dlog['args']['amount1Out']
 
-    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs, paths, swap_receipt):
+    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs, paths, swap_receipt, tx_contract):
         _from = dlog['args']['from'].lower()
         to = dlog['args']['to'].lower()
         contract = dlog['address'].lower()
@@ -154,10 +160,14 @@ class Trade:
                     # print(f'in ---- contract:{contract}, from={_from}', dlog['args']['value'], self.amount_in)
         elif contract == paths[-1]:  # 计算 out
             if contract == wbnb:
+                if to == operator or to == swap_receipt:
+                    self.amount_out = dlog['args']['value']
                 # wbnb 的数量从 withdrawal 里拿
-                pass
+                # pass
             elif to == operator or to == swap_receipt:  # 有时候swap得到的token是可以转给别人的
-                self.amount_out += dlog['args']['value']
+                self.amount_out = dlog['args']['value']
+            elif to == tx_contract:  # 如果实在找不到，那可能是直接给 router 了
+                self.amount_out = dlog['args']['value']
 
         to = dlog['args']['to'].lower()
         last_value = dlog['args']['value']
