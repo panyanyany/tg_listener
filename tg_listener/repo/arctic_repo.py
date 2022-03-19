@@ -51,9 +51,9 @@ class ArcticRepo:
             stat['pools'].setdefault(name, 0)
             stat['pools'][name] += sign * amt
 
-        self.update_stat(token, pool=stat['pools'])
+        self.update_stat(token, pools=stat['pools'])
 
-    def update_stat(self, token, last_tick_at=None, pool=None):
+    def update_stat(self, token, last_tick_at=None, pools=None):
         stats: Collection = self.db_data.stats
         cond = {"token": token}
         stat = stats.find_one(cond)
@@ -62,9 +62,9 @@ class ArcticRepo:
             stats.insert_one(stat)
         if last_tick_at:
             stat['last_tick_at'] = last_tick_at
-        if pool:
+        if pools:
             stat.setdefault('pools', {})
-            stat['pools'].update(pool)
+            stat['pools'].update(pools)
         stats.update_one(cond, {"$set": stat})
         return stat
 

@@ -17,7 +17,7 @@ def filter_token(token):
     # exit()
     data = data.resample('15min')['price'].agg(['first', 'last'])
     data['diff'] = (data['last'] - data['first']) / data['first']
-    if data.iloc[-1]['diff'] > 1:
+    if data.iloc[-1]['diff'] > 0.2:
         print(data)
         print('--- token:', token)
     return
@@ -29,9 +29,12 @@ def filter_token(token):
             print(sym, info)
 
 
-for sym in db.list_symbols():
+# print(arctic_db.db_tick.read('0x93dfa1613e47da016a937e26cce6626015e83407:liq:remove'))
+# exit()
+
+for sym in db.list_symbols(partial_match=':tick'):
     info = db.get_info(sym)
-    # print(info)
+    # print(sym, info)
     if info['len'] < 50:
         continue
     token = sym.split(':')[0]
