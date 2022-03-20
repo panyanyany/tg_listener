@@ -27,7 +27,7 @@ class LpService(base_service.BaseService):
             results = await multi()
         except BaseException as e:
             logger.debug('lp service await multi(): %s', e, exc_info=e)
-            logger.error('lp service await multi(): %s', e)
+            logger.warning('lp service await multi(): %s', e)
             return
         all_pairs = {}
         for key, val in results.items():

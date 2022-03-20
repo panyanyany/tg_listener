@@ -28,8 +28,6 @@ class SyncHandler(Cancelable):
         self.w3 = w3
         self.trades_queue = trades_queue
         self.price_trades_queue = Queue()
-        # self.bnb_price = 0
-        # self.cake_price = 0
 
     def cache_get(self, key):
         return RDB.get('bsc:' + key)
@@ -63,22 +61,6 @@ class SyncHandler(Cancelable):
                 except BaseException as e:
                     logger.debug('error detail', exc_info=e)
                     logger.error('handle_trades: %s', e)
-
-            if (datetime.now() - last_time_get_price).total_seconds() > max_secs_get_price:
-                try:
-                    # self.get_bnb_price()
-                    last_time_get_price = datetime.now()
-                except ReadTimeout as e:
-                    pass
-                except BaseException as e:
-                    logger.error('get bnb price', exc_info=e)
-
-    # def get_bnb_price(self):
-    #     self.bnb_price = Multicall(web3=bsc_web3).get_bnb_price() / (10 ** 12)
-    #     logger.info('bnb price: %s', self.bnb_price)
-    #     pair_info = Multicall(web3=bsc_web3).get_pair_info_with_price(cake_busd_pair)
-    #     self.cake_price = pair_info.token_0.busd_price_human
-    #     logger.info('cake price: %s', self.cake_price)
 
     async def handle_trade(self, trade: Trade):
         log_pairs = {}
