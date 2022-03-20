@@ -25,7 +25,7 @@ class TokenService(base_service.BaseService):
             results = await multi()
         except BaseException as e:
             logger.debug('token service await multi(): %s', e, exc_info=e)
-            logger.error('token service await multi(): %s', e)
+            logger.warning('token service await multi(): %s', e)
             return
         for token, decimals in results.items():
             self.rdb.set(token, decimals)

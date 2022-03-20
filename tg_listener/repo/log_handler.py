@@ -88,6 +88,12 @@ class SyncHandler(Cancelable):
             pair_info = await lp_service.inst.get(pair_addr)
             decimals0 = await token_service.inst.get(pair_info['token0'].lower())
             decimals1 = await token_service.inst.get(pair_info['token1'].lower())
+            if decimals0 is None:
+                logger.error("decimals0 is None, token0=%s", pair_info['token0'].lower())
+                continue
+            if decimals1 is None:
+                logger.error("decimals1 is None, token1=%s", pair_info['token1'].lower())
+                continue
 
             log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'], decimals0=decimals0,
                                         decimals1=decimals1,
