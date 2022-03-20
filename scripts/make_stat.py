@@ -44,7 +44,9 @@ def filter_token(stat, token):
 
 
 dt = datetime.now() - timedelta(minutes=15)
-stats = arctic_db.db_data.stats.find({"last_tick_at": {"$gte": dt}})
+# 不要刚开盘的
+dt_open = datetime.now() - timedelta(minutes=60)
+stats = arctic_db.db_data.stats.find({"last_tick_at": {"$gte": dt}, "recorded_at": {"$lte": dt_open}})
 
 # print(stats.count())
 # print(len(db.list_symbols(partial_match=':tick')))
