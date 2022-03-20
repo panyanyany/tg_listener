@@ -49,12 +49,13 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
     # 请求交易结果
     async def get_receipt(tx: ExtendedTxData):
         start = datetime.now()
-        max_secs = 10
+        max_secs = 20
         while (datetime.now() - start).total_seconds() < max_secs:
             try:
                 tx.receipt = await w3.eth.get_transaction_receipt(tx.hash)
                 return
             except TransactionNotFound:
+                await asyncio.sleep(1)
                 pass
             except BaseException as e:
                 logger.warning('get receipt: %s, type=%s', e, type(e))
