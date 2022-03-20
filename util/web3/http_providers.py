@@ -56,11 +56,13 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
         self.logger.debug("Making request HTTP. URI: %s, Method: %s",
                           self.endpoint_uri, method)
         request_data = self.encode_rpc_request(method, params)
+        kwargs = self.get_request_kwargs()
+        kwargs.update('timeout', 5)
         try:
             raw_response = await async_make_post_request(
                 self.endpoint_uri,
                 request_data,
-                **self.get_request_kwargs()
+                **kwargs
             )
         # except asyncio.TimeoutError as e:
         except BaseException as e:
