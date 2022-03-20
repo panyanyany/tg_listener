@@ -17,7 +17,7 @@ pd.set_option('max_colwidth', None)
 db = arctic_db.db_tick
 
 
-def filter_token(stat, token):
+def filter_token(stat, token, times=0.5, span='30min'):
     # stat = arctic_db.get_stat(token)
     # last_dt: datetime = stat['last_tick_at']
     # idle = (datetime.now() - last_dt).total_seconds() / 60
@@ -28,9 +28,9 @@ def filter_token(stat, token):
         return
     # print(data[['price', 'hash', 'value']].tail())
     # print(token)
-    data = data.resample('30min')['price'].agg(['first', 'last'])
+    data = data.resample(span)['price'].agg(['first', 'last'])
     data['diff'] = (data['last'] - data['first']) / data['first']
-    if data.iloc[-1]['diff'] > .2:
+    if data.iloc[-1]['diff'] > times:
         print(data.tail())
         print(f'--- token: https://poocoin.app/tokens/{token}', stat.get('is_dividend'), stat['pools'])
 
@@ -60,4 +60,4 @@ for stat in stats:
     if info['len'] < 5:
         continue
     token = sym.split(':')[0]
-    filter_token(stat, token)
+    filter_token(stat, token, span='15min', times=0.5)

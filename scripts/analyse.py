@@ -6,7 +6,7 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', None)
 
-token = '0x337fab272a8572a3b1c33ff0ae14c59591a8d8e2'
+token = '0xffd90fcc8c8544e244f0d84c4c83a355ff71328d'
 
 data = arctic_db.db_tick.read(f'{token}:tick')
 print(data.tail())

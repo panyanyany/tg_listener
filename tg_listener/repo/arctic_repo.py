@@ -24,7 +24,7 @@ class ArcticRepo:
         # self.db_tick: ChunkStore = a[lib_name]
 
     def add_liq(self, token: str, method: str, ticks, amount_in: dict):
-        key = f'{token}:liq:{method}'
+        key = f'{token}:liq'
         self.db_tick.append(key, ticks, upsert=True)
         self.update_stat_pool(token, method, amount_in)
         # self.update_stat(token, datetime.now())

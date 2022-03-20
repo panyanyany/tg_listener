@@ -133,7 +133,11 @@ class DbHandler(Cancelable):
         amount_in[get_token_name(price_pair.base_token)] = price_pair.base_res / (10 ** price_pair.base_decimals)
 
         # logger.info('amount_in: %s', amount_in)
-        d = {'hash': liq.hash, 'value': price_pair.price_in['usd'], 'operator': liq.operator, **amount_in}
+        d = {'hash': liq.hash,
+             'value': price_pair.price_in['usd'],
+             'operator': liq.operator,
+             'method': liq.method_type,
+             **amount_in}
         logger.debug('liq changed: liq=%s, price_pair=%s, d=%s', liq, price_pair, d)
         df = pandas.DataFrame(d, index=Index([dt], name='date'))
         arctic_db.add_liq(price_pair.quote_token, liq.method_type, df, amount_in)
