@@ -60,4 +60,4 @@ for stat in stats:
     if info['len'] < 5:
         continue
     token = sym.split(':')[0]
-    filter_token(stat, token, span='15min', times=0.5)
+    filter_token(stat, token, span='1h', times=0.5)

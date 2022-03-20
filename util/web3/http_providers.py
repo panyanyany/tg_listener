@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     endpoints = [
-        "https://bsc-dataseed.binance.org/",
+        # "https://bsc-dataseed.binance.org/",
         "https://bsc-dataseed1.binance.org/",
         "https://bsc-dataseed2.binance.org/",
         "https://bsc-dataseed3.binance.org/",
