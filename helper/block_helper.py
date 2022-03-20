@@ -47,9 +47,11 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
     #     txs2.append(tx2)
 
     # 请求交易结果
+    timeout = 20
+
     async def get_receipt(tx: ExtendedTxData):
         start = datetime.now()
-        max_secs = 20
+        max_secs = timeout
         while (datetime.now() - start).total_seconds() < max_secs:
             try:
                 tx.receipt = await w3.eth.get_transaction_receipt(tx.hash)
@@ -64,7 +66,7 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
     # await asyncio.sleep(1)
     await asyncio.wait([
         get_receipt(tx) for tx in txs
-    ], timeout=21)
+    ], timeout=timeout)
     failed_cnt = 0
     for tx in txs:
         if not tx.receipt:
