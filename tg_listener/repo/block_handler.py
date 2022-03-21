@@ -76,7 +76,7 @@ class BlockHandler(CancelableTiktok):
         logger.info(
             f"txs_cnt={len(txs):03}"
             f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
-            f", queue={self.block_queue.qsize()}/{len(self.blocks)}"
+            f", queue={len(self.blocks)}/{self.block_queue.qsize()}"
             f", ts_diff=({(now - block_dt[0]).total_seconds():.0f},{(now - block_dt[-1]).total_seconds():.0f})"
         )
 
