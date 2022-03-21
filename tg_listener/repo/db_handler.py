@@ -10,6 +10,7 @@ from web3 import Web3
 
 from tg_listener.repo.arctic_repo import arctic_db
 from tg_listener.services import token_service, price_service, lp_service
+from tg_listener.services.base_service import ServiceStopped
 from util.asyncio.cancelable import Cancelable
 from util.bsc.constants import wbnb, cake, usdt, busd, usdc
 from util.uniswap.liquidity import LiquidityChange
@@ -115,15 +116,21 @@ class DbHandler(Cancelable):
         liq = LiquidityChange.from_transaction(liq_tx.to_tx_data(), liq_tx.receipt, timestamp=liq_tx.timestamp)
         if not liq:
             return
-        decimals0 = await token_service.inst.get(liq.token0)
-        decimals1 = await token_service.inst.get(liq.token1)
+        try:
+            decimals0 = await token_service.inst.get(liq.token0)
+            decimals1 = await token_service.inst.get(liq.token1)
+        except ServiceStopped:
+            return
         pair = sort_pair(liq.token0, liq.token1, liq.amount0, liq.amount1, decimals0, decimals1)
         if not pair:
             return
 
         price_pair = PricePair.from_sorted_pair(pair)
-        price_pair.bnb_price = await price_service.inst.get_bnb_price()
-        price_pair.cake_price = await price_service.inst.get_cake_price()
+        try:
+            price_pair.bnb_price = await price_service.inst.get_bnb_price()
+            price_pair.cake_price = await price_service.inst.get_cake_price()
+        except ServiceStopped:
+            return
         price_pair.calc()
 
         # logger.info('liq changed: %s, price_pair=%s', liq, price_pair)
