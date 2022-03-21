@@ -47,7 +47,7 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
     #     txs2.append(tx2)
 
     # 请求交易结果
-    timeout = 20
+    timeout = 5
 
     async def get_receipt(tx: ExtendedTxData):
         start = datetime.now()

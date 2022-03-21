@@ -31,7 +31,7 @@ class BlockHandler(CancelableTiktok):
         return True
 
     async def _run(self):
-        await self.tiktok(3, self.get_block, self.process_blocks)
+        await self.tiktok(1, self.get_block, self.process_blocks)
 
     async def get_block(self):
         # 等待新的区块
