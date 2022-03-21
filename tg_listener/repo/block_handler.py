@@ -66,7 +66,7 @@ class BlockHandler(Cancelable):
                     f"{now}"
                     f", len(txs)={len(block['transactions']):03}"
                     f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
-                    f", {block['hash'].hex()}, {block['number']}, {dt}"
+                    f", block_hash={block['hash'].hex()}, number={block['number']}, timestamp={dt}"
                     f", delta={(now - dt).total_seconds():.1f}s"
                     f", queue={self.block_queue.qsize()}"
                 )

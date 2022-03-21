@@ -35,10 +35,15 @@ class ChainListener(Cancelable):
             #     continue
             #
             # if n != latest:
-            try:
-                block: BlockData = await self.w3.eth.get_block(n, full_transactions=True)
-            except:
-                continue
+            while self.is_running():
+                try:
+                    block: BlockData = await self.w3.eth.get_block(n, full_transactions=True)
+                    break
+                except BaseException as e:
+                    if 'header not found' in str(e):
+                        continue
+                    logger.error('get block: %s, %s, %s', n, type(e), e)
+                    continue
             self.queue.put_nowait(block)
             # latest = n
             # await asyncio.sleep(poll_interval)
@@ -60,11 +65,14 @@ class BlockNumberListener(Cancelable):
             # 这玩意会卡住
             # for event in event_filter.get_new_entries():
             #     await self.handle_event(event)
-            try:
-                n = await self.w3.eth.get_block_number()
-            except:
-                continue
 
-            if n != latest:
-                self.queue.put_nowait(n)
-                latest = n
+            if latest == 0:
+                try:
+                    n = await self.w3.eth.get_block_number()
+                    latest = n
+                except:
+                    continue
+
+            self.queue.put_nowait(latest)
+            latest += 1
+            await asyncio.sleep(1)

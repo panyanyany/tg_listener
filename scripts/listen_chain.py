@@ -1,5 +1,8 @@
 import time
 
+from web3 import Web3
+from web3.eth import AsyncEth
+
 from tg_listener.repo.db_handler import DbHandler
 from tg_listener.services import lp_service, token_service, price_service
 from util.log_util import setup3, default_ignore_names
@@ -24,9 +27,18 @@ w3 = async_bsc_web3
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
 
-    block_number_listener = BlockNumberListener(w3=w3)
-    chain_listener = ChainListener(w3=w3, block_number_queue=block_number_listener.queue)
-    block_handler = BlockHandler(chain_listener.queue, w3=w3)
+    binance_endpoints = [
+        'https://bsc-dataseed1.binance.org/',
+        "https://bsc-dataseed2.binance.org/",
+        "https://bsc-dataseed3.binance.org/",
+        "https://bsc-dataseed4.binance.org/",
+    ]
+    # async_binance_w3 = Web3(AsyncConcurrencyHTTPProvider().set_endpoints(binance_endpoints), modules={'eth': (AsyncEth,)}, middlewares=[])
+    async_binance_w3 = async_bsc_web3
+
+    block_number_listener = BlockNumberListener(w3=async_binance_w3)
+    chain_listener = ChainListener(w3=async_binance_w3, block_number_queue=block_number_listener.queue)
+    block_handler = BlockHandler(block_queue=chain_listener.queue, w3=w3)
 
     # block_handler 的下游
     swap_handler = SwapHandler(block_handler.swaps_queue, w3=w3)
