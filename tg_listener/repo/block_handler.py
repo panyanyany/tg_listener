@@ -36,8 +36,8 @@ class BlockHandler(CancelableTiktok):
     async def get_block(self):
         # 等待新的区块
         try:
-            # 在同一线程，不要用 await queue.get(), 会由于生产者队列为空导致一直阻塞，无法退出
             while True:
+                # 在同一线程，不要用 await queue.get(), 会由于生产者队列为空导致一直阻塞，无法退出
                 block: BlockData = self.block_queue.get_nowait()
                 self.blocks.append(block)
         except QueueEmpty:

@@ -70,7 +70,7 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
 
     # await asyncio.sleep(1)
     await asyncio.wait([
-        get_receipt(tx) for tx in txs
+        get_receipt(tx) for tx in txs[:settings.max_load_receipt]
     ], timeout=timeout)
     failed_cnt = 0
     for tx in txs:
