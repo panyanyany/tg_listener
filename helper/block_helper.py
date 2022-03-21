@@ -6,6 +6,7 @@ from typing import List
 from web3.exceptions import TransactionNotFound
 from web3.types import TxData
 
+import settings
 from util.uniswap.trade import Trade
 from util.web3.transaction import ExtendedTxData
 
@@ -47,7 +48,7 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
     #     txs2.append(tx2)
 
     # 请求交易结果
-    timeout = 5
+    timeout = settings.load_receipt_timeout
 
     async def get_receipt(tx: ExtendedTxData):
         start = datetime.now()
@@ -59,8 +60,12 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
             except TransactionNotFound:
                 await asyncio.sleep(1)
                 pass
+            # except asyncio.exceptions.TimeoutError as e:
+            #     pass
             except BaseException as e:
-                logger.warning('get receipt: %s, type=%s', e, type(e))
+                logger.warning('get receipt: %s, ts_diff=%.1f, type=%s', e,
+                               (datetime.now() - start).total_seconds(),
+                               type(e))
                 await asyncio.sleep(0.2)
 
     # await asyncio.sleep(1)

@@ -22,3 +22,5 @@ accounts = {
         'address': '0x....',
     }
 }
+
+load_receipt_timeout = 5  # 加载 receipt 的等待时间，量大，如果网络不好就设置多一点
