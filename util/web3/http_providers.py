@@ -30,7 +30,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     ]
     last_time = {}
     lock = threading.Lock()
-    interval = 0.05
+    interval = 0.1
 
     error_stat = {}
 
