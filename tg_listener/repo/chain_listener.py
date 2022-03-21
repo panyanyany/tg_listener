@@ -39,6 +39,7 @@ class ChainListener(Cancelable):
             while self.is_running():
                 try:
                     block: BlockData = await self.w3.eth.get_block(n, full_transactions=True)
+                    self.block_queue.put_nowait(block)
                     break
                 except BlockNotFound:
                     await asyncio.sleep(1)
@@ -51,7 +52,6 @@ class ChainListener(Cancelable):
                     await asyncio.sleep(1)
                     continue
             # logger.info(f'new block: id={n}')
-            self.block_queue.put_nowait(block)
             # latest = n
             # await asyncio.sleep(poll_interval)
 

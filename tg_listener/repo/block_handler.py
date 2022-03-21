@@ -49,11 +49,11 @@ class BlockHandler(CancelableTiktok):
             return
         txs = []
 
-        block_dt = []
+        block_ts_diffs = []
         for block in self.blocks:
             dt = datetime.fromtimestamp(block['timestamp'])
-            block_dt.append(dt)
             ts_diff = (datetime.now() - dt).total_seconds()
+            block_ts_diffs.append(ts_diff)
             logger.debug(f"txs_cnt={len(block['transactions'])}, hash={block['hash'].hex()}, number={block['number']}"
                          f", ts_diff={ts_diff:.1f}")
             for tx in block['transactions']:
@@ -72,12 +72,12 @@ class BlockHandler(CancelableTiktok):
         liq_transactions = list(filter(lambda e: e.receipt and e.receipt.status == 1, liq_transactions))
 
         now = datetime.now()
-        block_dt.sort()
+        block_ts_diffs.sort()
         logger.info(
             f"txs_cnt={len(txs):03}"
             f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
             f", queue={len(self.blocks)}/{self.block_queue.qsize()}"
-            f", ts_diff=({(now - block_dt[0]).total_seconds():.0f},{(now - block_dt[-1]).total_seconds():.0f})"
+            f", ts_diff=({block_ts_diffs[0]:.0f},{block_ts_diffs[-1]:.0f})"
         )
 
         self.swaps_queue.put_nowait(swap_transactions)
