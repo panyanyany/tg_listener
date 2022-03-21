@@ -61,7 +61,7 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
                 pass
             except BaseException as e:
                 logger.warning('get receipt: %s, type=%s', e, type(e))
-                await asyncio.sleep(1)
+                await asyncio.sleep(0.2)
 
     # await asyncio.sleep(1)
     await asyncio.wait([
