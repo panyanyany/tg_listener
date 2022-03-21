@@ -74,9 +74,9 @@ class BlockHandler(CancelableTiktok):
         now = datetime.now()
         block_dt.sort()
         logger.info(
-            f"block_cnt={len(self.blocks)}, txs_cnt={len(txs):03}"
+            f"txs_cnt={len(txs):03}"
             f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
-            f", queue={self.block_queue.qsize()}"
+            f", queue={self.block_queue.qsize()}/{len(self.blocks)}"
             f", ts_diff=({(now - block_dt[0]).total_seconds():.0f},{(now - block_dt[-1]).total_seconds():.0f})"
         )
 
