@@ -73,13 +73,12 @@ class BlockNumberListener(Cancelable):
             # for event in event_filter.get_new_entries():
             #     await self.handle_event(event)
 
-            if latest == 0:
-                try:
-                    n = await self.w3.eth.get_block_number()
+            try:
+                n = await self.w3.eth.get_block_number()
+                if latest < n:
                     latest = n
-                except:
-                    continue
-
-            self.queue.put_nowait(latest)
-            latest += 1
-            await asyncio.sleep(1)
+                    self.queue.put_nowait(latest)
+                await asyncio.sleep(0.2)
+            except:
+                await asyncio.sleep(0.1)
+                continue

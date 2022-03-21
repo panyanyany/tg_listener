@@ -41,8 +41,6 @@ if __name__ == "__main__":
     block_queue = Queue()
     chain_listener = ChainListener(w3=async_binance_w3, block_number_queue=block_number_listener.queue,
                                    block_queue=block_queue)
-    chain_listener2 = ChainListener(w3=async_binance_w3, block_number_queue=block_number_listener.queue,
-                                    block_queue=block_queue)
     block_handler = BlockHandler(block_queue=chain_listener.block_queue, w3=w3)
 
     # block_handler 的下游
@@ -56,7 +54,6 @@ if __name__ == "__main__":
     handlers = [
         block_number_listener,
         chain_listener,
-        chain_listener2,
         block_handler,
         swap_handler,
         # liq_handler,
