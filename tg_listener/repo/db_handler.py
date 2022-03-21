@@ -115,6 +115,7 @@ class DbHandler(Cancelable):
             diff = (datetime.now() - self.last_db_insert).total_seconds()
             if diff > 0:
                 speed = added / diff
+            self.last_db_insert = datetime.now()
         logger.info(f'db ticks inserted: {added}, speed={speed:.1f}')
 
     async def handle_liq(self, liq_tx: ExtendedTxData):
