@@ -95,7 +95,7 @@ class SyncHandler(Cancelable):
             return trade
 
         if trade_pair.quote_token not in log_pairs:
-            logger.warning('no quote found in log_pairs: txh=%s', trade.hash)
+            logger.debug('no quote found in log_pairs: txh=%s', trade.hash)
             return trade
         trade.price_pair = log_pairs[trade_pair.quote_token]
         return trade
