@@ -60,8 +60,8 @@ async def load_receipts(w3, txs: List[ExtendedTxData]) -> List[ExtendedTxData]:
             except TransactionNotFound:
                 await asyncio.sleep(1)
                 pass
-            # except asyncio.exceptions.TimeoutError as e:
-            #     pass
+            except asyncio.exceptions.TimeoutError as e:
+                pass
             except BaseException as e:
                 logger.warning('get receipt: %s, ts_diff=%.1f, type=%s', e,
                                (datetime.now() - start).total_seconds(),

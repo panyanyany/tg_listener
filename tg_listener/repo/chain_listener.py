@@ -41,11 +41,14 @@ class ChainListener(Cancelable):
                     block: BlockData = await self.w3.eth.get_block(n, full_transactions=True)
                     break
                 except BlockNotFound:
+                    await asyncio.sleep(1)
                     continue
                 except BaseException as e:
                     if 'header not found' in str(e):
+                        await asyncio.sleep(1)
                         continue
                     logger.error('get block: %s, %s, %s', n, type(e), e)
+                    await asyncio.sleep(1)
                     continue
             # logger.info(f'new block: id={n}')
             self.block_queue.put_nowait(block)
