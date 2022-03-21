@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from asyncio import Queue
+from asyncio import Queue, QueueEmpty
 from threading import Thread
 
 from hexbytes import HexBytes
@@ -14,15 +14,47 @@ logger = logging.getLogger(__name__)
 
 
 class ChainListener(Cancelable):
-    def __init__(self, w3: Web3 = None):
-        # if not w3:
-        #     provider = "https://bsc-dataseed1.binance.org/"  # can also be set through the environment variable `PROVIDER`
-        #     w3 = Web3(Web3.HTTPProvider(provider))
-        #     w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # 注入poa中间件
+    def __init__(self, block_number_queue: Queue, w3: Web3 = None):
         self.w3 = w3
+        self.block_number_queue = block_number_queue
         self.queue = Queue()
 
     async def loop(self, event_filter, poll_interval):
+        while self.is_running():
+            try:
+                n = self.block_number_queue.get_nowait()
+            except QueueEmpty:
+                await asyncio.sleep(0.1)
+                continue
+            # 这玩意会卡住
+            # for event in event_filter.get_new_entries():
+            #     await self.handle_event(event)
+            # try:
+            #     n = await self.w3.eth.get_block_number()
+            # except:
+            #     continue
+            #
+            # if n != latest:
+            try:
+                block: BlockData = await self.w3.eth.get_block(n, full_transactions=True)
+            except:
+                continue
+            self.queue.put_nowait(block)
+            # latest = n
+            # await asyncio.sleep(poll_interval)
+
+    async def run(self):
+        # block_filter = self.w3.eth.filter('latest')
+        await self.loop(None, 0.25)
+        logger.info('chain listener stopped')
+
+
+class BlockNumberListener(Cancelable):
+    def __init__(self, w3: Web3 = None):
+        self.w3 = w3
+        self.queue = Queue()
+
+    async def _run(self):
         latest = 0
         while self.is_running():
             # 这玩意会卡住
@@ -34,15 +66,5 @@ class ChainListener(Cancelable):
                 continue
 
             if n != latest:
-                try:
-                    block = await self.w3.eth.get_block(n, full_transactions=True)
-                except:
-                    continue
-                self.queue.put_nowait(block)
+                self.queue.put_nowait(n)
                 latest = n
-            await asyncio.sleep(poll_interval)
-
-    async def run(self):
-        # block_filter = self.w3.eth.filter('latest')
-        await self.loop(None, 0.25)
-        logger.info('chain listener stopped')

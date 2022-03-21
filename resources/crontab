@@ -1,0 +1,3 @@
+* * * * * cd /var/www/pyys/tg_listener && /home/ubuntu/.cache/pypoetry/virtualenvs/tg-listener-VlSwxBjz-py3.8/bin/python load_pool.py
+*/10 * * * * cd /var/www/pyys/tg_listener && /home/ubuntu/.cache/pypoetry/virtualenvs/tg-listener-VlSwxBjz-py3.8/bin/python update_airtable.py
+3 3 * * * cd /var/www/pyys/tg_listener && /home/ubuntu/.cache/pypoetry/virtualenvs/tg-listener-VlSwxBjz-py3.8/bin/python scripts/clear_db.py

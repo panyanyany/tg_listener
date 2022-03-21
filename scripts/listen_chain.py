@@ -10,7 +10,7 @@ import logging
 from signal import SIGTERM, SIGINT
 
 from tg_listener.repo.block_handler import BlockHandler
-from tg_listener.repo.chain_listener import ChainListener
+from tg_listener.repo.chain_listener import ChainListener, BlockNumberListener
 from tg_listener.repo.log_handler import SyncHandler
 from tg_listener.repo.transaction_handler import SwapHandler, LiqHandler
 from util.web3.util import async_bsc_web3
@@ -24,7 +24,8 @@ w3 = async_bsc_web3
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
 
-    chain_listener = ChainListener(w3=w3)
+    block_number_listener = BlockNumberListener(w3=w3)
+    chain_listener = ChainListener(w3=w3, block_number_queue=block_number_listener.queue)
     block_handler = BlockHandler(chain_listener.queue, w3=w3)
 
     # block_handler 的下游
@@ -36,6 +37,7 @@ if __name__ == "__main__":
     div_handler = DbHandler(log_sync_handler.price_trades_queue, block_handler.liq_queue, w3=w3)
 
     handlers = [
+        block_number_listener,
         chain_listener,
         block_handler,
         swap_handler,

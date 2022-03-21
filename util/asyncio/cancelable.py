@@ -18,6 +18,10 @@ class Cancelable:
         self.running = False
 
     async def run(self):
+        await self._run()
+        logger.info(f"{self.__class__.__name__} stopped")
+
+    async def _run(self):
         raise NotImplemented
 
 
