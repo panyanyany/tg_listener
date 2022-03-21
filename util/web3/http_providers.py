@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     endpoints = [
-        # "https://bsc-dataseed.binance.org/",
+        "https://bsc-dataseed.binance.org/",
         "https://bsc-dataseed1.binance.org/",
         "https://bsc-dataseed2.binance.org/",
         "https://bsc-dataseed3.binance.org/",
@@ -30,7 +30,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     ]
     last_time = {}
     lock = threading.Lock()
-    interval = 0.05
+    interval = 0.1
 
     error_stat = {}
 
