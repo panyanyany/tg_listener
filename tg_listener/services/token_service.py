@@ -13,7 +13,7 @@ class TokenService(base_service.BaseService):
         if len(self.items) == 0:
             return
         self.items = list(set(self.items))
-        logger.info(f'token service - 1: items={len(self.items)}')
+        # logger.info(f'token service - 1: items={len(self.items)}')
         calls = []
         for token in self.items:
             calls += [

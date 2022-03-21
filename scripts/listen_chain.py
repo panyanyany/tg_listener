@@ -70,6 +70,7 @@ if __name__ == "__main__":
 
 
     def cancel():
+        logging.info('Ctrl-C detected! Stopping all handles...')
         for h in handlers:
             logging.info(f'stopping {h.__class__.__name__}')
             h.stop()

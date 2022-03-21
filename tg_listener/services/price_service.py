@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class PriceService(base_service.TimedService):
+    interval = 5 * 60
+
     async def get_bnb_price(self):
         return await self.get(wbnb)
 

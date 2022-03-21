@@ -47,6 +47,7 @@ class ChainListener(Cancelable):
                         continue
                     logger.error('get block: %s, %s, %s', n, type(e), e)
                     continue
+            # logger.info(f'new block: id={n}')
             self.block_queue.put_nowait(block)
             # latest = n
             # await asyncio.sleep(poll_interval)

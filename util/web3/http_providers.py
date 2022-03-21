@@ -30,7 +30,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     ]
     last_time = {}
     lock = threading.Lock()
-    interval = 0.1
+    interval = 0.05
 
     error_stat = {}
 
@@ -38,6 +38,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
         super().__init__(endpoint_uri, request_kwargs)
 
     async def pick_endpoint(self):
+        start_time = datetime.now()
         while True:
             with self.lock:
                 for endpoint_uri in self.endpoints:
@@ -47,8 +48,10 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
                     if diff.total_seconds() > self.interval:
                         self.last_time[endpoint_uri] = datetime.now()
                         return endpoint_uri
-            # self.logger.debug('---- waiting: no endpoint available')
-            await asyncio.sleep(0.05)
+            time_spent = (datetime.now() - start_time).total_seconds()
+            if time_spent > 3:
+                logger.warning('---- waiting: no endpoint available, time_spent=%s', time_spent)
+            await asyncio.sleep(0.1)
 
     async def make_request(self, method: RPCEndpoint, params: Any) -> RPCResponse:
         self.endpoint_uri = await self.pick_endpoint()
