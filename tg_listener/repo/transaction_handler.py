@@ -45,7 +45,7 @@ class SwapHandler(Cancelable):
                     logger.warning('amount_out is 0: %s', str(trade))
                 else:
                     trades.append(trade)
-            logger.info(f'swap handler: trades={len(trades)}')
+            # logger.info(f'swap handler: trades={len(trades)}')
             self.trades_queue.put_nowait(trades)
         logger.info('swap handler stopped')
 
