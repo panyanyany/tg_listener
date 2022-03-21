@@ -50,7 +50,8 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
                         return endpoint_uri
             time_spent = (datetime.now() - start_time).total_seconds()
             if time_spent > 3:
-                logger.warning('---- waiting: no endpoint available, time_spent=%s', time_spent)
+                # logger.warning('---- waiting: no endpoint available, time_spent=%s', time_spent)
+                pass
             await asyncio.sleep(0.1)
 
     async def make_request(self, method: RPCEndpoint, params: Any) -> RPCResponse:
