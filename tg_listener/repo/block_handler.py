@@ -76,7 +76,7 @@ class BlockHandler(CancelableTiktok):
             f"block_cnt={len(self.blocks)}, txs_cnt={len(txs):03}"
             f", swap_cnt={len(swap_transactions)}, liq_cnt={len(liq_transactions)}"
             f", queue={self.block_queue.qsize()}"
-            f", ts_diff=({(now - block_dt[0]).total_seconds():.1f},{(now - block_dt[-1]).total_seconds():.1f})"
+            f", ts_diff=({(now - block_dt[0]).total_seconds():.0f},{(now - block_dt[-1]).total_seconds():.0f})"
         )
 
         self.swaps_queue.put_nowait(swap_transactions)
