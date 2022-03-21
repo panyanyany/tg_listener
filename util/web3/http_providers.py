@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import threading
 from datetime import datetime
 from typing import Any, Optional, Union
 
@@ -29,7 +28,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
         "https://bsc-dataseed4.ninicoin.io/",
     ]
     last_time = {}
-    lock = threading.Lock()
+    lock = asyncio.Lock()
     interval = 0.1
 
     error_stat = {}
@@ -40,7 +39,7 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     async def pick_endpoint(self):
         start_time = datetime.now()
         while True:
-            with self.lock:
+            async with self.lock:
                 for endpoint_uri in self.endpoints:
                     last_time: datetime = self.last_time.get(endpoint_uri, datetime.fromtimestamp(0))
                     diff = datetime.now() - last_time
