@@ -38,6 +38,9 @@ class LpService(base_service.BaseService):
             all_pairs[pair_addr] = pair_info
 
         for pair_addr, info in all_pairs.items():
+            if not info['token0'] or not info['token1']:
+                logger.error("lp token0 or token1 is None: lp=%s, info=%s", pair_addr, info)
+                continue
             info['token0'] = info['token0'].lower()
             info['token1'] = info['token1'].lower()
             self.rdb.set(pair_addr, info)
