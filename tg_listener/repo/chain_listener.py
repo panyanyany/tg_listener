@@ -5,6 +5,7 @@ from threading import Thread
 
 from hexbytes import HexBytes
 from web3 import Web3
+from web3.exceptions import BlockNotFound
 from web3.middleware import geth_poa_middleware
 from web3.types import BlockData
 
@@ -39,6 +40,8 @@ class ChainListener(Cancelable):
                 try:
                     block: BlockData = await self.w3.eth.get_block(n, full_transactions=True)
                     break
+                except BlockNotFound:
+                    continue
                 except BaseException as e:
                     if 'header not found' in str(e):
                         continue
