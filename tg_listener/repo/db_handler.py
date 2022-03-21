@@ -30,6 +30,8 @@ class DbHandler(Cancelable):
         self.trades_queue = trades_queue
         self.liq_queue = liq_queue
         self.last_db_insert = 0
+        self.init_insert_time = 0
+        self.total_insert_cnt = 0
 
     async def run(self):
         token_exists = {}
@@ -110,12 +112,22 @@ class DbHandler(Cancelable):
                     f', ts={trade.timestamp}',
                     exc_info=e)
 
+        self.total_insert_cnt += added
         speed = 0
+        avg_speed = 0
         if self.last_db_insert:
             diff = (datetime.now() - self.last_db_insert).total_seconds()
             if diff > 0:
                 speed = added / diff
-        logger.info(f'db ticks inserted: {added}, speed={speed:.1f}')
+                
+        if self.init_insert_time:
+            avg_diff = (datetime.now() - self.init_insert_time).total_seconds()
+            if avg_diff > 0:
+                avg_speed = self.total_insert_cnt / avg_diff
+
+        logger.info(f'db ticks inserted: {added}, speed={speed:.1f}, avg_speed={avg_speed:.1f}')
+        if not self.last_db_insert:
+            self.init_insert_time = datetime.now()
         self.last_db_insert = datetime.now()
 
     async def handle_liq(self, liq_tx: ExtendedTxData):
