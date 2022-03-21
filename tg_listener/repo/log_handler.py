@@ -103,10 +103,10 @@ class SyncHandler(Cancelable):
     async def handle_trades(self, trades: List[Trade]):
         if len(trades) == 0:
             return
-        logger.info(f'handle_trades - 1: trades={len(trades)}')
+        # logger.info(f'handle_trades - 1: trades={len(trades)}')
         await self.cache_all_pairs(trades)
         await self.cache_all_decimals(trades)
-        logger.info(f'handle_trades - 2: trades={len(trades)}')
+        # logger.info(f'handle_trades - 2: trades={len(trades)}')
 
         # 计算交易后价格
         price_trades = []

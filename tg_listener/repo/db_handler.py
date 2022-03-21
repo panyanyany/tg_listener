@@ -93,7 +93,7 @@ class DbHandler(Cancelable):
                  'value': value,
                  'operator': trade.operator,
                  **pools}
-            logger.debug('trade: %s, d: %s', trade, d)
+            # logger.debug('trade: %s, d: %s', trade, d)
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
             try:
                 arctic_db.add_ticks(trade.price_pair.quote_token, df)
@@ -145,6 +145,6 @@ class DbHandler(Cancelable):
              'operator': liq.operator,
              'method': liq.method_type,
              **amount_in}
-        logger.debug('liq changed: liq=%s, price_pair=%s, d=%s', liq, price_pair, d)
+        # logger.debug('liq changed: liq=%s, price_pair=%s, d=%s', liq, price_pair, d)
         df = pandas.DataFrame(d, index=Index([dt], name='date'))
         arctic_db.add_liq(price_pair.quote_token, liq.method_type, df, amount_in)
