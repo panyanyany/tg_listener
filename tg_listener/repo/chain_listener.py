@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 
 
 class ChainListener(Cancelable):
-    def __init__(self, block_number_queue: Queue, w3: Web3 = None):
+    def __init__(self, block_number_queue: Queue, w3: Web3 = None, block_queue=None):
         self.w3 = w3
         self.block_number_queue = block_number_queue
-        self.queue = Queue()
+        self.block_queue = block_queue or Queue()
 
     async def loop(self, event_filter, poll_interval):
         while self.is_running():
@@ -47,7 +47,7 @@ class ChainListener(Cancelable):
                         continue
                     logger.error('get block: %s, %s, %s', n, type(e), e)
                     continue
-            self.queue.put_nowait(block)
+            self.block_queue.put_nowait(block)
             # latest = n
             # await asyncio.sleep(poll_interval)
 
