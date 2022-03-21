@@ -77,12 +77,12 @@ class BlockNumberListener(Cancelable):
                 # 不要直接用 latest += 1 的方式推进，因为会导致下游反复 get_block
                 # 根据经验，get_block 太多会被接口惩罚
                 n = await self.w3.eth.get_block_number()
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(1)
                 if latest < n:
                     # await asyncio.sleep(1)
                     latest = n
                     self.queue.put_nowait(latest)
                     continue
             except:
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(1)
                 continue
