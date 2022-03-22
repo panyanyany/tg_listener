@@ -60,6 +60,7 @@ class DbHandler(Cancelable):
     async def handle_trade(self, trades: List[Trade]):
         exists = set()
         added = 0
+        c_time_start = datetime.now()
         for trade in trades:
             dt = datetime.fromtimestamp(trade.timestamp)
             key = f'{trade.price_pair.quote_token}:{trade.timestamp}'
@@ -119,13 +120,15 @@ class DbHandler(Cancelable):
             diff = (datetime.now() - self.last_db_insert).total_seconds()
             if diff > 0:
                 speed = added / diff
-                
+
         if self.init_insert_time:
             avg_diff = (datetime.now() - self.init_insert_time).total_seconds()
             if avg_diff > 0:
                 avg_speed = self.total_insert_cnt / avg_diff
 
-        logger.info(f'db ticks inserted: {added}, speed={speed:.1f}, avg_speed={avg_speed:.1f}')
+        c_time_diff = (datetime.now() - c_time_start).total_seconds()
+        logger.info(
+            f'db ticks inserted: {added}, speed={speed:.1f}, avg_speed={avg_speed:.1f}, c_time={c_time_diff:.1f}')
         if not self.last_db_insert:
             self.init_insert_time = datetime.now()
         self.last_db_insert = datetime.now()
