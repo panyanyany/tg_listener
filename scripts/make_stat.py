@@ -43,10 +43,10 @@ def filter_token(stat, token, times=0.5, span='30min'):
             print(sym, info)
 
 
-# 开盘时间最小允许多久(min)
-open_min_age = 60
-# 空闲期(上一次交易到现在)最大允许多久(min)
-idle_max_span = 15
+open_min_age = 60  # 开盘时间最小允许多久(min)
+idle_max_span = 15  # 空闲期(上一次交易到现在)最大允许多久(min)
+candlestick_span = '1h'  # K线间隔
+growth_times = 0.2  # 涨幅倍数
 
 dt_idle_gte = datetime.now() - timedelta(minutes=idle_max_span)
 dt_open_lte = datetime.now() - timedelta(minutes=open_min_age)
@@ -66,4 +66,4 @@ for stat in stats:
     if info['len'] < 5:
         continue
     token = sym.split(':')[0]
-    filter_token(stat, token, span='1h', times=0.5)
+    filter_token(stat, token, span=candlestick_span, times=growth_times)
