@@ -32,7 +32,10 @@ def filter_token(stat, token, times=0.5, span='30min'):
     data['diff'] = (data['last'] - data['first']) / data['first']
     if data.iloc[-1]['diff'] > times:
         print(data.tail())
-        print(f'--- token: https://poocoin.app/tokens/{token}', stat.get('is_dividend'), stat['pools'])
+
+        is_div = stat.get('is_dividend')
+        total = stat['pools'].get('TOTAL')
+        print(f'--- token: https://poocoin.app/tokens/{token}, is_div={is_div}, total={total:.0f}')
 
     return
 
