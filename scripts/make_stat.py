@@ -43,10 +43,16 @@ def filter_token(stat, token, times=0.5, span='30min'):
             print(sym, info)
 
 
-dt = datetime.now() - timedelta(minutes=15)
-# 不要刚开盘的
-dt_open = datetime.now() - timedelta(minutes=60)
-stats = arctic_db.db_data.stats.find({"last_tick_at": {"$gte": dt}, "recorded_at": {"$lte": dt_open}})
+# 开盘时间最小允许多久(min)
+open_min_age = 60
+# 空闲期(上一次交易到现在)最大允许多久(min)
+idle_max_span = 15
+
+dt_idle_gte = datetime.now() - timedelta(minutes=idle_max_span)
+dt_open_lte = datetime.now() - timedelta(minutes=open_min_age)
+query = {"last_tick_at": {"$gte": dt_idle_gte},
+         "recorded_at": {"$lte": dt_open_lte}}
+stats = arctic_db.db_data.stats.find(query)
 
 # print(stats.count())
 # print(len(db.list_symbols(partial_match=':tick')))
