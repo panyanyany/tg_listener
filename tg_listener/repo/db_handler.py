@@ -11,7 +11,7 @@ from web3 import Web3
 from tg_listener.repo.arctic_repo import arctic_db
 from tg_listener.services import token_service, price_service, lp_service
 from tg_listener.services.base_service import ServiceStopped
-from util.asyncio.cancelable import Cancelable
+from util.asyncio.cancelable import Cancelable, CancelableTiktok
 from util.bsc.constants import wbnb, cake, usdt, busd, usdc
 from util.uniswap.liquidity import LiquidityChange
 from util.uniswap.trade import Trade
@@ -22,8 +22,8 @@ from util.web3.transaction import ExtendedTxData
 logger = logging.getLogger(__name__)
 
 
-class DbHandler(Cancelable):
-    """分红币处理"""
+class DbHandler(CancelableTiktok):
+    """把交易写入数据库"""
 
     def __init__(self, trades_queue: Queue, liq_queue: Queue, w3: Web3):
         self.w3 = w3
@@ -32,35 +32,90 @@ class DbHandler(Cancelable):
         self.last_db_insert = 0
         self.init_insert_time = 0
         self.total_insert_cnt = 0
+        self.trades = []
+        self.liqs = []
+        self.added = 0
 
-    async def run(self):
-        token_exists = {}
-        while self.is_running():
-            trades: List[Trade] = []
-            liq: ExtendedTxData = None
-            try:
-                trades = self.trades_queue.get_nowait()
-            except QueueEmpty:
-                pass
-            try:
-                liq: ExtendedTxData = self.liq_queue.get_nowait()
-            except QueueEmpty:
-                pass
+    async def _run(self):
+        await self.tiktok(30, self.get_items, self.process)
 
-            if not any([len(trades) > 0, liq]):
-                await asyncio.sleep(0.1)
-                continue
+    async def get_items(self):
+        try:
+            self.trades += self.trades_queue.get_nowait()
+        except QueueEmpty:
+            pass
+        try:
+            self.liqs += [self.liq_queue.get_nowait()]
+        except QueueEmpty:
+            pass
 
-            if trades:
-                logger.info(f'trades={len(trades)}')
-                await self.handle_trade(trades)
-            if liq:
+    async def process(self):
+        if self.trades:
+            logger.info(f'trades={len(self.trades)}')
+            await self.handle_trades(self.trades)
+            self.trades = []
+        if self.liqs:
+            for liq in self.liqs:
                 await self.handle_liq(liq)
+            self.liqs = []
 
-    async def handle_trade(self, trades: List[Trade]):
+    async def handle_trades(self, trades: List[Trade]):
+        c_time_start = datetime.now()
+        tot_df, token_cnt, tot_stat = await self.merge_trades(trades)
+
+        for token in tot_df:
+            df = tot_df[token]
+            arctic_db.add_ticks(token, df)
+            # 更新池子
+            stat = arctic_db.get_stat(token)
+            pools = stat['pools'] or {}
+            pools.update(tot_stat[token]['pools'])
+            tot_value = 0
+            for c_token in canonicals:
+                c_name = get_token_name(c_token)
+                if c_name not in pools:
+                    continue
+                if c_token in [wbnb]:
+                    tot_value += pools[c_name] * await price_service.inst.get_bnb_price()
+                elif c_token in [cake]:
+                    tot_value += pools[c_name] * await price_service.inst.get_cake_price()
+                else:
+                    tot_value += pools[c_name]
+
+            pools['TOTAL'] = tot_value
+            arctic_db.update_stat(token,
+                                  pools=pools, is_dividend=tot_stat[token]['is_dividend'])
+
+        self.total_insert_cnt += self.added
+        speed = 0
+        avg_speed = 0
+        if self.last_db_insert:
+            diff = (datetime.now() - self.last_db_insert).total_seconds()
+            if diff > 0:
+                speed = self.added / diff
+
+        if self.init_insert_time:
+            avg_diff = (datetime.now() - self.init_insert_time).total_seconds()
+            if avg_diff > 0:
+                avg_speed = self.total_insert_cnt / avg_diff
+
+        c_time_diff = (datetime.now() - c_time_start).total_seconds()
+        insert_db_speed = 0
+        if c_time_diff > 0:
+            insert_db_speed = self.added / c_time_diff
+        logger.info(
+            f'db stat: {self.added}/{len(token_cnt)}, speed={speed:.1f}, avg_speed={avg_speed:.1f}'
+            f', c_time={c_time_diff:.1f}, insert_db_speed={insert_db_speed:.1f}')
+        if not self.last_db_insert:
+            self.init_insert_time = datetime.now()
+        self.last_db_insert = datetime.now()
+
+    async def merge_trades(self, trades: List[Trade]):
         exists = set()
         added = 0
-        c_time_start = datetime.now()
+        token_cnt = {}
+        tot_df = {}
+        tot_stat = {}
         for trade in trades:
             dt = datetime.fromtimestamp(trade.timestamp)
             key = f'{trade.price_pair.quote_token}:{trade.timestamp}'
@@ -90,7 +145,14 @@ class DbHandler(Cancelable):
             elif value_token in [usdt, usdc, busd]:
                 value = (value / (10 ** decimals))
 
+            quote_token = trade.price_pair.quote_token
+
             pools = {name: trade.price_pair.base_res / (10 ** trade.price_pair.base_decimals)}
+            tot_stat.setdefault(quote_token, {})
+            tot_stat[quote_token].setdefault('pools', {})
+            tot_stat[quote_token]['pools'].update(pools)
+            tot_stat[quote_token]['is_dividend'] = trade.is_dividend
+
             d = {'price': trade.price_pair.price_in['usd'],
                  'hash': trade.hash,
                  'direction': direction,
@@ -99,39 +161,15 @@ class DbHandler(Cancelable):
                  **pools}
             # logger.debug('trade: %s, d: %s', trade, d)
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
-            try:
-                arctic_db.add_ticks(trade.price_pair.quote_token, df)
-                # 更新池子
-                arctic_db.update_stat(trade.price_pair.quote_token,
-                                      pools=pools, is_dividend=trade.is_dividend)
-                added += 1
-            except BaseException as e:
-                logger.error(
-                    f'add_ticks failed: hash={trade.hash}'
-                    f', token={trade.price_pair.quote_token}'
-                    f', date={dt}'
-                    f', ts={trade.timestamp}',
-                    exc_info=e)
-
-        self.total_insert_cnt += added
-        speed = 0
-        avg_speed = 0
-        if self.last_db_insert:
-            diff = (datetime.now() - self.last_db_insert).total_seconds()
-            if diff > 0:
-                speed = added / diff
-
-        if self.init_insert_time:
-            avg_diff = (datetime.now() - self.init_insert_time).total_seconds()
-            if avg_diff > 0:
-                avg_speed = self.total_insert_cnt / avg_diff
-
-        c_time_diff = (datetime.now() - c_time_start).total_seconds()
-        logger.info(
-            f'db ticks inserted: {added}, speed={speed:.1f}, avg_speed={avg_speed:.1f}, c_time={c_time_diff:.1f}')
-        if not self.last_db_insert:
-            self.init_insert_time = datetime.now()
-        self.last_db_insert = datetime.now()
+            if quote_token not in tot_df:
+                tot_df[quote_token] = df
+            else:
+                tot_df[quote_token] = pandas.concat([tot_df[quote_token], df])
+            token_cnt.setdefault(trade.price_pair.quote_token, 0)
+            token_cnt[trade.price_pair.quote_token] += 1
+            added += 1
+        self.added = added
+        return tot_df, token_cnt, tot_stat
 
     async def handle_liq(self, liq_tx: ExtendedTxData):
         # logger.info(f'liq changed: {liq.hash.hex()} %s', liq.fn_details)

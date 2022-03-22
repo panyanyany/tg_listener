@@ -61,6 +61,8 @@ class SyncHandler(Cancelable):
                 except BaseException as e:
                     logger.debug('error detail', exc_info=e)
                     logger.error('handle_trades: %s', e)
+                    if 'no running event loop' in str(e):
+                        raise
 
     async def handle_trade(self, trade: Trade):
         log_pairs = {}
