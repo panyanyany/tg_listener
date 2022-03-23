@@ -1,12 +1,9 @@
 import asyncio
 import logging
 from asyncio.queues import QueueEmpty, Queue
-from threading import Thread
 
-import pandas
 from web3 import Web3
 
-from tg_listener.repo.arctic_repo import arctic_db
 from util.asyncio.cancelable import Cancelable
 from util.bsc.token import has_canonical, all_canonical
 from util.uniswap.trade import Trade

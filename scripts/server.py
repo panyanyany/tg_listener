@@ -1,6 +1,6 @@
 from flask import Flask, jsonify
 
-from tg_listener.repo.arctic_repo import arctic_db
+from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
 
 app = Flask(__name__)
 

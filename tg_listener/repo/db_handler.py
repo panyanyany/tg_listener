@@ -1,17 +1,16 @@
-import asyncio
 import logging
 from asyncio.queues import Queue, QueueEmpty
 from datetime import datetime
 from typing import List
 
 import pandas
-from pandas import MultiIndex, Index
+from pandas import Index
 from web3 import Web3
 
-from tg_listener.repo.arctic_repo import arctic_db
-from tg_listener.services import token_service, price_service, lp_service
+from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
+from tg_listener.services import token_service, price_service
 from tg_listener.services.base_service import ServiceStopped
-from util.asyncio.cancelable import Cancelable, CancelableTiktok
+from util.asyncio.cancelable import CancelableTiktok
 from util.bsc.constants import wbnb, cake, usdt, busd, usdc
 from util.uniswap.liquidity import LiquidityChange
 from util.uniswap.trade import Trade

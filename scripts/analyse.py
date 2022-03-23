@@ -1,8 +1,7 @@
 from datetime import timedelta, datetime
-from dateutil.parser import parse as dtparse
 import pandas as pd
 
-from tg_listener.repo.arctic_repo import arctic_db
+from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
 
 pd.set_option('display.width', 1000)
 pd.set_option('display.expand_frame_repr', False)
