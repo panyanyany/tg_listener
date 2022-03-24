@@ -25,7 +25,8 @@ setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'u
 
 w3 = async_bsc_web3
 
-if __name__ == "__main__":
+
+def main():
     loop = asyncio.get_event_loop()
 
     binance_endpoints = [
@@ -65,32 +66,32 @@ if __name__ == "__main__":
     ]
     [h.start() for h in handlers]
 
-
     def cancel():
         logging.info('Ctrl-C detected! Stopping all handles...')
         for h in handlers:
             logging.info(f'stopping {h.__class__.__name__}')
             h.stop()
 
-
     for signal in [SIGINT, SIGTERM]:
         loop.add_signal_handler(signal, cancel)
 
-
-    async def main():
+    async def run_handlers():
         await asyncio.gather(
             *[h.run() for h in handlers],
         )
-
 
     logging.info('everything start')
     try:
         # main_task = asyncio.ensure_future(block_handler.main())
         # loop.run_until_complete(main_task)
-        loop.run_until_complete(main())
+        loop.run_until_complete(run_handlers())
         logging.info('run completed')
     # except asyncio.exceptions.CancelledError as e:
     #     pass
     finally:
         logging.info('finally')
         loop.close()
+
+
+if __name__ == "__main__":
+    main()

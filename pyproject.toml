@@ -27,6 +27,7 @@ redis = "^4.1.4"
 numpy = "1.18.3"
 arctic = {git = "https://github.com/man-group/arctic.git"}
 Flask = "^2.0.3"
+Pympler = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
 
