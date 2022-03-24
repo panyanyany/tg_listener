@@ -1,10 +1,8 @@
 import logging
-import tracemalloc
 from asyncio.queues import Queue, QueueEmpty
 from datetime import datetime
 from typing import List
 
-import objgraph
 import pandas
 from pandas import Index
 from web3 import Web3
@@ -14,9 +12,9 @@ from tg_listener.services import token_service, price_service
 from tg_listener.services.base_service import ServiceStopped
 from util.asyncio.cancelable import CancelableTiktok
 from util.bsc.constants import wbnb, cake, usdt, busd, usdc
+from util.bsc.token import get_token_name, canonicals, StdToken, has_canonical
 from util.uniswap.liquidity import LiquidityChange
 from util.uniswap.trade import Trade
-from util.bsc.token import get_token_name, canonicals, StdToken, has_canonical
 from util.web3.pair import sort_pair, PricePair
 from util.web3.transaction import ExtendedTxData
 
@@ -107,12 +105,13 @@ class DbHandler(CancelableTiktok):
         logger.info(
             f'db stat: {self.added}/{len(token_cnt)}, speed={speed:.1f}, avg_speed={avg_speed:.1f}'
             f', c_time={c_time_diff:.1f}, insert_db_speed={insert_db_speed:.1f}')
-        objgraph.show_most_common_types(limit=10)
 
-        snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('lineno')
-        for stat in top_stats[:10]:
-            print(stat)
+        # objgraph.show_most_common_types(limit=10)
+        #
+        # snapshot = tracemalloc.take_snapshot()
+        # top_stats = snapshot.statistics('lineno')
+        # for stat in top_stats[:10]:
+        #     print(stat)
 
         if not self.last_db_insert:
             self.init_insert_time = datetime.now()
