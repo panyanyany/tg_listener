@@ -63,6 +63,8 @@ class SyncHandler(Cancelable):
                     logger.error('handle_trades: %s', e)
                     if 'no running event loop' in str(e):
                         raise
+                    # 暂停一下，免得无法 Ctrl-C
+                    await asyncio.sleep(1)
 
     async def handle_trade(self, trade: Trade):
         log_pairs = {}
