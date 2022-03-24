@@ -28,6 +28,7 @@ numpy = "1.18.3"
 arctic = {git = "https://github.com/man-group/arctic.git"}
 Flask = "^2.0.3"
 Pympler = "^1.0.1"
+objgraph = "^3.5.0"
 
 [tool.poetry.dev-dependencies]
 
