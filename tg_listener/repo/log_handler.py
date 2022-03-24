@@ -70,8 +70,8 @@ class SyncHandler(Cancelable):
             pair_addr = log['address'].lower()
 
             pair_info = await lp_service.inst.get(pair_addr)
-            decimals0 = await token_service.inst.get(pair_info['token0'].lower())
-            decimals1 = await token_service.inst.get(pair_info['token1'].lower())
+            decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
+            decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
             if decimals0 is None:
                 logger.error("decimals0 is None, token0=%s", pair_info['token0'].lower())
                 continue

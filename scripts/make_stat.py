@@ -11,5 +11,12 @@ pd.set_option('max_colwidth', None)
 # pd.set_option('display.max_rows', None)
 
 
-maker = tick_maker.TickMaker('1h', 0.1)
-maker.run(Path('storage/t.json'))
+maker = tick_maker.TickMaker([
+    tick_maker.TickMakerTask('15min', 0.1),
+    tick_maker.TickMakerTask('1h', 0.1),
+])
+maker.run()
+
+for key in maker.results:
+    result = maker.results[key]
+    result.save(Path(f'storage'))

@@ -83,7 +83,11 @@ class DbHandler(CancelableTiktok):
 
             pools['TOTAL'] = tot_value
             arctic_db.update_stat(token,
-                                  pools=pools, is_dividend=tot_stat[token]['is_dividend'])
+                                  pools=pools,
+                                  is_dividend=tot_stat[token]['is_dividend'],
+                                  name=await token_service.inst.get_name(token),
+                                  symbol=await token_service.inst.get_symbol(token),
+                                  )
 
         self.total_insert_cnt += self.added
         speed = 0
@@ -143,11 +147,11 @@ class DbHandler(CancelableTiktok):
                 value = 0
                 value_token = ''
 
-            decimals = await token_service.inst.get(value_token)
+            decimals = await token_service.inst.get_decimals(value_token)
             if value_token == wbnb:
                 value = (value / (10 ** decimals)) * await price_service.inst.get_bnb_price()
             elif value_token == cake:
-                decimals = await token_service.inst.get(value_token)
+                decimals = await token_service.inst.get_decimals(value_token)
                 value = (value / (10 ** decimals)) * await price_service.inst.get_cake_price()
             elif value_token in [usdt, usdc, busd]:
                 value = (value / (10 ** decimals))
@@ -184,8 +188,8 @@ class DbHandler(CancelableTiktok):
         if not liq:
             return
         try:
-            decimals0 = await token_service.inst.get(liq.token0)
-            decimals1 = await token_service.inst.get(liq.token1)
+            decimals0 = await token_service.inst.get_decimals(liq.token0)
+            decimals1 = await token_service.inst.get_decimals(liq.token1)
         except ServiceStopped:
             return
         pair = sort_pair(liq.token0, liq.token1, liq.amount0, liq.amount1, decimals0, decimals1)
