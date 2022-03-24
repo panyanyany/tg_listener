@@ -1,22 +1,15 @@
-import time
-from asyncio import Queue
-
-from web3 import Web3
-from web3.eth import AsyncEth
-
-from tg_listener.repo.db_handler import DbHandler
-from tg_listener.services import lp_service, token_service, price_service
-from util.log_util import setup3, default_ignore_names
-from util.web3.http_providers import AsyncConcurrencyHTTPProvider
-
 import asyncio
 import logging
+from asyncio import Queue
 from signal import SIGTERM, SIGINT
 
 from tg_listener.repo.block_handler import BlockHandler
 from tg_listener.repo.chain_listener import ChainListener, BlockNumberListener
+from tg_listener.repo.db_handler import DbHandler
 from tg_listener.repo.log_handler import SyncHandler
-from tg_listener.repo.transaction_handler import SwapHandler, LiqHandler
+from tg_listener.repo.transaction_handler import SwapHandler
+from tg_listener.services import lp_service, token_service, price_service
+from util.log_util import setup3, default_ignore_names
 from util.web3.util import async_bsc_web3
 
 setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'util.*'}))
