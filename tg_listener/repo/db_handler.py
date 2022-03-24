@@ -1,4 +1,5 @@
 import logging
+import tracemalloc
 from asyncio.queues import Queue, QueueEmpty
 from datetime import datetime
 from typing import List
@@ -107,6 +108,12 @@ class DbHandler(CancelableTiktok):
             f'db stat: {self.added}/{len(token_cnt)}, speed={speed:.1f}, avg_speed={avg_speed:.1f}'
             f', c_time={c_time_diff:.1f}, insert_db_speed={insert_db_speed:.1f}')
         objgraph.show_most_common_types(limit=10)
+
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        for stat in top_stats[:10]:
+            print(stat)
+
         if not self.last_db_insert:
             self.init_insert_time = datetime.now()
         self.last_db_insert = datetime.now()

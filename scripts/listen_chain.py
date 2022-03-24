@@ -1,3 +1,6 @@
+import tracemalloc
+
+tracemalloc.start()
 import asyncio
 import logging
 from asyncio import Queue
