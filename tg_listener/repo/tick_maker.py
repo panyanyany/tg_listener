@@ -6,6 +6,7 @@ from typing import Dict, List
 
 import arrow
 import pandas
+import pytz
 
 from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
 from util.big_number.big_number import float_to_str
@@ -46,6 +47,8 @@ class TickMakerResult:
 
             ticks['first'] = ticks['first'].apply(float_to_str)
             ticks['last'] = ticks['last'].apply(float_to_str)
+            ticks = ticks.tz_localize(pytz.timezone('Asia/Shanghai'))
+
             stat['ticks'] = json.loads(ticks.to_json(orient='index', date_format='', ))
 
             result.append(stat)

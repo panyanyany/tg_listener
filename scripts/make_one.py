@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pandas
 import pandas as pd
+import pytz
 
 from tg_listener.repo import tick_maker
 from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
@@ -38,6 +39,7 @@ def insight_rec(token: str, count):
     token = token.lower()
     data: pandas.DataFrame = arctic_db.db_tick.read(f'{token}:tick')
 
+    data = data.tz_localize(pytz.timezone('Asia/Shanghai'))
     print(data.iloc[-count:])
 
 
