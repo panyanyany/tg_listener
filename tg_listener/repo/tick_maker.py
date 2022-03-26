@@ -118,7 +118,7 @@ class TickMaker:
         # exit()
 
         stats = list(stats)
-        for stat in stats[:500]:
+        for stat in stats[:]:
             if self.debug_token and self.debug_token != stat['token']:
                 continue
             # del stat['_id']
