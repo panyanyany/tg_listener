@@ -156,6 +156,11 @@ class DbHandler(CancelableTiktok):
             elif value_token in [usdt, usdc, busd]:
                 value = (value / (10 ** decimals))
 
+            if direction == 'BUY':
+                price = value / trade.amount_out
+            else:
+                price = value / trade.amount_in
+
             quote_token = trade.price_pair.quote_token
 
             pools = {name: trade.price_pair.base_res / (10 ** trade.price_pair.base_decimals)}
@@ -164,12 +169,14 @@ class DbHandler(CancelableTiktok):
             tot_stat[quote_token]['pools'].update(pools)
             tot_stat[quote_token]['is_dividend'] = trade.is_dividend
 
-            d = {'price': trade.price_pair.price_in['usd'],
-                 'hash': trade.hash,
-                 'direction': direction,
-                 'value': value,
-                 'operator': trade.operator,
-                 **pools}
+            d = {
+                # 'price': trade.price_pair.price_in['usd'], 这个价格只是池子价格，不是交易时代币的价格
+                'price': price,  # 交易发生时代币价格，poocoin 的交易记录里也是这个价格
+                'hash': trade.hash,
+                'direction': direction,
+                'value': value,
+                'operator': trade.operator,
+                **pools}
             # logger.debug('trade: %s, d: %s', trade, d)
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
             if quote_token not in tot_df:
