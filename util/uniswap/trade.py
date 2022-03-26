@@ -115,7 +115,7 @@ class Trade:
                 sync_cnt += 1
             elif dlog['event'] == 'Withdrawal':
                 self.handle_withdrawal(operator, fn_name, dlog, paths)
-            print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
+            # print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
         if transfer_cnt > 4:
             # 转账日志大于4个，极有可能是分红币
@@ -191,7 +191,6 @@ class Trade:
 
         if _from == operator or _from == tx_contract:
             maker_transfer_to[to] = dlog['args']['value']
-            print(dlog['args'])
         # 计算 in
         if contract == paths[0]:
             if fn_name not in functions_send_eth:
