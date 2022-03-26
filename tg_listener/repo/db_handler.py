@@ -179,8 +179,10 @@ class DbHandler(CancelableTiktok):
                 'direction': direction,
                 'value': value,
                 'operator': trade.operator,
-                'amount_in': str(trade.amount_in),
-                'amount_out': str(trade.amount_out),
+                # 'amount_in': str(trade.amount_in),
+                # 'amount_out': str(trade.amount_out),
+                'swap_in': str(trade.swap_in),
+                'swap_out': str(trade.swap_out),
                 **pools}
             # logger.debug('trade: %s, d: %s', trade, d)
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
