@@ -235,6 +235,18 @@ def test_from_transaction():
                          swap_out=25624138040354738524157242558,  # 正确
                          )
          },
+        {'input': '0x3a1a19fc1dccc423f8652ec177d2ad9525757af88c9a1f7704445222de7bf363',
+         'name': 'SELL-本币分红币-swapExactTokensForTokensSupportingFeeOnTransferTokens',
+         'data': '',
+         'result': Trade(operator='0x9ede3765e695b0b16e122f3ba83d9a950038d70c',
+                         token_in='0xf172ea661a508af8d510b6319fb991fd71543272',
+                         token_out='0xe9e7cea3dedca5984780bafc599bd69add087d56',
+                         amount_in=21989377,
+                         amount_out=26059302370687557981,
+                         swap_in=20696506,
+                         swap_out=26059302370687557981,
+                         )
+         },
         # # amount_out 是 0
         # {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
         #  'name': 'swapETHForExactTokens',
@@ -249,7 +261,7 @@ def test_from_transaction():
     # print()
     for testdata in testdata_list[:]:
         txh = testdata['input']
-        # if txh != '0x105e3130bf0027eceeeabaf52db3f63f4a08f7b4da4718c5326f26b56a1f97a4':
+        # if txh != '0x3a1a19fc1dccc423f8652ec177d2ad9525757af88c9a1f7704445222de7bf363':
         #     continue
         print('------- testing:', txh)
         tx, rec = test_util.get_tx_n_receipt(txh)

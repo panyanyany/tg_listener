@@ -49,6 +49,8 @@ class Trade:
     log_decoder = LogDecoder()
     router_decoder = Decoder(pancake_swap_router_signatures)
 
+    first_swap_with_router_contract = ''
+
     def to_sorted_pair(self):
         return sort_pair(self.token_in, self.token_out, self.amount_in, self.amount_out)
 
@@ -106,14 +108,14 @@ class Trade:
                 last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'], paths, swap_receipt,
                                                   contract, maker_transfer_to)
             elif dlog['event'] == 'Swap':
-                self.handle_swap(operator, fn_name, dlog, i, receipt['logs'], maker_transfer_to)
+                self.handle_swap(operator, fn_name, dlog, i, receipt['logs'], maker_transfer_to, contract)
             elif dlog['event'] == 'Sync':
                 # self.handle_sync(paths, sync_cnt, dlog)
                 self.logs_sync.append(dlog)
                 sync_cnt += 1
             elif dlog['event'] == 'Withdrawal':
                 self.handle_withdrawal(operator, fn_name, dlog, paths)
-            # print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
+            print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
         if transfer_cnt > 4:
             # 转账日志大于4个，极有可能是分红币
@@ -157,11 +159,21 @@ class Trade:
             return False
         return True
 
-    def handle_swap(self, operator, fn_name, dlog, i, raw_logs, maker_transfer_to):
+    def handle_swap(self, operator, fn_name, dlog, i, raw_logs, maker_transfer_to, tx_contract):
         contract = dlog['address'].lower()
+        sender = dlog['args']['sender'].lower()
         to = dlog['args']['to'].lower()
 
-        if contract in maker_transfer_to:
+        if fn_name in ['swapExactTokensForTokensSupportingFeeOnTransferTokens']:
+            # 由 router 发送 token，只要第1次的即可
+            swap_in = dlog['args']['amount1In'] or dlog['args']['amount0In']
+            if sender == tx_contract:
+                if not self.first_swap_with_router_contract:
+                    self.first_swap_with_router_contract = contract
+                if self.first_swap_with_router_contract == contract:
+                    if self.swap_in < swap_in:
+                        self.swap_in = swap_in
+        elif contract in maker_transfer_to:
             self.swap_in = maker_transfer_to[contract]
         if to == operator:
             self.swap_out = dlog['args']['amount0Out'] or dlog['args']['amount1Out']
@@ -179,6 +191,7 @@ class Trade:
 
         if _from == operator or _from == tx_contract:
             maker_transfer_to[to] = dlog['args']['value']
+            print(dlog['args'])
         # 计算 in
         if contract == paths[0]:
             if fn_name not in functions_send_eth:
