@@ -19,6 +19,6 @@ maker = tick_maker.TickMaker([
 maker.debug_token = token.lower()
 maker.run()
 
-for key in maker.results:
-    result = maker.results[key]
-    result.save(Path(f'public'))
+# for key in maker.results:
+#     result = maker.results[key]
+#     result.save(Path(f'public'))
