@@ -14,11 +14,15 @@ pd.set_option('max_colwidth', None)
 
 # pd.set_option('display.max_rows', None)
 
+@click.group()
+def cli():
+    pass
 
-@click.command()
+
+@cli.command()
 @click.argument('token')
 @click.option('--span', default='15min')
-def insight(token: str, span='15min'):
+def insight_span(token: str, span='15min'):
     token = token.lower()
     tot_data: pandas.DataFrame = arctic_db.db_tick.read(f'{token}:tick')
     data = tot_data.resample(span)['price'].agg(['first', 'last']).dropna()
@@ -27,5 +31,16 @@ def insight(token: str, span='15min'):
     print(data.iloc[-10:])
 
 
+@cli.command()
+@click.argument('token')
+@click.option('--count', default=10)
+def insight_rec(token: str, count):
+    token = token.lower()
+    data: pandas.DataFrame = arctic_db.db_tick.read(f'{token}:tick')
+
+    print(data.iloc[-count:])
+
+
 if __name__ == '__main__':
-    insight()
+    mcli = click.CommandCollection(sources=[cli])
+    mcli()
