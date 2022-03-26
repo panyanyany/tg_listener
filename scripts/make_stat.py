@@ -14,6 +14,8 @@ pd.set_option('max_colwidth', None)
 maker = tick_maker.TickMaker([
     tick_maker.TickMakerTask('15min', 0.1),
     tick_maker.TickMakerTask('1h', 0.1),
+    tick_maker.TickMakerTask('1d', 0.1),
+    tick_maker.TickMakerTask('1h', 0.1, 3),
 ])
 maker.run()
 

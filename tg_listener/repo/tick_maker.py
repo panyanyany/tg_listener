@@ -16,9 +16,10 @@ db = arctic_db.db_tick
 class TickMakerTask:
     span: str
     times: float
+    min_count: int = 1
 
     def gen_key(self):
-        return f"T{self.span}_{self.times}"
+        return f"T{self.span}_{self.times}_{self.min_count}"
 
 
 @dataclasses.dataclass
@@ -72,6 +73,15 @@ class TickMaker:
         self.tasks: List[TickMakerTask] = tasks
         self.results: Dict[str, TickMakerResult] = {}
 
+    def check_min_count(self, data, min_count, times):
+        if len(data) < min_count:
+            return False
+        for i in range(min_count):
+            pos = i + 1
+            if data.iloc[-pos]['times'] < times:
+                return False
+        return True
+
     def filter_token(self, stat) -> pandas.DataFrame:
         token = stat['token']
         tot_data: pandas.DataFrame = arctic_db.db_tick.read(f'{token}:tick')
@@ -81,7 +91,7 @@ class TickMaker:
         for task in self.tasks:
             data = tot_data.resample(task.span)['price'].agg(['first', 'last']).dropna()
             data['times'] = (data['last'] - data['first']) / data['first']
-            if data.iloc[-1]['times'] >= task.times or data.iloc[-2]['times'] >= task.times:
+            if self.check_min_count(data, task.min_count, task.times):
                 if task.gen_key() not in self.results:
                     result = TickMakerResult(task=task, items=[])
                 else:
