@@ -94,9 +94,10 @@ class TickMaker:
 
         for task in self.tasks:
             data = tot_data.resample(task.span)['price'].agg(['first', 'last']).dropna()
-            if self.debug_token:
-                print(data.iloc[-4:])
             data['times'] = (data['last'] - data['first']) / data['first']
+            if self.debug_token:
+                print(tot_data.iloc[-20:])
+                print(data.iloc[-4:])
             if self.check_min_count(data, task.min_count, task.times):
                 if task.gen_key() not in self.results:
                     result = TickMakerResult(task=task, items=[])
