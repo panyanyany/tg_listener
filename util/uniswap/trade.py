@@ -158,6 +158,10 @@ class Trade:
                 if _from == operator:
                     self.amount_in += dlog['args']['value']
                     # print(f'in ---- contract:{contract}, from={_from}', dlog['args']['value'], self.amount_in)
+            else:
+                if fn_name == 'swapETHForExactTokens':
+                    self.amount_in += dlog['args']['value']
+
         elif contract == paths[-1]:  # 计算 out
             if contract == wbnb:
                 if to == operator or to == swap_receipt:

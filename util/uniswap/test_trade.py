@@ -167,6 +167,15 @@ def test_from_transaction():
                          amount_out=47731047819855843,
                          )
          },
+        {'input': '0x946193a0387a3328622b84583a7ff6c2ac9c5f3673c016ceee1400fe0a95745b',
+         'name': 'swapETHForExactTokens',
+         'data': '',
+         'result': Trade(operator='0x31606917beef969e934fefef5f3111e675a89d29',
+                         token_in='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+                         token_out='0x62f06ad3ebda0a6322df7bfe0870348577491ba1', amount_in=7685296379762318,
+                         amount_out=9800000000,
+                         )
+         },
         # # amount_out 是 0
         # {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
         #  'name': 'swapETHForExactTokens',
