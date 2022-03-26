@@ -176,6 +176,65 @@ def test_from_transaction():
                          amount_out=9800000000,
                          )
          },
+        {'input': '0xdb26a9608848857904150f84f7ba88f9b63a0df5d6b8a5318d0dfb61dc0a592d',
+         'name': 'swapETHForExactTokens',
+         'data': '',
+         'result': Trade(operator='0xb1c2a97f0daa7adcd5eee963aa020afd10caa7f5',
+                         token_in='0x8fff93e810a2edaafc326edee51071da9d398e83',
+                         token_out='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+                         amount_in=2000000000000000000,
+                         swap_in=1760000000000000000,
+                         amount_out=4938270197230496707)
+         },
+        # 以下来自看线工具
+        {'input': '0x000763d2c5bdbdbf457a7f3312720f57d5e8667d582282ba16e58ec50a833aba',
+         'name': 'SELL-',
+         'data': '',
+         'result': Trade(operator='0xaaff25bcbd3fdf8e1a57b65adf84cca784d9cd78',
+                         token_in='0x96708ca6ee46366710d9fc26d5b30c0af18aa534',
+                         token_out='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+                         amount_in=11111111111111111111000000000,
+                         swap_in=11111111111111111111000000000,
+                         amount_out=3299768120564190082,
+                         swap_out=3299768120564190082,
+                         )
+         },
+        {'input': '0x26f5709c6f706aa9302799654540551f12b2578c808dc1fb5871653086406893',
+         'name': 'BUY-',
+         'data': '',
+         'result': Trade(operator='0xaaff25bcbd3fdf8e1a57b65adf84cca784d9cd78',
+                         token_in='0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c',
+                         token_out='0x96708ca6ee46366710d9fc26d5b30c0af18aa534',
+                         amount_in=10000000000000000,
+                         swap_in=10000000000000000,
+                         amount_out=110106407471368005096,
+                         swap_out=110106407471368005096,
+                         )
+         },
+        {'input': '0xb6c50e748020be59118e9ec87067d59720a808744a0f0fd82e32263cf085b6f2',
+         'name': 'SELL-分红币-2LP-dext的描述不正确',
+         'data': '',
+         'result': Trade(operator='0x24d5b20e9ed3b243a3aa978d583328f33ef33bca',
+                         token_in='0x38ae40d9f1897ba20aebf37bf6a9d36778aac3f3',
+                         token_out='0xb0ac74434da55cf739b19a243af0658f17a053c9',
+                         amount_in=293111872486616136949930887587,  # 正确
+                         swap_in=260869566513088361885438489954,  # 正确
+                         amount_out=102052920909183,
+                         swap_out=102052920909183,
+                         )
+         },
+        {'input': '0x9d8bb9063f0422504feb39bfe401b8f89e079ed7b17e24c724e94f151e18dd5a',
+         'name': 'BUY-分红币-2LP-swapExactTokensForTokens',
+         'data': '',
+         'result': Trade(operator='0x245305a8d93af27f29164bb419fe78101045fdca',
+                         token_in='0x55d398326f99059ff775485246999027b3197955',
+                         token_out='0x38ae40d9f1897ba20aebf37bf6a9d36778aac3f3',
+                         amount_in=6500000000000000000,  # 正确
+                         swap_in=6500000000000000000,  # 正确
+                         amount_out=23061724236319264671741518303,  # 正确
+                         swap_out=25624138040354738524157242558,  # 正确
+                         )
+         },
         # # amount_out 是 0
         # {'input': '0x5b8ee8c28e51e9ddb5f7b5b7b75bfdafbea9030e4ae378ee1210c0027468070f',
         #  'name': 'swapETHForExactTokens',
@@ -204,11 +263,26 @@ def test_from_transaction():
         print()
         print(trade)
         print()
+
+        # if trade:
+        #     print(trade.amount_in, trade.swap_out)
+        #     print(trade.swap_in, trade.amount_out)
+        #     if trade.swap_in > trade.amount_in:
+        #         print('1 - boom!!!!!!')
+        #         return
+        #     if trade.swap_out < trade.amount_out:
+        #         print('2 - boom!!!!!!')
+        #         return
+
         if trade:
             trade.hash = ''
             trade.logs_sync = []
             trade.price_pair = None
             trade.is_dividend = False
+        if testdata['result'] and not testdata['result'].swap_in:
+            trade.swap_in = 0
+        if testdata['result'] and not testdata['result'].swap_out:
+            trade.swap_out = 0
         if testdata['result']:
             testdata['result'].hash = ''
         assert trade == testdata['result']

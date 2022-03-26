@@ -37,6 +37,9 @@ class Trade:
 
     hash: str = ''
 
+    swap_in: int = 0
+    swap_out: int = 0
+
     price_pair: PricePair = None  # 注意: 这个东西只是用来计算价格的，跟 set(token_in, token_out) 很可能不一致
 
     logs_sync: List[EventData] = field(default_factory=list)
@@ -69,6 +72,7 @@ class Trade:
         fn_inputs = fn_details[1]
         paths = list(map(lambda e: e.lower(), fn_inputs['path']))
         swap_receipt = fn_inputs['to'].lower()
+        maker_transfer_to = {}
         # if not has_canonical(paths):
         #     print('----- 3', paths)
         #     return
@@ -100,9 +104,9 @@ class Trade:
             if dlog['event'] == 'Transfer':
                 transfer_cnt += 1
                 last_value = self.handle_transfer(operator, fn_name, dlog, i, receipt['logs'], paths, swap_receipt,
-                                                  contract)
+                                                  contract, maker_transfer_to)
             elif dlog['event'] == 'Swap':
-                self.handle_swap(operator, fn_name, dlog, i, receipt['logs'])
+                self.handle_swap(operator, fn_name, dlog, i, receipt['logs'], maker_transfer_to)
             elif dlog['event'] == 'Sync':
                 # self.handle_sync(paths, sync_cnt, dlog)
                 self.logs_sync.append(dlog)
@@ -129,6 +133,8 @@ class Trade:
             # exact* 方法
             self.amount_out = fn_inputs.get('amountOut')
 
+        if not self.swap_out:
+            self.swap_out = self.amount_out
         return self
 
     @classmethod
@@ -141,17 +147,38 @@ class Trade:
         pair = PricePair(**dataclasses.asdict(pair), bnb_price=bnb_price, cake_price=cake_price).calc()
         return pair
 
-    def handle_swap(self, operator, fn_name, dlog, i, raw_logs):
+    def check_swap_amount(self):
+        trade = self
+        if trade.swap_in > trade.amount_in:
+            logger.error(f'swap_in > amount_in, {self}')
+            return False
+        if trade.swap_out < trade.amount_out:
+            logger.error(f'swap_out > amount_out, {self}')
+            return False
+        return True
+
+    def handle_swap(self, operator, fn_name, dlog, i, raw_logs, maker_transfer_to):
+        contract = dlog['address'].lower()
+        to = dlog['args']['to'].lower()
+
+        if contract in maker_transfer_to:
+            self.swap_in = maker_transfer_to[contract]
+        if to == operator:
+            self.swap_out = dlog['args']['amount0Out'] or dlog['args']['amount1Out']
         if i == len(raw_logs) - 1:
             if self.amount_in == 0:
                 self.amount_in = dlog['args']['amount1In'] or dlog['args']['amount0In']
             if self.amount_out == 0:
                 self.amount_out = dlog['args']['amount1Out']
 
-    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs, paths, swap_receipt, tx_contract):
+    def handle_transfer(self, operator, fn_name, dlog, i, raw_logs, paths, swap_receipt, tx_contract,
+                        maker_transfer_to):
         _from = dlog['args']['from'].lower()
         to = dlog['args']['to'].lower()
         contract = dlog['address'].lower()
+
+        if _from == operator or _from == tx_contract:
+            maker_transfer_to[to] = dlog['args']['value']
         # 计算 in
         if contract == paths[0]:
             if fn_name not in functions_send_eth:

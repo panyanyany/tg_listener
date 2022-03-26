@@ -156,10 +156,13 @@ class DbHandler(CancelableTiktok):
             elif value_token in [usdt, usdc, busd]:
                 value = (value / (10 ** decimals))
 
+            if not trade.check_swap_amount():
+                continue
+
             if direction == 'BUY':
-                price = value / trade.amount_out
+                price = value / trade.swap_out
             else:
-                price = value / trade.amount_in
+                price = value / trade.swap_in
 
             quote_token = trade.price_pair.quote_token
 
