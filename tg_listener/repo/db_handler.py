@@ -138,10 +138,10 @@ class DbHandler(CancelableTiktok):
             name = get_token_name(trade.price_pair.base_token)
             direction = 'BUY' if has_canonical([trade.token_in]) else 'SELL'
             if has_canonical([trade.token_in]):
-                value = trade.amount_in
+                value = trade.swap_in
                 value_token = trade.token_in
             elif has_canonical([trade.token_out]):
-                value = trade.amount_out
+                value = trade.swap_out
                 value_token = trade.token_out
             else:
                 value = 0
