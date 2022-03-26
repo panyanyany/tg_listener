@@ -69,6 +69,8 @@ class TickMaker:
     open_min_age = 60  # 开盘时间最小允许多久(min)
     idle_max_span = 15  # 空闲期(上一次交易到现在)最大允许多久(min)
 
+    debug_token = ''
+
     def __init__(self, tasks):
         # self.candlestick_span = candlestick_span
         # self.growth_times = growth_times
@@ -92,6 +94,8 @@ class TickMaker:
 
         for task in self.tasks:
             data = tot_data.resample(task.span)['price'].agg(['first', 'last']).dropna()
+            if self.debug_token:
+                print(data.iloc[-4:])
             data['times'] = (data['last'] - data['first']) / data['first']
             if self.check_min_count(data, task.min_count, task.times):
                 if task.gen_key() not in self.results:
@@ -115,6 +119,8 @@ class TickMaker:
 
         stats = list(stats)
         for stat in stats[:500]:
+            if self.debug_token and self.debug_token != stat['token']:
+                continue
             # del stat['_id']
             # print(json.dumps(stat, default=str))
             # return

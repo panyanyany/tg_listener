@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -10,10 +11,12 @@ pd.set_option('display.expand_frame_repr', False)
 pd.set_option('max_colwidth', None)
 # pd.set_option('display.max_rows', None)
 
+token = sys.argv
 
 maker = tick_maker.TickMaker([
     tick_maker.TickMakerTask('15min', 0.1),
 ])
+maker.debug_token = token
 maker.run()
 
 for key in maker.results:
