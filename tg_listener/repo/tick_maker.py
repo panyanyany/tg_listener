@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List
 
+import arrow
 import pandas
 
 from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
@@ -53,6 +54,7 @@ class TickMakerResult:
         if not save_name.parent.exists():
             save_name.parent.mkdir(parents=True)
 
+        result = {'build_time': arrow.now(), 'items': result}
         with save_name.open('w+') as fp:
             json.dump(result, fp, default=str)
 
