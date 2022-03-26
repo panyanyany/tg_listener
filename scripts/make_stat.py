@@ -21,4 +21,4 @@ maker.run()
 
 for key in maker.results:
     result = maker.results[key]
-    result.save(Path(f'storage'))
+    result.save(Path(f'public'))
