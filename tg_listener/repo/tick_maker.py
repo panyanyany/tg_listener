@@ -95,6 +95,9 @@ class TickMaker:
         if len(tot_data[tot_data['direction'] == 'SELL']) < 3:
             return
 
+        # 这种交易不能要，价格太离谱
+        tot_data = tot_data[tot_data['value'] < 0.1]
+
         for task in self.tasks:
             data = tot_data.resample(task.span)['price'].agg(['first', 'last']).dropna()
             data['times'] = (data['last'] - data['first']) / data['first']
