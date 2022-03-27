@@ -137,36 +137,37 @@ class DbHandler(CancelableTiktok):
             # 判断交易方向：BUY / SELL
             name = get_token_name(trade.price_pair.base_token)
             direction = 'BUY' if has_canonical([trade.token_in]) else 'SELL'
-            if has_canonical([trade.token_in]):
-                value = trade.swap_in
-                value_token = trade.token_in
-            elif has_canonical([trade.token_out]):
-                value = trade.swap_out
-                value_token = trade.token_out
-            else:
-                value = 0
-                value_token = ''
+            # if has_canonical([trade.token_in]):
+            #     value = trade.swap_in
+            #     value_token = trade.token_in
+            # elif has_canonical([trade.token_out]):
+            #     value = trade.swap_out
+            #     value_token = trade.token_out
+            # else:
+            #     value = 0
+            #     value_token = ''
 
-            decimals = await token_service.inst.get_decimals(value_token)
-            if value_token == wbnb:
-                value = (value / (10 ** decimals)) * await price_service.inst.get_bnb_price()
-            elif value_token == cake:
-                decimals = await token_service.inst.get_decimals(value_token)
-                value = (value / (10 ** decimals)) * await price_service.inst.get_cake_price()
-            elif value_token in [usdt, usdc, busd]:
-                value = (value / (10 ** decimals))
+            # decimals = await token_service.inst.get_decimals(value_token)
+            # if value_token == wbnb:
+            #     value = (value / (10 ** decimals)) * await price_service.inst.get_bnb_price()
+            # elif value_token == cake:
+            #     decimals = await token_service.inst.get_decimals(value_token)
+            #     value = (value / (10 ** decimals)) * await price_service.inst.get_cake_price()
+            # elif value_token in [usdt, usdc, busd]:
+            #     value = (value / (10 ** decimals))
 
-            if not trade.check_swap_amount():
-                continue
+            # if not trade.check_swap_amount():
+            #     continue
+            #
+            # if direction == 'BUY':
+            #     price = value / trade.swap_out
+            # else:
+            #     price = value / trade.swap_in
 
-            if direction == 'BUY':
-                price = value / trade.swap_out
-            else:
-                price = value / trade.swap_in
-
+            price = trade.price_pair.price_in['usd']
             quote_token = trade.price_pair.quote_token
 
-            pools = {name: trade.price_pair.base_res / (10 ** trade.price_pair.base_decimals)}
+            pools = {name: trade.res_pair.base_res / (10 ** trade.res_pair.base_decimals)}
             tot_stat.setdefault(quote_token, {})
             tot_stat[quote_token].setdefault('pools', {})
             tot_stat[quote_token]['pools'].update(pools)
@@ -177,13 +178,14 @@ class DbHandler(CancelableTiktok):
                 'price': price,  # 交易发生时代币价格，poocoin 的交易记录里也是这个价格
                 'hash': trade.hash,
                 'direction': direction,
-                'value': value,
+                'value': trade.price_pair.value,
                 'operator': trade.operator,
-                # 'amount_in': str(trade.amount_in),
-                # 'amount_out': str(trade.amount_out),
-                'swap_in': str(trade.swap_in),
-                'swap_out': str(trade.swap_out),
+                'amount_in': str(trade.amount_in),
+                'amount_out': str(trade.amount_out),
+                'quote_res': str(trade.price_pair.quote_res),
+                'base_res': str(trade.price_pair.base_res),
                 **pools}
+            print(quote_token)
             # logger.debug('trade: %s, d: %s', trade, d)
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
             if quote_token not in tot_df:

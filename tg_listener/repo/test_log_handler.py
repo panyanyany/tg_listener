@@ -27,7 +27,7 @@ def test_log_handler():
 
     trade = Trade.from_transaction(tx, receipt)
     asyncio.run(
-        handler.handle_trade(trade)
+        handler.handle_swap(trade)
     )
     print()
     print(trade.price_pair)

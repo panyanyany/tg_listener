@@ -66,7 +66,52 @@ class SyncHandler(Cancelable):
                     # 暂停一下，免得无法 Ctrl-C
                     await asyncio.sleep(1)
 
-    async def handle_trade(self, trade: Trade):
+    async def handle_swap(self, trade: Trade):
+        trade_pair = trade.to_sorted_pair()
+        if not trade_pair:
+            # 这个交易不是直接用 usdt/busd/bnb 来完成的
+            # logger.warning('trade obj sort pair failed: %s', str(trade))
+            return trade
+
+        swap_pairs = {}
+        for log in trade.logs_swap:
+            pair_addr = log['address'].lower()
+
+            pair_info = await lp_service.inst.get(pair_addr)
+            decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
+            decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
+            if decimals0 is None:
+                logger.error("decimals0 is None, token0=%s", pair_info['token0'].lower())
+                continue
+            if decimals1 is None:
+                logger.error("decimals1 is None, token1=%s", pair_info['token1'].lower())
+                continue
+
+            log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'],
+                                        amount0=log['args']['amount0In'] or log['args']['amount0Out'],
+                                        amount1=log['args']['amount1In'] or log['args']['amount1Out'],
+                                        decimals0=decimals0,
+                                        decimals1=decimals1,
+                                        bnb_price=await price_service.inst.get_bnb_price(),
+                                        cake_price=await price_service.inst.get_cake_price())
+            if not log_pair:
+                continue
+            # logger.info('trade log: %s', log_pair)
+            # print(log_pair)
+            if log_pair.quote_token not in swap_pairs:
+                swap_pairs[log_pair.quote_token] = log_pair
+            else:
+                if swap_pairs[log_pair.quote_token].quote_res < log_pair.quote_res:
+                    swap_pairs[log_pair.quote_token] = log_pair
+            # break
+
+        if trade_pair.quote_token not in swap_pairs:
+            logger.debug('no quote found in swap_pairs: txh=%s', trade.hash)
+            return trade
+        trade.price_pair = swap_pairs[trade_pair.quote_token]
+        return trade
+
+    async def handle_sync(self, trade: Trade):
         log_pairs = {}
         for log in trade.logs_sync:
             pair_addr = log['address'].lower()
@@ -83,6 +128,8 @@ class SyncHandler(Cancelable):
 
             log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'], decimals0=decimals0,
                                         decimals1=decimals1,
+                                        amount0=log['args']['reserve0'],
+                                        amount1=log['args']['reserve1'],
                                         bnb_price=await price_service.inst.get_bnb_price(),
                                         cake_price=await price_service.inst.get_cake_price())
             if not log_pair:
@@ -101,7 +148,7 @@ class SyncHandler(Cancelable):
         if trade_pair.quote_token not in log_pairs:
             logger.debug('no quote found in log_pairs: txh=%s', trade.hash)
             return trade
-        trade.price_pair = log_pairs[trade_pair.quote_token]
+        trade.res_pair = log_pairs[trade_pair.quote_token]
         return trade
 
     async def handle_trades(self, trades: List[Trade]):
@@ -115,8 +162,11 @@ class SyncHandler(Cancelable):
         # 计算交易后价格
         price_trades = []
         for trade in trades:
-            trade = await self.handle_trade(trade)
+            trade = await self.handle_swap(trade)
             if not trade.price_pair:
+                continue
+            trade = await self.handle_sync(trade)
+            if not trade.res_pair:
                 continue
             price_trades.append(trade)
         logger.info(f'handle_trades - 3: price_trades={len(price_trades)}')
@@ -135,6 +185,16 @@ class SyncHandler(Cancelable):
     async def cache_all_decimals(self, trades):
         """ 缓存所有代币的 decimals """
         for trade in trades:
+            for log in trade.logs_swap:
+                pair_addr = log['address'].lower()
+                pair_info = await lp_service.inst.get(pair_addr)
+
+                token_service.inst.add(pair_info['token0'].lower())
+                token_service.inst.add(pair_info['token1'].lower())
+
+    async def cache_all_decimals0(self, trades):
+        """ 缓存所有代币的 decimals """
+        for trade in trades:
             for log in trade.logs_sync:
                 pair_addr = log['address'].lower()
                 pair_info = await lp_service.inst.get(pair_addr)
@@ -143,6 +203,13 @@ class SyncHandler(Cancelable):
                 token_service.inst.add(pair_info['token1'].lower())
 
     async def cache_all_pairs(self, trades):
+        """ 缓存所有 lp 信息 """
+        for trade in trades:
+            for log in trade.logs_swap:
+                pair_addr = log['address'].lower()
+                lp_service.inst.add(pair_addr)
+
+    async def cache_all_pairs0(self, trades):
         """ 缓存所有 lp 信息 """
         for trade in trades:
             for log in trade.logs_sync:

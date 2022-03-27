@@ -25,6 +25,8 @@ class PricePair(SortedPair):
     bnb_price: float = 0
     cake_price: float = 0
 
+    value: float = 0
+
     @classmethod
     def from_sorted_pair(cls, pair):
         return PricePair(**dataclasses.asdict(pair))
@@ -46,10 +48,13 @@ class PricePair(SortedPair):
             pair.price = 0
         if pair.base_token in [busd, usdt, usdc]:
             pair.price_in['usd'] = pair.price
+            pair.value = base_res_human
         elif pair.base_token in [wbnb]:
             pair.price_in['bnb'] = pair.price
+            pair.value = base_res_human * self.bnb_price
         elif pair.base_token in [cake]:
             pair.price_in['cake'] = pair.price
+            pair.value = base_res_human * self.cake_price
 
         if 'usd' not in pair.price_in:
             if 'bnb' in pair.price_in and self.bnb_price:

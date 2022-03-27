@@ -41,8 +41,10 @@ class Trade:
     swap_out: int = 0
 
     price_pair: PricePair = None  # 注意: 这个东西只是用来计算价格的，跟 set(token_in, token_out) 很可能不一致
+    res_pair: PricePair = None  # 注意: 这个东西只是用来计算价格的，跟 set(token_in, token_out) 很可能不一致
 
     logs_sync: List[EventData] = field(default_factory=list)
+    logs_swap: List[EventData] = field(default_factory=list)
 
     is_dividend: bool = False
 
@@ -82,7 +84,7 @@ class Trade:
 
         self = cls(operator=operator, token_in=paths[0], token_out=paths[-1], amount_in=0, amount_out=0,
                    timestamp=timestamp,
-                   hash=tx['hash'].hex().lower(), logs_sync=[])
+                   hash=tx['hash'].hex().lower(), logs_sync=[], logs_swap=[])
 
         raw_amount_in = fn_inputs.get('amountIn', 0)
 
@@ -109,6 +111,7 @@ class Trade:
                                                   contract, maker_transfer_to)
             elif dlog['event'] == 'Swap':
                 self.handle_swap(operator, fn_name, dlog, i, receipt['logs'], maker_transfer_to, contract)
+                self.logs_swap.append(dlog)
             elif dlog['event'] == 'Sync':
                 # self.handle_sync(paths, sync_cnt, dlog)
                 self.logs_sync.append(dlog)
@@ -140,8 +143,10 @@ class Trade:
         return self
 
     @classmethod
-    def calc_price(cls, dlog, token0, token1, decimals0, decimals1, bnb_price=None, cake_price=None):
-        pair = sort_pair(token0, token1, dlog['args']['reserve0'], dlog['args']['reserve1'], decimals0=decimals0,
+    def calc_price(cls, dlog, token0, token1, decimals0, decimals1,
+                   amount0, amount1,
+                   bnb_price=None, cake_price=None):
+        pair = sort_pair(token0, token1, amount0, amount1, decimals0=decimals0,
                          decimals1=decimals1)
         if not pair:
             return None
