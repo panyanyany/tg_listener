@@ -16,7 +16,7 @@ def cli():
 
 @cli.command()
 @click.argument('token')
-@click.option('--hours')
+@click.option('--hours', type=int)
 def a(token, hours):
     # token = '0x56aa5cb724cb12c0452ac51094a7ae165202f81e'
     # token = '0xabaf0bcd3a4f6d3bd76edc10ea922d50b751c357'
