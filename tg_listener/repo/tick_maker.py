@@ -123,6 +123,8 @@ class TickMaker:
 
         stats = list(stats)
         for stat in stats[:]:
+            if stat['pools']['TOTAL'] < 100:
+                continue
             if self.debug_token and self.debug_token != stat['token']:
                 continue
             # del stat['_id']
