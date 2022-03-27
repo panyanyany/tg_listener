@@ -185,7 +185,7 @@ class DbHandler(CancelableTiktok):
                 'quote_res': str(trade.price_pair.quote_res),
                 'base_res': str(trade.price_pair.base_res),
                 **pools}
-            print(quote_token)
+            # print(quote_token)
             # logger.debug('trade: %s, d: %s', trade, d)
             df = pandas.DataFrame(d, index=Index([dt], name='date'))
             if quote_token not in tot_df:
