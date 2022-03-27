@@ -21,7 +21,7 @@ def test_log_handler():
     Thread(target=daemon).start()
 
     handler = SyncHandler(Queue(), w3=bsc_web3)
-    txh = '0x873c20afd932a4985e02ef417517e47e136f18f56b98ae067e1398fcb8f108ec'
+    txh = '0x327a7a75e0f372847209878650d59078a1fc14ba6baa5003e5d8b3c2e745bd86'
     tx = bsc_web3.eth.get_transaction(txh)
     receipt = bsc_web3.eth.get_transaction_receipt(txh)
 
