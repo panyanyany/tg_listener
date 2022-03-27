@@ -69,7 +69,7 @@ class TickMaker:
     results: Dict[str, TickMakerResult]
 
     # 通用配置
-    open_min_age = 60  # 开盘时间最小允许多久(min)
+    open_min_age = 30  # 开盘时间最小允许多久(min)
     idle_max_span = 15  # 空闲期(上一次交易到现在)最大允许多久(min)
 
     debug_token = ''
