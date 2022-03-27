@@ -39,6 +39,7 @@ def insight_span(token: str, span='15min'):
 def insight_rec(token: str, count):
     token = token.lower()
     data: pandas.DataFrame = arctic_db.db_tick.read(f'{token}:tick')
+    data = data[data['value'] > 0.01]
 
     data = data.tz_localize(pytz.timezone('Asia/Shanghai'))
     print(data.iloc[-count:])

@@ -96,7 +96,7 @@ class TickMaker:
             return
 
         # 这种交易不能要，价格太离谱
-        tot_data = tot_data[tot_data['value'] < 0.01]
+        tot_data = tot_data[tot_data['value'] > 0.01]
 
         for task in self.tasks:
             data = tot_data.resample(task.span)['price'].agg(['first', 'last']).dropna()
