@@ -90,8 +90,12 @@ class SyncHandler(Cancelable):
             # print(log)
             # 0x327a7a75e0f372847209878650d59078a1fc14ba6baa5003e5d8b3c2e745bd86
             # 同时有 amount0In, amount1In, amount0Out
+            # 0x6842abd55496d13c33302a95f57b6e1801e7c6e4daff8ac977d272aa4e5d9de6
+            amount0 = log['args']['amount0Out']
+            if amount0 == 0:
+                amount0 = log['args']['amount0In']
             log_pair = trade.calc_price(log, pair_info['token0'], pair_info['token1'],
-                                        amount0=log['args']['amount0Out'],
+                                        amount0=amount0,
                                         amount1=log['args']['amount1In'] + log['args']['amount1Out'],
                                         decimals0=decimals0,
                                         decimals1=decimals1,
