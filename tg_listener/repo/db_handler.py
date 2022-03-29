@@ -70,7 +70,7 @@ class DbHandler(CancelableTiktok):
             pools = stat['pools'] or {}
             pools.update(tot_stat[token]['pools'])
 
-            lps = stat['lps'] or {}
+            lps = stat.get('lps', {})
             lps.update(tot_stat[token]['lps'])
 
             tot_value = 0
