@@ -1,7 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, List
 
 from eth_typing import URI
 from web3 import AsyncHTTPProvider
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
     endpoints = [
-        # "https://bsc-dataseed.binance.org/",
+        "https://bsc-dataseed.binance.org/",
         "https://bsc-dataseed1.binance.org/",
         "https://bsc-dataseed2.binance.org/",
         "https://bsc-dataseed3.binance.org/",
@@ -33,8 +33,10 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
 
     error_stat = {}
 
-    def __init__(self, endpoint_uri: Optional[Union[URI, str]] = None, request_kwargs: Optional[Any] = None) -> None:
+    def __init__(self, endpoint_uri: Optional[Union[URI, str]] = None, request_kwargs: Optional[Any] = None,
+                 endpoints=Optional[List[str]]) -> None:
         super().__init__(endpoint_uri, request_kwargs)
+        self.endpoints = endpoints or AsyncConcurrencyHTTPProvider.endpoints
 
     async def pick_endpoint(self):
         start_time = datetime.now()
