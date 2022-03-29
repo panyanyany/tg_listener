@@ -15,6 +15,7 @@ class SortedPair:
 
     quote_decimals: int = None
     base_decimals: int = None
+    lp: str = None
 
 
 @dataclass

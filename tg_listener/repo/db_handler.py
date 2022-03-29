@@ -69,6 +69,10 @@ class DbHandler(CancelableTiktok):
             stat = arctic_db.get_stat(token)
             pools = stat['pools'] or {}
             pools.update(tot_stat[token]['pools'])
+
+            lps = stat['lps'] or {}
+            lps.update(tot_stat[token]['lps'])
+
             tot_value = 0
             for c_token in canonicals:
                 c_name = get_token_name(c_token)
@@ -87,6 +91,7 @@ class DbHandler(CancelableTiktok):
                                   is_dividend=tot_stat[token]['is_dividend'],
                                   name=await token_service.inst.get_name(token),
                                   symbol=await token_service.inst.get_symbol(token),
+                                  lps=lps,
                                   )
 
         self.total_insert_cnt += self.added
@@ -137,32 +142,6 @@ class DbHandler(CancelableTiktok):
             # 判断交易方向：BUY / SELL
             name = get_token_name(trade.price_pair.base_token)
             direction = 'BUY' if has_canonical([trade.token_in]) else 'SELL'
-            # if has_canonical([trade.token_in]):
-            #     value = trade.swap_in
-            #     value_token = trade.token_in
-            # elif has_canonical([trade.token_out]):
-            #     value = trade.swap_out
-            #     value_token = trade.token_out
-            # else:
-            #     value = 0
-            #     value_token = ''
-
-            # decimals = await token_service.inst.get_decimals(value_token)
-            # if value_token == wbnb:
-            #     value = (value / (10 ** decimals)) * await price_service.inst.get_bnb_price()
-            # elif value_token == cake:
-            #     decimals = await token_service.inst.get_decimals(value_token)
-            #     value = (value / (10 ** decimals)) * await price_service.inst.get_cake_price()
-            # elif value_token in [usdt, usdc, busd]:
-            #     value = (value / (10 ** decimals))
-
-            # if not trade.check_swap_amount():
-            #     continue
-            #
-            # if direction == 'BUY':
-            #     price = value / trade.swap_out
-            # else:
-            #     price = value / trade.swap_in
 
             price = trade.price_pair.price_in['usd']
             quote_token = trade.price_pair.quote_token
@@ -172,6 +151,8 @@ class DbHandler(CancelableTiktok):
             tot_stat[quote_token].setdefault('pools', {})
             tot_stat[quote_token]['pools'].update(pools)
             tot_stat[quote_token]['is_dividend'] = trade.is_dividend
+            tot_stat[quote_token].setdefault('lps', {})
+            tot_stat[quote_token]['lps'][get_token_name(trade.price_pair.base_token)] = trade.price_pair.lp
 
             d = {
                 # 'price': trade.price_pair.price_in['usd'], 这个价格只是池子价格，不是交易时代币的价格

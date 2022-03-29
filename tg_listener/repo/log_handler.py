@@ -105,6 +105,7 @@ class SyncHandler(Cancelable):
                 continue
             # logger.info('trade log: %s', log_pair)
             # print(log_pair)
+            log_pair.lp = pair_addr
             if log_pair.quote_token not in swap_pairs:
                 swap_pairs[log_pair.quote_token] = log_pair
             else:
@@ -143,6 +144,7 @@ class SyncHandler(Cancelable):
                 continue
             # logger.info('trade log: %s', log_pair)
             # print(log_pair)
+            log_pair.lp = pair_addr
             log_pairs[log_pair.quote_token] = log_pair
             # break
 
