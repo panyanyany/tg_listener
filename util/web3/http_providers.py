@@ -75,7 +75,8 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
             AsyncConcurrencyHTTPProvider.error_stat[self.endpoint_uri] += 1
             stat = AsyncConcurrencyHTTPProvider.error_stat[self.endpoint_uri]
             if stat > 1 and stat % 50 == 0:
-                logger.warning("endpoint too many errors: %s", AsyncConcurrencyHTTPProvider.error_stat)
+                sorted_stat = sorted(AsyncConcurrencyHTTPProvider.error_stat.items(), key=lambda e: e[1], reverse=True)
+                logger.warning("endpoint too many errors: %s", sorted_stat)
             raise
 
         response = self.decode_rpc_response(raw_response)
