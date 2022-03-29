@@ -1,1 +1,3 @@
-print(7685296379762318 / 1e18 * 400)
+data = {'a': 2, 'b': 1, 'c': 5}
+data = sorted(data.items(), key=lambda e: e[1])
+print(data)
