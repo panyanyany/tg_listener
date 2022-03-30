@@ -19,11 +19,11 @@ pd.set_option('max_colwidth', None)
 logger.info('start')
 
 maker = tick_maker.TickMaker([
-    tick_maker.TickMakerTask('15min', 0.1),
-    tick_maker.TickMakerTask('1h', 0.1),
-    tick_maker.TickMakerTask('1h', 0.01, 3),
-    tick_maker.TickMakerTask('1d', 0.1),
-    tick_maker.TickMakerTask('1d', 0.01, 3),
+    tick_maker.TickMakerRuleGrow('15min', 0.1),
+    tick_maker.TickMakerRuleGrow('1h', 0.1),
+    tick_maker.TickMakerRuleGrow('1h', 0.01, 3),
+    tick_maker.TickMakerRuleGrow('1d', 0.1),
+    tick_maker.TickMakerRuleGrow('1d', 0.01, 3),
 ])
 maker.run()
 

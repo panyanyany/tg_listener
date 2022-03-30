@@ -9,7 +9,7 @@ import settings
 from tg_listener.models.AddressStat import make_stat
 from tg_listener.models.models import AddressRecord
 
-address_ptn = re.compile(r'(x[a-z0-9]{40})', re.IGNORECASE | re.MULTILINE)
+address_ptn = re.compile(r'([a-z0-9]{40})', re.IGNORECASE | re.MULTILINE)
 words_ptn = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9]")  # 匹配不是中文、大小写、数字的其他字符
 multi_space = re.compile(r"\s+")
 
@@ -53,7 +53,7 @@ class Listener:
                     beg = text.index(m.group(0))
                     beg = max(0, beg - 10)
                     text = text[beg:]
-                    address = '0' + m.group(0).lower()
+                    address = '0x' + m.group(0).lower()
                     if address in settings.BLOCK_ADDRESSES:
                         return
                     # text = text.replace(m.group(0), ' ' + m.group(0) + ' ')

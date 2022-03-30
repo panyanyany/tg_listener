@@ -15,13 +15,28 @@ db = arctic_db.db_tick
 
 
 @dataclasses.dataclass
-class TickMakerTask:
+class TickMakerRule:
     span: str
     times: float
+
+    def gen_key(self):
+        raise NotImplemented
+
+
+@dataclasses.dataclass
+class TickMakerRuleGrow(TickMakerRule):
     min_count: int = 1
 
     def gen_key(self):
         return f"T{self.span}_{self.times}_{self.min_count}"
+
+
+@dataclasses.dataclass
+class TickMakerRuleKeep(TickMakerRule):
+    child_span: str
+
+    def gen_key(self):
+        return f"TK{self.span}_{self.times}_{self.child_span}"
 
 
 @dataclasses.dataclass
@@ -32,7 +47,7 @@ class TickMakerResultItem:
 
 @dataclasses.dataclass
 class TickMakerResult:
-    task: TickMakerTask
+    task: TickMakerRuleGrow
     items: List[TickMakerResultItem]
 
     # stat: dict
@@ -77,7 +92,7 @@ class TickMaker:
     def __init__(self, tasks):
         # self.candlestick_span = candlestick_span
         # self.growth_times = growth_times
-        self.tasks: List[TickMakerTask] = tasks
+        self.tasks: List[TickMakerRuleGrow] = tasks
         self.results: Dict[str, TickMakerResult] = {}
 
     def check_min_count(self, data, min_count, times):
