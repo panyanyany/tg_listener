@@ -1,3 +1,4 @@
+"""监控 Telegram"""
 import logging
 
 from tg_listener.db import init_database
