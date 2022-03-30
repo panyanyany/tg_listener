@@ -442,12 +442,13 @@ default_ignore_names = [
 ]
 
 
-def setup3(cmd_level=1, max_age=3 * 24 * 60, ignore_names=None):
+def setup3(cmd_level=1, max_age=3 * 24 * 60, ignore_names=None, rm_parents=0):
     """
     :param cmd_level:
         level 1: python lps/cli.py xxx: logs/lps/cli.log
         level 2: python lps/cli.py xxx: logs/lps/cli/xxx.log
     :param max_age:
+    :param rm_parents: logs/lps/cli.log --> logs/cli/xxx.log
     :return:
     """
     args = sys.argv[:cmd_level]
@@ -465,14 +466,10 @@ def setup3(cmd_level=1, max_age=3 * 24 * 60, ignore_names=None):
     dir_path = '/'.join(args)
     parts = dir_path.split('/')
 
-    # # 不要源码根目录, 否则会出现 logs/src/lps/cli.log 的效果
-    # # 修正后效果：logs/lps/cli.log
-    # cwd_name = os.path.basename(os.getcwd())
-    # if parts[0] == cwd_name:
-    #     # print('parts[0] == cwd_name')
-    #     parts = parts[1:]
-
+    if len(parts) >= rm_parents:
+        parts = parts[rm_parents:]
     dir_path = '/'.join(parts)
+
     name = os.path.basename(dir_path)
 
     logfile = Path(__file__).parent.parent.parent.joinpath(

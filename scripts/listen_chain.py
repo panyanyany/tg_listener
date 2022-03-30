@@ -12,7 +12,7 @@ from tg_listener.services import lp_service, token_service, price_service
 from util.log_util import setup3, default_ignore_names
 from util.web3.util import async_bsc_web3
 
-setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'util.*'}))
+setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'util.*'}), rm_parents=1)
 
 # start_monitoring(seconds_frozen=20, test_interval=1000)
 
