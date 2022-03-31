@@ -9,7 +9,7 @@ import settings
 from tg_listener.models.AddressStat import make_stat
 from tg_listener.models.models import AddressRecord
 
-address_ptn = re.compile(r'([a-z0-9]{40})', re.IGNORECASE | re.MULTILINE)
+address_ptn = re.compile(r'([a-f0-9]{40})', re.IGNORECASE | re.MULTILINE)
 words_ptn = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9]")  # 匹配不是中文、大小写、数字的其他字符
 multi_space = re.compile(r"\s+")
 
