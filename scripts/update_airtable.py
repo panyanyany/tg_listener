@@ -30,12 +30,17 @@ def load_stat():
                                                             AddressStat.init_busd_amount.desc()).limit(100)
 
     logger.debug('get %s AddressStat', len(query))
+    stat = {}
     records = []
     for md in query:
         md: AddressStat
         if not md.symbol:
+            stat.setdefault('no_symbol', 0)
+            stat['no_symbol'] += 1
             continue
         if md.now_busd_amount <= 100:
+            stat.setdefault('low_busd_amount', 0)
+            stat['low_busd_amount'] += 1
             continue
         records.append({
             '代币符号': md.symbol,
@@ -48,7 +53,7 @@ def load_stat():
             '更新时间': str(md.updated_at),
         })
 
-    logger.debug('%s records need to update', len(records))
+    logger.debug('%s records need to update, stat=%s', len(records), stat)
     ids = list(map(lambda e: e['id'], table.all()))
     if len(ids) > 0:
         for _ids in chunks(ids, 10):
