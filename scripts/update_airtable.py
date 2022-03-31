@@ -1,13 +1,18 @@
+import logging
+
 import arrow
 from pyairtable import Table
 
 import settings
 from tg_listener.db import init_database
 from tg_listener.models.AddressStat import AddressStat
+from util.log_util import setup3, default_ignore_names
 
+setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'util.*'}), rm_parents=1)
 init_database()
 
 table = Table(settings.airtable['api_key'], 'appRLf4sYiFHWsI1D', '当天统计')
+logger = logging.getLogger(__name__)
 
 
 def chunks(lst, n):
@@ -24,6 +29,7 @@ def load_stat():
         (AddressStat.created_at.day == today.day)).order_by(AddressStat.cnt.desc(),
                                                             AddressStat.init_busd_amount.desc()).limit(100)
 
+    logger.debug('get %s AddressStat', len(query))
     records = []
     for md in query:
         md: AddressStat
@@ -42,6 +48,7 @@ def load_stat():
             '更新时间': str(md.updated_at),
         })
 
+    logger.debug('%s records need to update', len(records))
     ids = list(map(lambda e: e['id'], table.all()))
     if len(ids) > 0:
         for _ids in chunks(ids, 10):
