@@ -39,7 +39,8 @@ class LpService(base_service.BaseService):
 
         for pair_addr, info in all_pairs.items():
             if not info['token0'] or not info['token1']:
-                logger.error("lp token0 or token1 is None: lp=%s, info=%s", pair_addr, info)
+                logger.warning("lp token0 or token1 is None: lp=%s, info=%s", pair_addr, info)
+                self.add(pair_addr)
                 continue
             info['token0'] = info['token0'].lower()
             info['token1'] = info['token1'].lower()

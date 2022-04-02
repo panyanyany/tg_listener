@@ -1,3 +1,19 @@
-data = {'a': 2, 'b': 1, 'c': 5}
-data = sorted(data.items(), key=lambda e: e[1])
-print(data)
+import asyncio
+
+
+async def eternity():
+    while True:
+        print('x')
+        await asyncio.sleep(0.5)
+
+
+async def main():
+    # Wait for at most 1 second
+    try:
+        await asyncio.wait_for(eternity(), timeout=1.0)
+    except asyncio.TimeoutError:
+        print('timeout!')
+    await asyncio.sleep(5)
+
+
+asyncio.run(main())

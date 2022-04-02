@@ -77,9 +77,13 @@ class SyncHandler(Cancelable):
         for log in trade.logs_swap:
             pair_addr = log['address'].lower()
 
-            pair_info = await lp_service.inst.get(pair_addr)
-            decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
-            decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
+            try:
+                pair_info = await lp_service.inst.get(pair_addr)
+                decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
+                decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
+            except TimeoutError as e:
+                logger.error(e)
+                continue
             if decimals0 is None:
                 logger.error("decimals0 is None, token0=%s", pair_info['token0'].lower())
                 continue
@@ -124,9 +128,13 @@ class SyncHandler(Cancelable):
         for log in trade.logs_sync:
             pair_addr = log['address'].lower()
 
-            pair_info = await lp_service.inst.get(pair_addr)
-            decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
-            decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
+            try:
+                pair_info = await lp_service.inst.get(pair_addr)
+                decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
+                decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
+            except TimeoutError as e:
+                logger.error(e)
+                continue
             if decimals0 is None:
                 logger.error("decimals0 is None, token0=%s", pair_info['token0'].lower())
                 continue
@@ -196,7 +204,11 @@ class SyncHandler(Cancelable):
         for trade in trades:
             for log in trade.logs_swap:
                 pair_addr = log['address'].lower()
-                pair_info = await lp_service.inst.get(pair_addr)
+                try:
+                    pair_info = await lp_service.inst.get(pair_addr)
+                except TimeoutError as e:
+                    logger.error(e)
+                    continue
 
                 token_service.inst.add(pair_info['token0'].lower())
                 token_service.inst.add(pair_info['token1'].lower())
@@ -206,7 +218,11 @@ class SyncHandler(Cancelable):
         for trade in trades:
             for log in trade.logs_sync:
                 pair_addr = log['address'].lower()
-                pair_info = await lp_service.inst.get(pair_addr)
+                try:
+                    pair_info = await lp_service.inst.get(pair_addr)
+                except TimeoutError as e:
+                    logger.error(e)
+                    continue
 
                 token_service.inst.add(pair_info['token0'].lower())
                 token_service.inst.add(pair_info['token1'].lower())

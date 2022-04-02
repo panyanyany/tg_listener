@@ -28,26 +28,30 @@ class BaseService(cancelable.CancelableTiktok):
         self.queue.put_nowait(item)
         return False
 
-    async def get_item(self):
+    async def load_queue(self):
         while self.queue.qsize():
             self.items.append(self.queue.get_nowait())
 
-    async def get(self, lp_addr):
+    async def get(self, lp_addr, timeout=5):
         """拿信息，没有就等待"""
         if self.rdb.exists(lp_addr):
             return self.rdb.get(lp_addr)
 
         self.add(lp_addr)
 
+        time_cost = 0
         while self.is_running():
+            if time_cost > timeout:
+                raise TimeoutError(f"wait for {lp_addr}")
             if self.rdb.exists(lp_addr):
                 return self.rdb.get(lp_addr)
             else:
                 await asyncio.sleep(0.1)
+                time_cost += 0.1
         raise ServiceStopped(self.__class__.__name__)
 
     async def run(self):
-        await self.tiktok(5, self.get_item, self.batch_process)
+        await self.tiktok(5, self.load_queue, self.batch_process)
 
     async def batch_process(self):
         raise NotImplemented

@@ -86,11 +86,17 @@ class DbHandler(CancelableTiktok):
                     tot_value += pools[c_name]
 
             pools['TOTAL'] = tot_value
+            try:
+                name = await token_service.inst.get_name(token)
+                symbol = await token_service.inst.get_symbol(token)
+            except TimeoutError as e:
+                logger.error(e)
+                continue
             arctic_db.update_stat(token,
                                   pools=pools,
                                   is_dividend=tot_stat[token]['is_dividend'],
-                                  name=await token_service.inst.get_name(token),
-                                  symbol=await token_service.inst.get_symbol(token),
+                                  name=name,
+                                  symbol=symbol,
                                   lps=lps,
                                   )
 
@@ -187,6 +193,9 @@ class DbHandler(CancelableTiktok):
         try:
             decimals0 = await token_service.inst.get_decimals(liq.token0)
             decimals1 = await token_service.inst.get_decimals(liq.token1)
+        except TimeoutError as e:
+            logger.error(e)
+            return
         except ServiceStopped:
             return
         pair = sort_pair(liq.token0, liq.token1, liq.amount0, liq.amount1, decimals0, decimals1)
