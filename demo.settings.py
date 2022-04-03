@@ -40,3 +40,7 @@ endpoints = [
     "https://bsc-dataseed3.ninicoin.io/",
     "https://bsc-dataseed4.ninicoin.io/",
 ]
+
+make_stat_ignore_tokens = {
+    '0x2e74ee4fc4466d0883ef5e12a0ce344bfe15be8d',  # PumpETH
+}

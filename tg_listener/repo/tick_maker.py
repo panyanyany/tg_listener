@@ -8,6 +8,7 @@ import arrow
 import pandas
 import pytz
 
+import settings
 from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
 from util.big_number.big_number import float_to_str
 
@@ -144,6 +145,8 @@ class TickMaker:
             if stat['pools']['TOTAL'] < 100:
                 continue
             if self.debug_token and self.debug_token != stat['token']:
+                continue
+            if stat['token'] in settings.make_stat_ignore_tokens:
                 continue
             # del stat['_id']
             # print(json.dumps(stat, default=str))
