@@ -44,8 +44,16 @@ def a(token, hours):
         buyers.append(item)
     c_buyers = len(buyers)
     c_uniq_buyers = len(set(buyers))
+    if c_buyers:
+        new_rate = c_new_buyers / c_buyers
+    else:
+        new_rate = 0
+    if c_sellers:
+        new_rate_2 = c_new_buyers / c_sellers
+    else:
+        new_rate_2 = 0
     print(
-        f"buyers={c_buyers}, uniq={c_uniq_buyers}, new={c_new_buyers}, new/all={c_new_buyers / c_buyers:.2f}, new/sell={c_new_buyers / c_sellers:.2f}")
+        f"buyers={c_buyers}, uniq={c_uniq_buyers}, new={c_new_buyers}, new/all={new_rate:.2f}, new/sell={new_rate_2:.2f}")
 
     data = data[data['direction'] == 'SELL']
     print(len(data))
