@@ -59,7 +59,7 @@ class ArcticRepo:
         stat = stats.find_one(cond)
         return stat
 
-    def update_stat(self, token, last_tick_at=None, pools=None, is_dividend=False, name=None, symbol=None, lps=None):
+    def update_stat(self, token, last_tick_at=None, pools=None, is_dividend=None, name=None, symbol=None, lps=None):
         stats: Collection = self.db_data.stats
         cond = {"token": token}
         stat = stats.find_one(cond)
@@ -74,7 +74,7 @@ class ArcticRepo:
         if lps:
             stat.setdefault('lps', {})
             stat['lps'].update(lps)
-        if is_dividend:
+        if is_dividend is not None:
             stat['is_dividend'] = is_dividend
         if name:
             stat['name'] = name
