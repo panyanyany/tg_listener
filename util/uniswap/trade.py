@@ -46,7 +46,7 @@ class Trade:
     logs_sync: List[EventData] = field(default_factory=list)
     logs_swap: List[EventData] = field(default_factory=list)
 
-    is_dividend: bool = False
+    is_dividend: bool = None
 
     log_decoder = LogDecoder()
     router_decoder = Decoder(pancake_swap_router_signatures)
