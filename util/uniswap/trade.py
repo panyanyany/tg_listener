@@ -120,8 +120,8 @@ class Trade:
                 self.handle_withdrawal(operator, fn_name, dlog, paths)
             # print(f"Contract: {dlog['address']}, {dlog['event']}({dict(dlog['args'])})")
 
-        if transfer_cnt > 6:
-            # 转账日志大于6个，极有可能是分红币
+        if transfer_cnt > 10:
+            # 极有可能是分红币
             self.is_dividend = True
         # # 最后一个可能是其他的 router
         # if self.amount_out == 0:
