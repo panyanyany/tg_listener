@@ -21,6 +21,7 @@ def a(token, hours):
     # token = '0x56aa5cb724cb12c0452ac51094a7ae165202f81e'
     # token = '0xabaf0bcd3a4f6d3bd76edc10ea922d50b751c357'
     # end = dtparse('2022-03-20 21:30')
+    token = token.lower()
     end = datetime.now()
     start = end - timedelta(hours=hours)
 
