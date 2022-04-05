@@ -108,8 +108,8 @@ class TickMaker:
     def filter_token(self, stat) -> pandas.DataFrame:
         token = stat['token']
         tot_data: pandas.DataFrame = arctic_db.db_tick.read(f'{token}:tick')
-        if len(tot_data[tot_data['direction'] == 'SELL']) < 3:
-            return
+        # if len(tot_data[tot_data['direction'] == 'SELL']) < 3:
+        #     return
 
         # 这种交易不能要，价格太离谱
         tot_data = tot_data[tot_data['value'] > 0.01]
