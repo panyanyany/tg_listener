@@ -9,7 +9,7 @@ from PIL import Image
 
 class BorderRm:
     def nms(self, boxes, overlap=0.8):
-        boxes = [[i[0], i[2], i[1], i[3], s] for i, s in boxes.lp_addresses()]
+        boxes = [[i[0], i[2], i[1], i[3], s] for i, s in boxes.items()]
         boxes = sorted(boxes, key=lambda N: N[4])
         if not boxes:
             pick = []

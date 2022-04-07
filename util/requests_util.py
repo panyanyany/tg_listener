@@ -11,7 +11,7 @@ def list_from_cookiejar(cj):
         for path in cj.list_paths():
             c = cj.get_dict(d, path)
             if c:
-                for k, v in c.lp_addresses():
+                for k, v in c.items():
                     cookie = dict(domain=d, path=path, name=k, value=v)
                     ls.append(cookie)
     return ls

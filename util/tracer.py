@@ -59,7 +59,7 @@ def stacktraces3():
 
 def stacktraces2():
     code = []
-    for threadId, stack in sys._current_frames().lp_addresses():
+    for threadId, stack in sys._current_frames().items():
         flish = frame2list(stack)
         r = format_frame(flish, threadId)
         code.append(r)
@@ -72,7 +72,7 @@ def stacktraces2():
 
 def stacktraces():
     code = []
-    for threadId, stack in sys._current_frames().lp_addresses():
+    for threadId, stack in sys._current_frames().items():
         code.append("\n# ThreadID: %s" % threadId)
         for filename, lineno, name, line in traceback.extract_stack(stack):
             code.append('File: "%s", line %d, in %s' % (filename, lineno, name))
