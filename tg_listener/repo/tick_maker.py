@@ -126,7 +126,7 @@ class TickMaker:
                 print(data.iloc[-4:])
             if self.check_min_count(data, task.min_count, task.times):
                 if task.gen_key() not in self.results:
-                    result = TickMakerResult(task=task, items=[])
+                    result = TickMakerResult(task=task, token_results=[])
                 else:
                     result = self.results[task.gen_key()]
 
