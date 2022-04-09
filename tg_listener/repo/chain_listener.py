@@ -83,6 +83,7 @@ class BlockNumberListener(Cancelable):
                     latest = n
                     self.queue.put_nowait(latest)
                     continue
-            except:
+            except Exception as e:
+                logger.error(f'getting block number, %s', e)
                 await asyncio.sleep(1)
                 continue

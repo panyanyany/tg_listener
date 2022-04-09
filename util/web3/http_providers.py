@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import urllib.request
 from datetime import datetime
 from typing import Any, Optional, Union, List
 
@@ -62,6 +63,8 @@ class AsyncConcurrencyHTTPProvider(AsyncHTTPProvider):
                           self.endpoint_uri, method)
         request_data = self.encode_rpc_request(method, params)
         kwargs = self.get_request_kwargs()
+        sys_proxies = urllib.request.getproxies()
+        kwargs['proxy'] = sys_proxies.get('http')
         # kwargs.update('timeout', 5)
         try:
             raw_response = await async_make_post_request(

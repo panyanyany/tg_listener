@@ -82,7 +82,7 @@ class SyncHandler(Cancelable):
                 decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
                 decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
             except TimeoutError as e:
-                logger.error(e)
+                logger.warning('service call failed: %s', e)
                 continue
             if decimals0 is None:
                 logger.error("decimals0 is None, token0=%s", pair_info['token0'].lower())
