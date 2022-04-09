@@ -90,7 +90,7 @@ class DbHandler(CancelableTiktok):
                 name = await token_service.inst.get_name(token)
                 symbol = await token_service.inst.get_symbol(token)
             except TimeoutError as e:
-                logger.error(e)
+                logger.warning(e)
                 continue
             arctic_db.update_stat(token,
                                   pools=pools,
@@ -194,7 +194,7 @@ class DbHandler(CancelableTiktok):
             decimals0 = await token_service.inst.get_decimals(liq.token0)
             decimals1 = await token_service.inst.get_decimals(liq.token1)
         except TimeoutError as e:
-            logger.error(e)
+            logger.warning(e)
             return
         except ServiceStopped:
             return

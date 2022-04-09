@@ -133,7 +133,7 @@ class SyncHandler(Cancelable):
                 decimals0 = await token_service.inst.get_decimals(pair_info['token0'].lower())
                 decimals1 = await token_service.inst.get_decimals(pair_info['token1'].lower())
             except TimeoutError as e:
-                logger.error(e)
+                logger.warning(e)
                 continue
             if decimals0 is None:
                 logger.error("decimals0 is None, token0=%s", pair_info['token0'].lower())
@@ -207,7 +207,7 @@ class SyncHandler(Cancelable):
                 try:
                     pair_info = await lp_service.inst.get(pair_addr)
                 except TimeoutError as e:
-                    logger.error(e)
+                    logger.warning(e)
                     continue
 
                 token_service.inst.add(pair_info['token0'].lower())
@@ -221,7 +221,7 @@ class SyncHandler(Cancelable):
                 try:
                     pair_info = await lp_service.inst.get(pair_addr)
                 except TimeoutError as e:
-                    logger.error(e)
+                    logger.warning(e)
                     continue
 
                 token_service.inst.add(pair_info['token0'].lower())
