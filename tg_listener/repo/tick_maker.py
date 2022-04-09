@@ -20,11 +20,21 @@ db = arctic_db.db_tick
 
 
 @dataclasses.dataclass
+class TokenResult:
+    stat: dict
+    ticks: pandas.DataFrame
+
+
+@dataclasses.dataclass
 class TickMakerRule:
-    span: str
-    times: float
+    span: str = ''
+    times: float = 0
+    token_results: List[TokenResult] = dataclasses.field(default_factory=list)
 
     def gen_key(self):
+        raise NotImplemented
+
+    def add(self, stat, data):
         raise NotImplemented
 
 
@@ -35,31 +45,23 @@ class TickMakerRuleGrow(TickMakerRule):
     def gen_key(self):
         return f"T{self.span}_{self.times}_{self.min_count}"
 
+    def check_min_count(self, data, min_count, times):
+        if len(data) < min_count:
+            return False
+        for i in range(min_count):
+            pos = i + 1
+            if data.iloc[-pos]['times'] < times:
+                return False
+        return True
 
-@dataclasses.dataclass
-class TickMakerRuleKeep(TickMakerRule):
-    child_span: str
-
-    def gen_key(self):
-        return f"TK{self.span}_{self.times}_{self.child_span}"
-
-
-@dataclasses.dataclass
-class TokenResult:
-    stat: dict
-    ticks: pandas.DataFrame
-
-
-@dataclasses.dataclass
-class TickMakerResult:
-    task: TickMakerRuleGrow
-    token_results: List[TokenResult]
-
-    # stat: dict
-    # ticks: pandas.DataFrame
+    def add(self, stat, tot_data):
+        task = self
+        data = tot_data.resample(task.span)['price'].agg(['first', 'last']).dropna()
+        data['times'] = (data['last'] - data['first']) / data['first']
+        if self.check_min_count(data, task.min_count, task.times):
+            self.token_results.append(TokenResult(stat=stat, ticks=data))
 
     def save(self, dirpath: Path):
-
         result = []
         for item in self.token_results:
             stat = dict(item.stat)
@@ -73,7 +75,7 @@ class TickMakerResult:
 
             result.append(stat)
 
-        save_name = dirpath.joinpath(self.task.gen_key() + '.json')
+        save_name = dirpath.joinpath(self.gen_key() + '.json')
         if not save_name.parent.exists():
             save_name.parent.mkdir(parents=True)
 
@@ -82,11 +84,26 @@ class TickMakerResult:
             json.dump(result, fp, default=str)
 
 
+@dataclasses.dataclass
+class TickMakerRuleMostlyGrow(TickMakerRule):
+    child_span: str = ''
+
+    def gen_key(self):
+        return f"TM{self.span}_{self.times}_{self.child_span}"
+
+
+@dataclasses.dataclass
+class TickMakerResult:
+    task: TickMakerRuleGrow
+
+    # stat: dict
+    # ticks: pandas.DataFrame
+
+
 class TickMaker:
     # candlestick_span = '1h'  # K线间隔
     # growth_times = 0.1  # 涨幅倍数
-    tasks = []
-    results: Dict[str, TickMakerResult]
+    tasks: List[TickMakerRuleGrow] = []
 
     # 通用配置
     open_min_age = 1  # 开盘时间最小允许多久(min)
@@ -98,16 +115,6 @@ class TickMaker:
         # self.candlestick_span = candlestick_span
         # self.growth_times = growth_times
         self.tasks: List[TickMakerRuleGrow] = tasks
-        self.results: Dict[str, TickMakerResult] = {}
-
-    def check_min_count(self, data, min_count, times):
-        if len(data) < min_count:
-            return False
-        for i in range(min_count):
-            pos = i + 1
-            if data.iloc[-pos]['times'] < times:
-                return False
-        return True
 
     def filter_token(self, stat) -> pandas.DataFrame:
         token = stat['token']
@@ -119,19 +126,16 @@ class TickMaker:
         tot_data = tot_data[tot_data['value'] > 0.01]
 
         for task in self.tasks:
-            data = tot_data.resample(task.span)['price'].agg(['first', 'last']).dropna()
-            data['times'] = (data['last'] - data['first']) / data['first']
-            if self.debug_token:
-                print(tot_data.iloc[-20:])
-                print(data.iloc[-4:])
-            if self.check_min_count(data, task.min_count, task.times):
-                if task.gen_key() not in self.results:
-                    result = TickMakerResult(task=task, token_results=[])
-                else:
-                    result = self.results[task.gen_key()]
-
-                result.token_results.append(TokenResult(stat=stat, ticks=data))
-                self.results[task.gen_key()] = result
+            task.add(stat, tot_data)
+            # if not token_result:
+            #     continue
+            # if task.gen_key() not in self.task_results:
+            #     result = TickMakerResult(task=task, token_results=[])
+            # else:
+            #     result = self.task_results[task.gen_key()]
+            #
+            # result.token_results.append(token_result)
+            # self.task_results[task.gen_key()] = result
 
     def run(self):
         dt_idle_gte = datetime.now() - timedelta(minutes=self.idle_max_span)

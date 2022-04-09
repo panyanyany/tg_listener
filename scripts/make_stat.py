@@ -21,12 +21,11 @@ logger.info('start')
 maker = tick_maker.TickMaker([
     tick_maker.TickMakerRuleGrow('15min', 0.1),
     tick_maker.TickMakerRuleGrow('1h', 0.1),
-    tick_maker.TickMakerRuleGrow('1h', 0.01, 3),
+    tick_maker.TickMakerRuleGrow('1h', 0.01, min_count=3),
     tick_maker.TickMakerRuleGrow('1d', 0.1),
-    tick_maker.TickMakerRuleGrow('1d', 0.01, 3),
+    tick_maker.TickMakerRuleGrow('1d', 0.01, min_count=3),
 ])
 maker.run()
 
-for key in maker.results:
-    result = maker.results[key]
-    result.save(Path(f'public'))
+for task in maker.tasks:
+    task.save(Path(f'public'))
