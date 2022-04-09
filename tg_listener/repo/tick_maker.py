@@ -9,9 +9,13 @@ import pandas
 import pytz
 
 import settings
+from tg_listener.db import init_database
+from tg_listener.models.models import AddressRecord
 from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
 from util.big_number.big_number import float_to_str
+from util.datetime_util.datetime_util import dtt_parse
 
+mysql_db = init_database()
 db = arctic_db.db_tick
 
 
@@ -41,7 +45,7 @@ class TickMakerRuleKeep(TickMakerRule):
 
 
 @dataclasses.dataclass
-class TickMakerResultItem:
+class TokenResult:
     stat: dict
     ticks: pandas.DataFrame
 
@@ -49,7 +53,7 @@ class TickMakerResultItem:
 @dataclasses.dataclass
 class TickMakerResult:
     task: TickMakerRuleGrow
-    items: List[TickMakerResultItem]
+    token_results: List[TokenResult]
 
     # stat: dict
     # ticks: pandas.DataFrame
@@ -57,7 +61,7 @@ class TickMakerResult:
     def save(self, dirpath: Path):
 
         result = []
-        for item in self.items:
+        for item in self.token_results:
             stat = dict(item.stat)
             ticks = item.ticks
 
@@ -126,7 +130,7 @@ class TickMaker:
                 else:
                     result = self.results[task.gen_key()]
 
-                result.items.append(TickMakerResultItem(stat=stat, ticks=data))
+                result.token_results.append(TokenResult(stat=stat, ticks=data))
                 self.results[task.gen_key()] = result
 
     def run(self):
@@ -157,4 +161,12 @@ class TickMaker:
             info = db.get_info(sym)
             if info['len'] < 5:
                 continue
+
+            # 最后一次 CX 时间
+            md_rec: AddressRecord = AddressRecord.get_or_none(AddressRecord.address == stat['token'])
+            if md_rec:
+                stat['last_cx_at'] = arrow.get(dtt_parse(md_rec.updated_at)).format()
+            else:
+                stat['last_cx_at'] = None
+
             self.filter_token(stat)
