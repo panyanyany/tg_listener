@@ -25,7 +25,7 @@ maker = tick_maker.TickMaker([
     # TickMakerRuleGrow(span='1h', times=0.01, min_count=3),
     TickMakerRuleGrow('1d', 0.1),
     # TickMakerRuleGrow(span='1d', times=0.01, min_count=3),
-    TickMakerRuleMostlyGrow(span='12h', times=0.1, child_span='1h', child_error=0.05),
+    TickMakerRuleMostlyGrow(span='24h', times=0.1, child_span='1h', child_error=0.05),
 ])
 maker.run()
 
