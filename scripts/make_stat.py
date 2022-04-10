@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from tg_listener.repo import tick_maker
-from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
+from tg_listener.repo.analysis_repo import tick_maker
+from tg_listener.repo.analysis_repo.tick_rules.TickMakerRuleGrow import TickMakerRuleGrow
 from util.log_util import setup3, default_ignore_names
 
 setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'util.*'}))
@@ -19,11 +19,11 @@ pd.set_option('max_colwidth', None)
 logger.info('start')
 
 maker = tick_maker.TickMaker([
-    tick_maker.TickMakerRuleGrow('15min', 0.1),
-    tick_maker.TickMakerRuleGrow('1h', 0.1),
-    tick_maker.TickMakerRuleGrow('1h', 0.01, min_count=3),
-    tick_maker.TickMakerRuleGrow('1d', 0.1),
-    tick_maker.TickMakerRuleGrow('1d', 0.01, min_count=3),
+    TickMakerRuleGrow('15min', 0.1),
+    TickMakerRuleGrow('1h', 0.1),
+    TickMakerRuleGrow('1h', 0.01, min_count=3),
+    TickMakerRuleGrow('1d', 0.1),
+    TickMakerRuleGrow('1d', 0.01, min_count=3),
 ])
 maker.run()
 
