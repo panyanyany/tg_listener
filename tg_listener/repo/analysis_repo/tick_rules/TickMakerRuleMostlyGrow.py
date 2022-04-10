@@ -8,6 +8,7 @@ from tg_listener.repo.analysis_repo.tick_rules.base import TickMakerRule, TokenR
 
 logger = logging.getLogger(__name__)
 
+
 @dataclasses.dataclass
 class TickMakerRuleMostlyGrow(TickMakerRule):
     span: str = ''

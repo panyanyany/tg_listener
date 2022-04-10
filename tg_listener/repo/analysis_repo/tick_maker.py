@@ -1,4 +1,5 @@
 import dataclasses
+import logging
 from datetime import datetime, timedelta
 from typing import List
 
@@ -14,6 +15,7 @@ from util.datetime_util.datetime_util import dtt_parse
 
 init_database()
 db = arctic_db.db_tick
+logger = logging.getLogger(__name__)
 
 
 class TickMaker:
@@ -36,6 +38,7 @@ class TickMaker:
         token = stat['token']
         tot_data: pandas.DataFrame = arctic_db.db_tick.read(f'{token}:tick')
         if len(tot_data[tot_data['direction'] == 'SELL']) < 3:
+            logger.debug(f"{stat['name']} {stat['token']} len(sell)(={len(tot_data[tot_data['direction'] == 'SELL'])}) < 3")
             return
 
         # 这种交易不能要，价格太离谱
@@ -59,6 +62,7 @@ class TickMaker:
         stats = list(stats)
         for stat in stats[:]:
             if stat['pools']['TOTAL'] < 100:
+                logger.debug(f"{stat['name']} {stat['token']} total(={stat['pools']['TOTAL']}) < 100")
                 continue
             if self.debug_token and self.debug_token != stat['token']:
                 continue
@@ -72,6 +76,7 @@ class TickMaker:
                 continue
             info = db.get_info(sym)
             if info['len'] < 5:
+                logger.debug(f"{stat['name']} {stat['token']} info.len(={info['len']}) < 5")
                 continue
 
             # 最后一次 CX 时间
