@@ -1,10 +1,12 @@
 import dataclasses
+import logging
 from datetime import datetime
 
 import pandas as pd
 
 from tg_listener.repo.analysis_repo.tick_rules.base import TickMakerRule, TokenResult
 
+logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class TickMakerRuleMostlyGrow(TickMakerRule):
@@ -22,16 +24,18 @@ class TickMakerRuleMostlyGrow(TickMakerRule):
 
         child_span_count = int(pd.to_timedelta(self.span) / pd.to_timedelta(self.child_span))
         if len(data) < child_span_count:
-            print(stat['name'], f'{len(data)} < child_span_count')
+            logger.info(f"{stat['name']} {stat['token']} {len(data)} < child_span_count")
             return False
 
-        if (data.iloc[-1]['last'] - data.iloc[0]['first']) / data.iloc[0]['first'] < self.times:
-            print(stat['name'], '< self.times')
+        tot_times = (data.iloc[-1]['last'] - data.iloc[0]['first']) / data.iloc[0]['first']
+        if tot_times < self.times:
+            logger.info(f"{stat['name']} {stat['token']} {tot_times} < self.times")
             return False
 
         data['times'] = (data['last'] - data['first']) / data['first']
-        if len(data[data['times'] < -self.child_error]) > 0:
-            print(stat['name'], '低于 child_error')
+        low_errors = data[data['times'] < -self.child_error]
+        if len(low_errors) > 0:
+            logger.info(f"{stat['name']} {stat['token']} {len(low_errors)} > 0")
             return False
 
         self.token_results.append(TokenResult(stat=stat, ticks=data))
