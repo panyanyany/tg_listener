@@ -5,6 +5,7 @@ import pandas as pd
 
 from tg_listener.repo.analysis_repo import tick_maker
 from tg_listener.repo.analysis_repo.tick_rules.TickMakerRuleGrow import TickMakerRuleGrow
+from tg_listener.repo.analysis_repo.tick_rules.TickMakerRuleMostlyGrow import TickMakerRuleMostlyGrow
 from util.log_util import setup3, default_ignore_names
 
 setup3(ignore_names=list(set(['web3.*', 'asyncio'] + default_ignore_names) - {'util.*'}))
@@ -19,11 +20,12 @@ pd.set_option('max_colwidth', None)
 logger.info('start')
 
 maker = tick_maker.TickMaker([
-    TickMakerRuleGrow('15min', 0.1),
-    TickMakerRuleGrow('1h', 0.1),
-    TickMakerRuleGrow('1h', 0.01, min_count=3),
+    TickMakerRuleGrow(span='15min', times=0.1),
+    TickMakerRuleGrow(span='1h', times=0.1),
+    # TickMakerRuleGrow(span='1h', times=0.01, min_count=3),
     TickMakerRuleGrow('1d', 0.1),
-    TickMakerRuleGrow('1d', 0.01, min_count=3),
+    # TickMakerRuleGrow(span='1d', times=0.01, min_count=3),
+    TickMakerRuleMostlyGrow(span='12h', times=0.1, child_span='1h', child_error=0.05),
 ])
 maker.run()
 

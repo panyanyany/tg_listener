@@ -8,7 +8,7 @@ import pandas
 import settings
 from tg_listener.db import init_database
 from tg_listener.models.models import AddressRecord
-from tg_listener.repo.analysis_repo.tick_rules.TickMakerRuleGrow import TickMakerRuleGrow
+from tg_listener.repo.analysis_repo.tick_rules.base import TickMakerRule
 from tg_listener.repo.arctic_repo.arctic_repo import arctic_db
 from util.datetime_util.datetime_util import dtt_parse
 
@@ -19,7 +19,7 @@ db = arctic_db.db_tick
 class TickMaker:
     # candlestick_span = '1h'  # K线间隔
     # growth_times = 0.1  # 涨幅倍数
-    tasks: List[TickMakerRuleGrow] = []
+    tasks: List[TickMakerRule] = []
 
     # 通用配置
     open_min_age = 1  # 开盘时间最小允许多久(min)
@@ -30,7 +30,7 @@ class TickMaker:
     def __init__(self, tasks):
         # self.candlestick_span = candlestick_span
         # self.growth_times = growth_times
-        self.tasks: List[TickMakerRuleGrow] = tasks
+        self.tasks: List[TickMakerRule] = tasks
 
     def filter_token(self, stat) -> pandas.DataFrame:
         token = stat['token']
@@ -42,6 +42,7 @@ class TickMaker:
         tot_data = tot_data[tot_data['value'] > 0.01]
 
         for task in self.tasks:
+            task: TickMakerRule
             task.add(stat, tot_data)
 
     def run(self):
