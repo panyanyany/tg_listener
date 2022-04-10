@@ -22,13 +22,16 @@ class TickMakerRuleMostlyGrow(TickMakerRule):
 
         child_span_count = int(pd.to_timedelta(self.span) / pd.to_timedelta(self.child_span))
         if len(data) < child_span_count:
+            print(stat['token'], f'{len(data)} < child_span_count')
             return False
 
         if (data.iloc[-1]['last'] - data.iloc[0]['first']) / data.iloc[0]['first'] < self.times:
+            print(stat['token'], '< self.times')
             return False
 
         data['times'] = (data['last'] - data['first']) / data['first']
         if len(data[data['times'] < -self.child_error]) > 0:
+            print(stat['token'], '低于 child_error')
             return False
 
         self.token_results.append(TokenResult(stat=stat, ticks=data))
