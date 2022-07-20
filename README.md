@@ -6,6 +6,8 @@ scripts/mon_tg.py
 ```
 作用：将群组中所有出现的代币都记录起来，整理成一个排行榜，就可以知道哪些币正在宣传，以及哪些币正在变得热门
 
+![](./resources/images/mon_tg.png)
+
 ## 监控币安链所有代币价格
 ```
 scripts/listen_chain.py
