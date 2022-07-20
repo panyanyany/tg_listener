@@ -1,6 +1,6 @@
 # 币安链代币价格监控 & Telegram 代币宣传监控统计工具
 
-## 监控TG群组中的代币推荐
+## 功能1：监控TG群组中的代币推荐
 ```
 scripts/mon_tg.py
 ```
@@ -8,7 +8,7 @@ scripts/mon_tg.py
 
 ![](./resources/images/mon_tg.png)
 
-## 监控币安链所有代币价格
+## 功能2：监控币安链所有代币价格，并生成排行榜
 ```
 scripts/listen_chain.py
 ```
@@ -17,8 +17,14 @@ scripts/listen_chain.py
 
 ![](./resources/images/tugou.jpg)
 
+## 一些小问题
+
 ### Push to multiple remote
 https://gist.github.com/rvl/c3f156e117e22a25f242
 
 ### E11000 duplicate key error collection
 lib 的引擎错了，lib 删掉重新初始化
+
+
+## 交个朋友
+![](./resources/images/wechat.jpeg)
